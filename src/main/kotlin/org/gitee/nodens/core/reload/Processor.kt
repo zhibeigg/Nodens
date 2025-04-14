@@ -1,4 +1,4 @@
-package org.gitee.orryx.core.reload
+package org.gitee.nodens.core.reload
 
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
@@ -8,8 +8,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
-
-@SupportedAnnotationTypes("org.gitee.orryx.core.reload.Reload")
+@SupportedAnnotationTypes("org.gitee.nodens.core.reload.Reload")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 class Processor: AbstractProcessor() {
 

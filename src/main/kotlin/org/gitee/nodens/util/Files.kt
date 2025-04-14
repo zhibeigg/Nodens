@@ -1,4 +1,4 @@
-package org.gitee.orryx.utils
+package org.gitee.nodens.util
 
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
@@ -25,7 +25,10 @@ internal fun getFiles(file: File): List<File> {
     when (file.isDirectory) {
         true -> listOf += file.listFiles()!!.flatMap { getFiles(it) }
         false -> {
-            if (file.name.endsWith(".yml")) {
+            if (file.extension == "yml") {
+                listOf += file
+            }
+            if (file.extension == "js") {
                 listOf += file
             }
         }

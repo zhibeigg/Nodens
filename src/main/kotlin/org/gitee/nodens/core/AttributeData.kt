@@ -1,4 +1,5 @@
 package org.gitee.nodens.core
 
-class AttributeData {
-}
+import org.gitee.nodens.common.DigitalParser
+
+class AttributeData(override val attributeNumber: IAttributeGroup.Number, override val value: DigitalParser.Value): IAttributeData

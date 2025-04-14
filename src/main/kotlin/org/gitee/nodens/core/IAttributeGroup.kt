@@ -1,6 +1,10 @@
 package org.gitee.nodens.core
 
-interface AttributeGroup {
+import org.gitee.nodens.common.DamageProcessor
+import org.gitee.nodens.common.DigitalParser
+import org.gitee.nodens.common.EntitySyncProfile
+
+interface IAttributeGroup {
 
     // 属性组名
     val name: String
@@ -11,11 +15,11 @@ interface AttributeGroup {
 
         val config: AttributeConfig
 
-        fun handle()
+        fun sync(entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>)
 
-        enum class Type {
-            PERCENT, COUNT;
-        }
+        fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>)
+
+        fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>)
 
         enum class ValueType {
             RANGE, SINGLE;

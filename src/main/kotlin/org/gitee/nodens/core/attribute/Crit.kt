@@ -1,4 +1,94 @@
 package org.gitee.nodens.core.attribute
 
-object Crit {
+import org.gitee.nodens.common.DamageProcessor
+import org.gitee.nodens.common.DigitalParser
+import org.gitee.nodens.core.AttributeConfig
+import org.gitee.nodens.core.AttributeManager
+import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.attribute.Crit.PhysicalChance.config
+import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
+import org.gitee.nodens.util.NODENS_NAMESPACE
+import taboolib.common.util.random
+
+object Crit: IAttributeGroup {
+
+    override val name: String = "Crit"
+
+    object PhysicalChance: AbstractNumber() {
+
+        override val config: AttributeConfig
+            get() = AttributeManager.getConfig(Crit.name, name)
+
+        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            if (damageProcessor.damageType == Damage.Physics.name) {
+                Crit.handleAttacker(damageProcessor, valueMap)
+            }
+        }
+    }
+
+    object MagicChance: AbstractNumber() {
+
+        override val config: AttributeConfig
+            get() = AttributeManager.getConfig(Crit.name, name)
+
+        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            if (damageProcessor.damageType == Damage.Magic.name) {
+                Crit.handleAttacker(damageProcessor, valueMap)
+            }
+        }
+    }
+
+    private fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+        val chance = when (config.valueType) {
+            IAttributeGroup.Number.ValueType.SINGLE -> valueMap[DigitalParser.Type.PERCENT]!![0]
+            IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[DigitalParser.Type.PERCENT]!![0], valueMap[DigitalParser.Type.PERCENT]!![1])
+        }
+        val resistance = damageProcessor.defender.attributeMemory()?.mergedAttribute(CritChanceResistance)
+        val resistanceChance = when (CritChanceResistance.config.valueType) {
+            IAttributeGroup.Number.ValueType.SINGLE -> resistance?.get(DigitalParser.Type.PERCENT)?.get(0) ?: 0.0
+            IAttributeGroup.Number.ValueType.RANGE -> resistance?.get(DigitalParser.Type.PERCENT)?.let { random(it[0], it[1]) } ?: 0.0
+        }
+        if (random((chance - resistanceChance).coerceAtLeast(0.0).coerceAtMost(1.0))) {
+            damageProcessor.crit = true
+        }
+    }
+
+    object Addon: AbstractNumber() {
+
+        override val config: AttributeConfig
+            get() = AttributeManager.getConfig(Crit.name, name)
+
+        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            if (damageProcessor.crit) {
+                val addon = when (MagicChance.config.valueType) {
+                    IAttributeGroup.Number.ValueType.SINGLE -> valueMap[DigitalParser.Type.PERCENT]!![0]
+                    IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[DigitalParser.Type.PERCENT]!![0], valueMap[DigitalParser.Type.PERCENT]!![1])
+                }
+                damageProcessor.addDamageSource("$NODENS_NAMESPACE${Crit.name}$name", this, damageProcessor.getFinalDamage() * addon)
+            }
+        }
+    }
+
+    object CritChanceResistance: AbstractNumber() {
+
+        override val config: AttributeConfig
+            get() = AttributeManager.getConfig(Crit.name, name)
+    }
+
+    object CritAddonResistance: AbstractNumber() {
+
+        override val config: AttributeConfig
+            get() = AttributeManager.getConfig(Crit.name, name)
+
+        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            if (damageProcessor.crit) {
+                val addon = when (MagicChance.config.valueType) {
+                    IAttributeGroup.Number.ValueType.SINGLE -> valueMap[DigitalParser.Type.PERCENT]!![0]
+                    IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[DigitalParser.Type.PERCENT]!![0], valueMap[DigitalParser.Type.PERCENT]!![1])
+                }
+                val damage = damageProcessor.getDamageSource("$NODENS_NAMESPACE${Crit.name}${Addon.name}")?.damage ?: return
+                damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Crit.name}$name", this, damage * addon)
+            }
+        }
+    }
 }

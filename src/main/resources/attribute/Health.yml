@@ -1,0 +1,14 @@
+Max:
+  combatPower: 1.0
+  valueType: SINGLE
+  priority: 1
+  keys:
+    - 生命上限
+    - 最大生命值
+Regain:
+  combatPower: 1.0
+  valueType: SINGLE
+  priority: 1
+  period: 20
+  keys:
+    - 生命恢复

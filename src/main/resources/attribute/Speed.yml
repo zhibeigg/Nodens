@@ -1,0 +1,14 @@
+Attack:
+  combatPower: 1.0
+  valueType: SINGLE
+  priority: 1
+  keys:
+    - 攻击速度
+    - 攻速加成
+Move:
+  combatPower: 1.0
+  valueType: SINGLE
+  priority: 1
+  keys:
+    - 移动速度
+    - 移速加成

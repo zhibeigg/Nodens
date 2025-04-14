@@ -1,0 +1,6 @@
+Addon:
+  combatPower: 1.0
+  valueType: SINGLE
+  priority: 1
+  keys:
+    - 全能吸血

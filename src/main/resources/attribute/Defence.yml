@@ -1,0 +1,16 @@
+Physics:
+  # 战斗力系数
+  combatPower: 1.0
+  # 类型：单个 或 范围
+  valueType: SINGLE
+  # 优先级，优先计算值小的属性
+  priority: 1
+  # 识别关键字
+  keys:
+    - 物理防御
+Magic:
+  combatPower: 1.0
+  valueType: SINGLE
+  priority: 1
+  keys:
+    - 魔法防御

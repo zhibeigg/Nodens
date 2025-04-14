@@ -1,16 +1,15 @@
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReferenceArray
-import javax.swing.text.html.InlineView
 
 /**
- * 初始化一个LoreMap（线程安全版）
+ * 初始化一个[FastMatchingMap]（线程安全, 纳秒级匹配耗时）
  *
  * @param ignoreSpace 是否忽略空格
  * @param ignoreColor 是否忽略颜色代码
  * @param ignoreColon 是否忽略冒号
  * @param ignorePrefix 是否允许从任意前缀开始匹配
  */
-class FastLoreMap<T>(
+class FastMatchingMap<T>(
     private val ignoreSpace: Boolean = true,
     private val ignoreColor: Boolean = true,
     private val ignoreColon: Boolean = true,
@@ -44,10 +43,10 @@ class FastLoreMap<T>(
     }
 
     /**
-     * 向LoreMap中放入lore和对应的对象（线程安全）
+     * 向[FastMatchingMap]中放入识别key和对应的对象（线程安全）
      */
-    fun put(lore: String, value: T) {
-        val cleanKey = preprocess(lore)
+    fun put(key: String, value: T) {
+        val cleanKey = preprocess(key)
         // 当前指针为根目录
         var current = root
 

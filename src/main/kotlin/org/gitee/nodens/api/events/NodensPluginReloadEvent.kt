@@ -1,9 +1,9 @@
-package org.gitee.orryx.api.events
+package org.gitee.nodens.api.events
 
 import taboolib.common.util.unsafeLazy
 import taboolib.platform.type.BukkitProxyEvent
 
-class OrryxPluginReloadEvent: BukkitProxyEvent() {
+class NodensPluginReloadEvent: BukkitProxyEvent() {
 
     private val functions by unsafeLazy { mutableListOf<Func>() }
 

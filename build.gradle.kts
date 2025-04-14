@@ -1,33 +1,21 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import io.izzel.taboolib.gradle.*
-import io.izzel.taboolib.gradle.Basic
-import io.izzel.taboolib.gradle.BukkitFakeOp
-import io.izzel.taboolib.gradle.BukkitHook
-import io.izzel.taboolib.gradle.BukkitUI
-import io.izzel.taboolib.gradle.BukkitUtil
-import io.izzel.taboolib.gradle.BukkitNMS
-import io.izzel.taboolib.gradle.BukkitNMSUtil
-import io.izzel.taboolib.gradle.BukkitNMSItemTag
-import io.izzel.taboolib.gradle.BukkitNMSDataSerializer
-import io.izzel.taboolib.gradle.I18n
-import io.izzel.taboolib.gradle.CommandHelper
-import io.izzel.taboolib.gradle.MinecraftChat
-import io.izzel.taboolib.gradle.Metrics
-import io.izzel.taboolib.gradle.Database
-import io.izzel.taboolib.gradle.Kether
-import io.izzel.taboolib.gradle.JavaScript
-import io.izzel.taboolib.gradle.Jexl
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+val publishUsername: String by project
+val publishPassword: String by project
+val build: String by project
 
 plugins {
     java
+    `maven-publish`
+    kotlin("jvm") version "1.9.24"
     id("io.izzel.taboolib") version "2.0.22"
-    id("org.jetbrains.kotlin.jvm") version "1.8.22"
 }
 
 taboolib {
     env {
         install(Basic)
+        install(Bukkit)
         install(BukkitFakeOp)
         install(BukkitHook)
         install(BukkitUI)
@@ -52,22 +40,35 @@ taboolib {
             name("纸杯")
         }
     }
-    version { taboolib = "6.2.3" }
+    version {
+        taboolib = "6.2.3-0b616a8"
+        coroutines = "1.8.0"
+    }
 }
 
 repositories {
     mavenCentral()
+    maven("https://repo.tabooproject.org/repository/releases")
+    maven("https://www.mcwar.cn/nexus/repository/maven-public/")
 }
 
 dependencies {
     compileOnly("ink.ptms.core:v12004:12004:mapped")
     compileOnly("ink.ptms.core:v12004:12004:universal")
+    compileOnly("ink.ptms.core:v11200:11200")
+    compileOnly("ink.ptms:nms-all:1.0.0")
+
     compileOnly(kotlin("stdlib"))
+    compileOnly(kotlin("reflect"))
     compileOnly(fileTree("libs"))
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+}
+
+tasks.withType<Jar> {
+    destinationDirectory.set(File(build))
 }
 
 tasks.withType<KotlinCompile> {
@@ -77,7 +78,42 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-configure<JavaPluginConvention> {
+java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+kotlin {
+    sourceSets.all {
+        languageSettings {
+            languageVersion = "2.0"
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url = uri("https://www.mcwar.cn/nexus/repository/maven-releases/")
+            credentials {
+                username = publishUsername
+                password = publishPassword
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("library") {
+            from(components["java"])
+            artifact(tasks["kotlinSourcesJar"]) {
+                classifier = "sources"
+            }
+            artifact("${build}/${rootProject.name}-${version}-api.jar") {
+                classifier = "api"
+            }
+            groupId = project.group.toString()
+        }
+    }
 }

@@ -1,8 +1,10 @@
 package org.gitee.nodens.core
 
-interface AttributeData {
+import org.gitee.nodens.common.DigitalParser
 
-    val attributeNumber: AttributeGroup.Number
+interface IAttributeData {
 
-    val value: Array<Double>
+    val attributeNumber: IAttributeGroup.Number
+
+    val value: DigitalParser.Value
 }

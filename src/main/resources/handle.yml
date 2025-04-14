@@ -1,0 +1,32 @@
+# damageType 攻击类型
+# damageSources 攻击源列表
+# defenceSources 防御源列表
+# attacker 攻击者
+# defender 防御者
+# source[id] 源的ID
+# source[attribute] 源的属性所属名
+# source[value] 源的值
+# 此处可写更高级算式
+# 最后返回值为 finalDamage
+onDamage: |-
+  set a to 0
+  for i in damageSources then {
+    set a to math add [ &a &i[value] ]
+  }
+  for i in defenceSources then {
+    set a to math sub [ &a &i[value] ]
+  }
+  &a
+# healSources 治疗源列表
+# healer 治疗者
+# passive 受疗者
+# source[attribute] 源的属性所属名
+# source[value] 源的值
+# 此处可写更高级算式
+# 最后返回值为 finalHeal
+onHeal: |-
+  set a to 0
+  for i in healSources then {
+    set a to math add [ &a &i[value] ]
+  }
+  &a

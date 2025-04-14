@@ -1,9 +1,9 @@
-package org.gitee.orryx.core.reload
+package org.gitee.nodens.core.reload
 
-import org.gitee.orryx.api.Orryx
-import org.gitee.orryx.api.events.OrryxPluginReloadEvent
-import org.gitee.orryx.api.interfaces.IReloadAPI
-import org.gitee.orryx.utils.debug
+import org.gitee.nodens.api.Nodens
+import org.gitee.nodens.api.events.NodensPluginReloadEvent
+import org.gitee.nodens.api.interfaces.IReloadAPI
+import org.gitee.nodens.util.debug
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
 import taboolib.common.platform.Awake
@@ -30,18 +30,17 @@ object ReloadAPI: IReloadAPI, ClassVisitor(3) {
             methodList += ReloadFunction(
                 method,
                 owner.getInstance() ?: return,
-                method.getAnnotation(Reload::class.java).property<Int>("weight")!!
+                method.getAnnotation(Reload::class.java).enum("weight")
             )
-            debug("&e┣&7Reload loaded &e${method.owner.name}/${method.name} &a√")
+            debug("&e┣&7Reload loaded &e${method.owner.name}/${method.name} &a√".colored())
         }
     }
 
     override fun reload() {
-        val event = OrryxPluginReloadEvent()
+        val event = NodensPluginReloadEvent()
         if (event.call()) {
             info("&e┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".colored())
-            Orryx.config.reload()
-            debug = Orryx.config.getBoolean("Debug")
+            Nodens.config.reload()
             val extensions = event.getFunctions()
             val weights = (methodList.map { it.weight } + extensions.map { it.weight }).distinct()
             weights.sorted().forEach { weight ->

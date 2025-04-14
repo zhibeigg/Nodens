@@ -1,4 +1,4 @@
-package org.gitee.orryx.core.reload
+package org.gitee.nodens.core.reload
 
 /**
  * 按照权重从小到大执行
@@ -6,4 +6,4 @@ package org.gitee.orryx.core.reload
  * */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class Reload(val weight: Int = 0)
+annotation class Reload(val weight: Int)
