@@ -10,7 +10,8 @@ abstract class AbstractNumber: IAttributeGroup.Number {
     override val name: String
         get() = this::class.java.simpleName
 
-    override fun sync(entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+    override fun sync(
+        entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>) {
     }
 
     override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {

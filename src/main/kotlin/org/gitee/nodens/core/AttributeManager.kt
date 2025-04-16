@@ -77,7 +77,7 @@ object AttributeManager {
         return ATTRIBUTE_MATCHING_MAP.getMatchResult(attribute)?.let { matchResult ->
             val remain = matchResult.remain ?: return null
             val parser = DigitalParser(remain, matchResult.value)
-            AttributeData(matchResult.value, parser.getDoubleArray())
+            AttributeData(matchResult.value, parser.getValue())
         }
     }
 

@@ -11,9 +11,10 @@ import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.core.*
 import org.gitee.nodens.core.attribute.Health
+import org.gitee.nodens.core.attribute.Mapping
 import org.gitee.nodens.core.reload.Reload
-import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.ensureSync
+import org.gitee.nodens.util.mergeValues
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.Schedule
@@ -48,7 +49,14 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         @SubscribeEvent
         private fun onPlayerJoinEvent(event: PlayerJoinEvent) {
-            entityAttributeMemoriesMap[event.player.uniqueId] = EntityAttributeMemory(event.player)
+            event.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.let { instance ->
+                instance.modifiers.forEach {
+                    instance.removeModifier(it)
+                }
+            }
+            entityAttributeMemoriesMap[event.player.uniqueId] = EntityAttributeMemory(event.player).apply {
+                syncAttributeToBukkit()
+            }
         }
 
         @SubscribeEvent
@@ -165,17 +173,21 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         }
     }
 
-    fun mergedAllAttribute(): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
+    fun mergedAllAttribute(isTransferMap: Boolean = true): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
         val extData = extendMemory.values.mapNotNull { if (!it.closed) it.attributeData else null }
         val itemsData = getItemsAttribute()
         val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
         (extData + itemsData).groupBy { it.attributeNumber }.forEach { (number, list) ->
             mergeData[number] = mergeValues(*list.map { it.value }.toTypedArray())
         }
-        return mergeData
+        return if (isTransferMap) {
+            transferMap(mergeData)
+        } else {
+            mergeData
+        }
     }
 
-    fun mergedExtendAttribute(): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
+    fun mergedExtendAttribute(isTransferMap: Boolean = true): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
         val data = extendMemory.values
         val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
         data.groupBy { it.attributeData.attributeNumber }.forEach { (number, list) ->
@@ -187,41 +199,42 @@ class EntityAttributeMemory(val entity: LivingEntity) {
                 }
             }.toTypedArray())
         }
-        return mergeData
+        return if (isTransferMap) {
+            transferMap(mergeData)
+        } else {
+            mergeData
+        }
     }
 
-    fun mergedAttribute(attribute: IAttributeGroup.Number): Map<DigitalParser.Type, DoubleArray> {
-        val extData = extendMemory.values
+    fun mergedAttribute(attribute: IAttributeGroup.Number, isTransferMap: Boolean = true): Map<DigitalParser.Type, DoubleArray> {
+        val extData = extendMemory.values.mapNotNull { if (!it.closed) it.attributeData else null }
         val itemsData = getItemsAttribute()
-        return mergeValues(*extData.mapNotNull { tempAttributeData ->
-            if (!tempAttributeData.closed && tempAttributeData.attributeData.attributeNumber == attribute) {
-                tempAttributeData.attributeData.value
-            } else {
-                null
+        val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
+        (extData + itemsData).groupBy { it.attributeNumber }.forEach { (number, list) ->
+            if (number is Mapping.MappingAttribute) {
+                mergeData[number] = mergeValues(*list.map { it.value }.toTypedArray())
             }
-        }.toTypedArray() + itemsData.mapNotNull { attributeData ->
-            if (attributeData.attributeNumber == attribute) {
-                attributeData.value
-            } else {
-                null
-            }
-        }.toTypedArray())
+        }
+        return if (isTransferMap) {
+            transferMap(mergeData)[attribute] ?: emptyMap()
+        } else {
+            mergeData[attribute] ?: emptyMap()
+        }
     }
 
-    private fun mergeValues(vararg values: DigitalParser.Value): Map<DigitalParser.Type, DoubleArray> {
-        val group = values.groupBy { it.type }
-        val map = hashMapOf<DigitalParser.Type, DoubleArray>()
-        DigitalParser.Type.entries.forEach { type ->
-            val list = group[type] ?: return@forEach
-            val maxSize = list.maxOfOrNull { it.doubleArray.size } ?: 0
-            val result = DoubleArray(maxSize)
-            for (value in list) {
-                for (i in value.doubleArray.indices) {
-                    result[i] += value.doubleArray[i]
+    fun transferMap(map: Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
+        val mutableMap = map.toMutableMap()
+        map.forEach { (key, value) ->
+            if (key is Mapping.MappingAttribute) {
+                mutableMap.remove(key)
+                key.getAttributes(entity, value).forEach {
+                    mutableMap[it.key] = mergeValues(
+                        *it.value.map { entry -> DigitalParser.Value(entry.key, entry.value) }.toTypedArray(),
+                        *mutableMap[it.key]?.map { entry -> DigitalParser.Value(entry.key, entry.value) }?.toTypedArray() ?: emptyArray()
+                    )
                 }
             }
-            map[type] = result
         }
-        return map
+        return mutableMap
     }
 }

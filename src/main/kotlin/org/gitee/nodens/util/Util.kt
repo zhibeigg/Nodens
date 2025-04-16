@@ -1,5 +1,6 @@
 package org.gitee.nodens.util
 
+import org.gitee.nodens.common.DigitalParser
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -19,4 +20,21 @@ class ReloadableLazy<T>(private val check: () -> Any?, private val initializer: 
         @Suppress("UNCHECKED_CAST")
         return cached as T
     }
+}
+
+fun mergeValues(vararg values: DigitalParser.Value): Map<DigitalParser.Type, DoubleArray> {
+    val group = values.groupBy { it.type }
+    val map = hashMapOf<DigitalParser.Type, DoubleArray>()
+    DigitalParser.Type.entries.forEach { type ->
+        val list = group[type] ?: return@forEach
+        val maxSize = list.maxOfOrNull { it.doubleArray.size } ?: 0
+        val result = DoubleArray(maxSize)
+        for (value in list) {
+            for (i in value.doubleArray.indices) {
+                result[i] += value.doubleArray[i]
+            }
+        }
+        map[type] = result
+    }
+    return map
 }

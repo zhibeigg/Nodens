@@ -9,7 +9,7 @@ class DigitalParser(private val value: String, private val number: IAttributeGro
 
     private lateinit var type: Type
 
-    fun getDoubleArray(): Value {
+    fun getValue(): Value {
         val list = value.split("-").map {
             if (it.last() == '%') {
                 type = Type.PERCENT

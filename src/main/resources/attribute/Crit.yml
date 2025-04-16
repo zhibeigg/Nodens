@@ -9,7 +9,7 @@ MagicChance:
   valueType: SINGLE
   priority: 1
   keys:
-    - 法术暴击率
+    - 魔法暴击率
 Addon:
   combatPower: 1.0
   valueType: SINGLE

@@ -1,5 +1,6 @@
 package org.gitee.nodens.api
 
+import org.gitee.nodens.api.interfaces.INodensAPI
 import org.gitee.nodens.common.Handle.handle
 import org.gitee.nodens.core.reload.Reload
 import taboolib.common.LifeCycle
@@ -23,4 +24,19 @@ object Nodens {
         info("&e┣&7Config loaded &a√".colored())
     }
 
+    private var api: INodensAPI? = null
+
+    /**
+     * 注册开发者接口
+     */
+    fun register(api: INodensAPI) {
+        this.api = api
+    }
+
+    /**
+     * 获取开发者接口
+     */
+    fun api(): INodensAPI {
+        return api ?: error("OrryxAPI has not finished loading, or failed to load!")
+    }
 }

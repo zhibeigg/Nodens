@@ -1,0 +1,9 @@
+AllAttribute:
+  attributes:
+    - 物理攻击 +{{ math [ &value 1 ] }}%
+    - 魔法攻击 +{{ math [ &value 1 ] }}%
+    - 暴击几率 +{{ math [ &value 1 ] }}%
+    - 暴击伤害 +{{ math [ &value 5 ] }}%
+    - 最大生命值 +{{ math [ &value 1 ] }}%
+  keys:
+    - 全属性提升

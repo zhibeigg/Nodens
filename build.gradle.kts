@@ -9,6 +9,7 @@ plugins {
     java
     `maven-publish`
     kotlin("jvm") version "1.9.24"
+    kotlin("plugin.serialization") version "1.9.24"
     id("io.izzel.taboolib") version "2.0.22"
 }
 
@@ -57,6 +58,9 @@ dependencies {
     compileOnly("ink.ptms.core:v12004:12004:universal")
     compileOnly("ink.ptms.core:v11200:11200")
     compileOnly("ink.ptms:nms-all:1.0.0")
+
+    taboo("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3") { isTransitive = false }
+    taboo("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3") { isTransitive = false }
 
     compileOnly(kotlin("stdlib"))
     compileOnly(kotlin("reflect"))
