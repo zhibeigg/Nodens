@@ -1,4 +1,5 @@
 import io.izzel.taboolib.gradle.*
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val publishUsername: String by project
@@ -8,9 +9,9 @@ val build: String by project
 plugins {
     java
     `maven-publish`
-    kotlin("jvm") version "1.9.24"
-    kotlin("plugin.serialization") version "1.9.24"
-    id("io.izzel.taboolib") version "2.0.22"
+    kotlin("jvm") version "2.1.20"
+    kotlin("plugin.serialization") version "2.1.20"
+    id("io.izzel.taboolib") version "2.0.23"
 }
 
 taboolib {
@@ -59,8 +60,8 @@ dependencies {
     compileOnly("ink.ptms.core:v11200:11200")
     compileOnly("ink.ptms:nms-all:1.0.0")
 
-    taboo("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3") { isTransitive = false }
-    taboo("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3") { isTransitive = false }
+    taboo("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1") { isTransitive = false }
+    taboo("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1") { isTransitive = false }
 
     compileOnly(kotlin("stdlib"))
     compileOnly(kotlin("reflect"))
@@ -76,9 +77,9 @@ tasks.withType<Jar> {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs = listOf("-Xjvm-default=all")
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+        freeCompilerArgs.set(listOf("-Xjvm-default=all"))
     }
 }
 
