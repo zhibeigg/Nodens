@@ -1,6 +1,5 @@
 package org.gitee.nodens.module.item
 
-import taboolib.common5.cint
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.xseries.XEnchantment
 import taboolib.library.xseries.XItemFlag
@@ -34,7 +33,7 @@ class ItemConfig(val key: String, configurationSection: ConfigurationSection) {
 
     val isUnBreakable = configurationSection.getBoolean("unbreakable")
 
-    val sell = configurationSection.getDouble("sell")
+    val sell = configurationSection.getString("sell")
 
     // 标注版本
     val hashCode = configurationSection.toString().hashCode()

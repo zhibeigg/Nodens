@@ -1,0 +1,22 @@
+村好剑:
+  # 是否自动更新
+  update: true
+  material: DIAMOND_SWORD
+  name: 无敌村好剑
+  lore:
+    - "物理攻击: +{{ randoms 武器攻击 }}"
+    - ""
+    - "村子里最好的剑"
+  variables:
+    level: |-
+      random2 1 to 10
+  itemFlags:
+    - HIDE_ENCHANTS
+    - HIDE_ATTRIBUTES
+    - HIDE_UNBREAKABLE
+    - HIDE_DESTROYS
+    - HIDE_PLACED_ON
+    - HIDE_POTION_EFFECTS
+  unbreakable: true
+  sell: |-
+    randoms 武器价值

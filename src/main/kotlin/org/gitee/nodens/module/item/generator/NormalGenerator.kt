@@ -13,12 +13,15 @@ import org.gitee.nodens.util.toVariable
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
+import taboolib.common5.cdouble
 import taboolib.common5.cint
 import taboolib.module.kether.*
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.ItemBuilder
 
 object NormalGenerator: IItemGenerator {
+
+    const val SELL_TAG = "NODENS@SELL"
 
     @Serializable
     data class NormalContext(override val key: String, val variable: HashMap<String, Variable<*>>, override val hashcode: Int): IItemContext
@@ -33,6 +36,7 @@ object NormalGenerator: IItemGenerator {
             if (it.key in map.keys) return@forEach
             context.variable[it.key] = it.getVariable(sender, itemConfig, context)
         }
+        context.variable[SELL_TAG] = (itemConfig.sell?.let { eval(sender, itemConfig, context, it).cdouble } ?: 0.0).toVariable()
         val parser = parse(sender, itemConfig, context, itemConfig.lore + itemConfig.name)
 
         val builder = ItemBuilder(itemConfig.material)
@@ -82,6 +86,19 @@ object NormalGenerator: IItemGenerator {
                 .set("itemContext", context)
                 .build()
         )
+    }
+
+    private fun eval(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, string: String): Any? {
+        return KetherShell.eval(
+            string,
+            ScriptOptions.builder()
+                .namespace(namespace = nodensEnvironmentNamespaces)
+                .sender(sender)
+                .sandbox(false)
+                .set("item", itemConfig)
+                .set("itemContext", context)
+                .build()
+        ).orNull()
     }
 
     /**

@@ -1,0 +1,5 @@
+# level 为物品配置中的
+武器攻击: |-
+  calc "level*20"
+武器价值: |-
+  calc "level*20"

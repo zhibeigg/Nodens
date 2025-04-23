@@ -2,6 +2,7 @@ package org.gitee.nodens.util
 
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.*
+import org.gitee.nodens.module.item.generator.NormalGenerator
 import taboolib.module.nms.getItemTag
 
 const val CONTEXT_TAG = "NODENS_CONTEXT"
@@ -24,4 +25,9 @@ fun Any.toVariable(): Variable<*> {
         is Boolean -> BooleanVariable(this)
         else -> error("not supported variable type: ${this::class.qualifiedName}")
     }
+}
+
+fun ItemStack.getConfig(): ItemConfig? {
+    val context = context<NormalGenerator.NormalContext>() ?: return null
+    return ItemManager.itemConfigs[context.key]
 }
