@@ -12,6 +12,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.module.configuration.Configuration
+import taboolib.platform.util.isAir
 import taboolib.platform.util.onlinePlayers
 
 object ItemManager {
@@ -40,6 +41,7 @@ object ItemManager {
 
     private fun updateInventory(player: Player) {
         player.inventory.forEach {
+            if (it.isAir()) return@forEach
             val context = it.context<NormalGenerator.NormalContext>() ?: return@forEach
             val config = getItemConfig(context.key) ?: return@forEach
             if (config.isUpdate && config.hashCode == context.hashcode) updateItem(player, it)

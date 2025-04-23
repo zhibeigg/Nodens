@@ -44,7 +44,7 @@ taboolib {
     }
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
     version {
-        taboolib = "6.2.3-0b616a8"
+        taboolib = "6.2.3-8cc2f66"
         coroutines = "1.8.0"
     }
 }
@@ -61,8 +61,7 @@ dependencies {
     compileOnly("ink.ptms.core:v11200:11200")
     compileOnly("ink.ptms:nms-all:1.0.0")
 
-    taboo("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1") { isTransitive = false }
-    taboo("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1") { isTransitive = false }
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 
     compileOnly(kotlin("stdlib"))
     compileOnly(kotlin("reflect"))
