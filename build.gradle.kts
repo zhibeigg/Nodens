@@ -42,6 +42,7 @@ taboolib {
             name("纸杯")
         }
     }
+    relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
     version {
         taboolib = "6.2.3-0b616a8"
         coroutines = "1.8.0"
