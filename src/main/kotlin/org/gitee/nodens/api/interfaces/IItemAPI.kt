@@ -14,5 +14,4 @@ interface IItemAPI {
      * 获得生成器
      * */
     fun getItemGenerator(): IItemGenerator
-
 }

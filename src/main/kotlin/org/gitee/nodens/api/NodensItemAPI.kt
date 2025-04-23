@@ -12,7 +12,7 @@ import taboolib.common.platform.PlatformFactory
 class NodensItemAPI: IItemAPI {
 
     override fun getItemConfig(key: String): ItemConfig? {
-        return ItemManager.itemConfigs[key]
+        return ItemManager.getItemConfig(key)
     }
 
     override fun getItemGenerator(): IItemGenerator {
