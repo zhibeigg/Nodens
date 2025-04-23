@@ -80,5 +80,4 @@ object AttributeManager {
             AttributeData(matchResult.value, parser.getValue())
         }
     }
-
 }

@@ -174,7 +174,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     }
 
     fun mergedAllAttribute(isTransferMap: Boolean = true): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
-        val extData = extendMemory.values.mapNotNull { if (!it.closed) it.attributeData else null }
+        val extData = extendMemory.values.flatMap { if (!it.closed) it.attributeData else emptyList() }
         val itemsData = getItemsAttribute()
         val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
         (extData + itemsData).groupBy { it.attributeNumber }.forEach { (number, list) ->
@@ -188,15 +188,11 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     }
 
     fun mergedExtendAttribute(isTransferMap: Boolean = true): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
-        val data = extendMemory.values
+        val extData = extendMemory.values.flatMap { if (!it.closed) it.attributeData else emptyList() }
         val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
-        data.groupBy { it.attributeData.attributeNumber }.forEach { (number, list) ->
-            mergeData[number] = mergeValues(*list.mapNotNull { tempAttributeData ->
-                if (!tempAttributeData.closed) {
-                    tempAttributeData.attributeData.value
-                } else {
-                    null
-                }
+        extData.groupBy { it.attributeNumber }.forEach { (number, list) ->
+            mergeData[number] = mergeValues(*list.map { tempAttributeData ->
+                tempAttributeData.value
             }.toTypedArray())
         }
         return if (isTransferMap) {
@@ -207,7 +203,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     }
 
     fun mergedAttribute(attribute: IAttributeGroup.Number, isTransferMap: Boolean = true): Map<DigitalParser.Type, DoubleArray> {
-        val extData = extendMemory.values.mapNotNull { if (!it.closed) it.attributeData else null }
+        val extData = extendMemory.values.flatMap { if (!it.closed) it.attributeData else emptyList() }
         val itemsData = getItemsAttribute()
         val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
         (extData + itemsData).groupBy { it.attributeNumber }.forEach { (number, list) ->
