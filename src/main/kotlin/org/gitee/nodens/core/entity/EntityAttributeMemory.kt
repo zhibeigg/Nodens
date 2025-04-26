@@ -1,5 +1,8 @@
 package org.gitee.nodens.core.entity
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
@@ -7,6 +10,7 @@ import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
+import org.gitee.nodens.api.NodensAPI.Companion.pluginScope
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.core.*
@@ -23,6 +27,7 @@ import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import taboolib.common.platform.service.PlatformExecutor
+import taboolib.expansion.SyncDispatcher
 import taboolib.module.chat.colored
 import taboolib.platform.util.onlinePlayers
 import java.util.*
@@ -32,7 +37,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
     companion object {
 
-        private val entityAttributeMemoriesMap = hashMapOf<UUID, EntityAttributeMemory>()
+        internal val entityAttributeMemoriesMap = hashMapOf<UUID, EntityAttributeMemory>()
         private var regainTask: PlatformExecutor.PlatformTask? = null
 
         @Schedule(async = false, period = 1)
@@ -149,7 +154,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     }
 
     fun updateAttributeAsync() {
-        submitAsync {
+        pluginScope.launch {
             val iterator = extendMemory.iterator()
             while (iterator.hasNext()) {
                 val entry = iterator.next()
@@ -157,7 +162,9 @@ class EntityAttributeMemory(val entity: LivingEntity) {
                     iterator.remove()
                 }
             }
-            syncAttributeToBukkit()
+            withContext(SyncDispatcher) {
+                syncAttributeToBukkit()
+            }
         }
     }
 

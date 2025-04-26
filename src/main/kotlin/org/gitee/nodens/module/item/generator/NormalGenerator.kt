@@ -1,7 +1,5 @@
 package org.gitee.nodens.module.item.generator
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -22,9 +20,6 @@ import taboolib.platform.util.ItemBuilder
 object NormalGenerator: IItemGenerator {
 
     const val SELL_TAG = "NODENS@SELL"
-
-    @Serializable
-    data class NormalContext(override val key: String, val variable: HashMap<String, Variable<*>>, override val hashcode: Int): IItemContext
 
     override fun generate(key: String, amount: Int, player: Player?, map: Map<String, Any>): ItemStack {
         val sender = player?.let { adaptPlayer(it) } ?: console()

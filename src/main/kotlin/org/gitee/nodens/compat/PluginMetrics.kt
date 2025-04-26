@@ -20,5 +20,4 @@ object PluginMetrics {
             AttributeManager.ATTRIBUTE_MATCHING_MAP.size
         })
     }
-
 }

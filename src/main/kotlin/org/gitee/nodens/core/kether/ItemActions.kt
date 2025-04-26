@@ -1,7 +1,7 @@
 package org.gitee.nodens.core.kether
 
 import org.gitee.nodens.module.item.ItemConfig
-import org.gitee.nodens.module.item.generator.NormalGenerator
+import org.gitee.nodens.module.item.NormalContext
 import org.gitee.nodens.module.random.RandomManager
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
@@ -32,17 +32,17 @@ object ItemActions {
         }
     }
 
-    @KetherProperty(bind = NormalGenerator.NormalContext::class)
-    fun propertyContext() = object : ScriptProperty<NormalGenerator.NormalContext>("NormalGenerator.NormalContext.operator") {
+    @KetherProperty(bind = NormalContext::class)
+    fun propertyContext() = object : ScriptProperty<NormalContext>("NormalGenerator.NormalContext.operator") {
 
-        override fun read(instance: NormalGenerator.NormalContext, key: String): OpenResult {
+        override fun read(instance: NormalContext, key: String): OpenResult {
             return when (key) {
                 "key" -> OpenResult.successful(instance.key)
                 else -> OpenResult.successful(instance.variable[key])
             }
         }
 
-        override fun write(instance: NormalGenerator.NormalContext, key: String, value: Any?): OpenResult {
+        override fun write(instance: NormalContext, key: String, value: Any?): OpenResult {
             return try {
                 instance.variable[key] = value?.toVariable()!!
                 OpenResult.successful()
@@ -58,13 +58,13 @@ object ItemActions {
             text()
         ).apply(it) { id ->
             future {
-                val context = script().get<NormalGenerator.NormalContext>("itemContext") ?: return@future completedFuture(null)
+                val context = script().get<NormalContext>("itemContext") ?: return@future completedFuture(null)
                 randomsEval(script().sender, id, context)
             }
         }
     }
 
-    fun randomsEval(sender: ProxyCommandSender?, randoms: String, context: NormalGenerator.NormalContext): CompletableFuture<Any?> {
+    fun randomsEval(sender: ProxyCommandSender?, randoms: String, context: NormalContext): CompletableFuture<Any?> {
         val randoms = RandomManager.randomsMap[randoms] ?: return CompletableFuture.completedFuture(null)
         return KetherShell.eval(
             randoms.action,

@@ -19,8 +19,8 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
     var crit = false
 
     class PriorityRunnable(val priority: Int, val callback: (damage: Double) -> Unit)
-    class DamageSource(val key: String, val attribute: IAttributeGroup.Number, val damage: Double)
-    class DefenceSource(val key: String, val attribute: IAttributeGroup.Number, val defence: Double)
+    class DamageSource(override val key: String, override val attribute: IAttributeGroup.Number, val damage: Double): AbstractSource(damage)
+    class DefenceSource(override val key: String, override val attribute: IAttributeGroup.Number, val defence: Double): AbstractSource(defence)
 
     internal val damageSources = hashMapOf<String, DamageSource>()
     internal val defenceSources = hashMapOf<String, DefenceSource>()
@@ -38,19 +38,8 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
         return defenceSources[key]
     }
 
-    fun addDefenceSource(key: String, attribute: IAttributeGroup.Number, defence: Double): Boolean {
-        defenceSources[key] = when(attribute) {
-            Defence.Physics -> if (damageType == "PHYSICS") DefenceSource(key, attribute, defence) else return false
-            Defence.Magic -> if (damageType == "MAGIC") DefenceSource(key, attribute, defence) else return false
-            else -> {
-                if(attribute.name.uppercase() == damageType) {
-                    DefenceSource(key, attribute, defence)
-                } else {
-                    return false
-                }
-            }
-        }
-        return true
+    fun addDefenceSource(key: String, attribute: IAttributeGroup.Number, defence: Double) {
+        defenceSources[key] = DefenceSource(key, attribute, defence)
     }
 
     fun getFinalDamage(): Double {
@@ -80,15 +69,23 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
     }
 
     fun handle() {
-        handle(attacker)
-        handle(defender)
+        handleAttacker()
+        handleDefender()
     }
 
-    private fun handle(entity: LivingEntity) {
-        entity.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
+    private fun handleAttacker() {
+        attacker.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
             o1.config.handlePriority.compareTo(o2.config.handlePriority)
         }?.forEach {
             it.key.handleAttacker(this, it.value)
+        }
+    }
+
+    private fun handleDefender() {
+        defender.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
+            o1.config.handlePriority.compareTo(o2.config.handlePriority)
+        }?.forEach {
+            it.key.handleDefender(this, it.value)
         }
     }
 }

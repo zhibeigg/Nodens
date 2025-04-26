@@ -1,0 +1,80 @@
+package org.gitee.nodens.common
+
+import org.bukkit.entity.LivingEntity
+import org.bukkit.event.entity.EntityRegainHealthEvent
+import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
+
+class RegainProcessor(val healer: LivingEntity, val passive: LivingEntity) {
+
+    class PriorityRunnable(val priority: Int, val callback: (regain: Double) -> Unit)
+    class RegainSource(override val key: String, override val attribute: IAttributeGroup.Number, val regain: Double): AbstractSource(regain)
+    class ReduceSource(override val key: String, override val attribute: IAttributeGroup.Number, val reduce: Double): AbstractSource(reduce)
+
+    internal val regainSources = hashMapOf<String, RegainSource>()
+    internal val reduceSources = hashMapOf<String, ReduceSource>()
+    internal val runnableList = mutableListOf<PriorityRunnable>()
+
+    fun getRegainSource(key: String): RegainSource? {
+        return regainSources[key]
+    }
+
+    fun addRegainSource(key: String, attribute: IAttributeGroup.Number, regain: Double) {
+        regainSources[key] = RegainSource(key, attribute, regain)
+    }
+
+    fun getReduceSource(key: String): ReduceSource? {
+        return reduceSources[key]
+    }
+
+    fun addReduceSource(key: String, attribute: IAttributeGroup.Number, reduce: Double) {
+        reduceSources[key] = ReduceSource(key, attribute, reduce)
+    }
+
+    fun getFinalRegain(): Double {
+        return Handle.runProcessor(this).coerceAtLeast(0.0)
+    }
+
+    fun onRegain(priority: Int, callback: (damage: Double) -> Unit) {
+        runnableList.add(PriorityRunnable(priority, callback))
+    }
+
+    /**
+     * 执行恢复
+     * @return [EntityRegainHealthEvent]实体恢复事件
+     * */
+    fun callRegain(): EntityRegainHealthEvent? {
+        return Handle.doHeal(passive, getFinalRegain())?.apply {
+            if (!isCancelled) {
+                callback(amount)
+            }
+        }
+    }
+
+    fun callback(damage: Double) {
+        runnableList.sortedBy { it.priority }.forEach {
+            it.callback(damage)
+        }
+    }
+
+    fun handle() {
+        handleHealer()
+        handlePassive()
+    }
+
+    private fun handleHealer() {
+        healer.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
+            o1.config.handlePriority.compareTo(o2.config.handlePriority)
+        }?.forEach {
+            it.key.handleHealer(this, it.value)
+        }
+    }
+
+    private fun handlePassive() {
+        passive.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
+            o1.config.handlePriority.compareTo(o2.config.handlePriority)
+        }?.forEach {
+            it.key.handlePassive(this, it.value)
+        }
+    }
+}

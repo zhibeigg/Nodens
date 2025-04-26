@@ -42,6 +42,7 @@ taboolib {
             name("纸杯")
         }
     }
+    relocate("com.eatthepath.uuid", "org.gitee.nodens.eatthepath.uuid")
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
     version {
         taboolib = "6.2.3-8cc2f66"
@@ -61,7 +62,10 @@ dependencies {
     compileOnly("ink.ptms.core:v11200:11200")
     compileOnly("ink.ptms:nms-all:1.0.0")
 
+    compileOnly("org.eldergod.ext:DragonCore:2.6.2.9")
+    compileOnly("org.eldergod.ext:MythicMobs:4.11.0")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+    compileOnly("com.eatthepath:fast-uuid:0.2.0")
 
     compileOnly(kotlin("stdlib"))
     compileOnly(kotlin("reflect"))

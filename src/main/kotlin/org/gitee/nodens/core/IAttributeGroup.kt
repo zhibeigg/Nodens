@@ -3,6 +3,7 @@ package org.gitee.nodens.core
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
+import org.gitee.nodens.common.RegainProcessor
 
 interface IAttributeGroup {
 
@@ -20,6 +21,10 @@ interface IAttributeGroup {
         fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>)
 
         fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>)
+
+        fun handleHealer(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>)
+
+        fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>)
 
         enum class ValueType {
             RANGE, SINGLE;

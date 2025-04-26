@@ -102,5 +102,4 @@ object EntityListener {
         val double = 1.0 + (addon[PERCENT]?.get(0) ?: 0.0)
         e.amount = (double * e.amount.cdouble).cint
     }
-
 }

@@ -1,5 +1,9 @@
 package org.gitee.nodens.api
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.gitee.nodens.api.interfaces.INodensAPI
@@ -9,8 +13,11 @@ import org.gitee.nodens.core.IAttributeData
 import org.gitee.nodens.core.TempAttributeData
 import org.gitee.nodens.core.entity.EntityAttributeMemory
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
+import taboolib.common.LifeCycle
 import taboolib.common.env.RuntimeDependencies
 import taboolib.common.env.RuntimeDependency
+import taboolib.common.platform.Awake
+import taboolib.expansion.AsyncDispatcher
 
 @RuntimeDependencies(
     RuntimeDependency(
@@ -50,5 +57,14 @@ class NodensAPI: INodensAPI {
 
     override fun matchAttributes(attributes: List<String>): List<IAttributeData> {
         return attributes.mapNotNull { matchAttribute(it) }
+    }
+
+    companion object {
+        internal val pluginScope = CoroutineScope(AsyncDispatcher + SupervisorJob())
+
+        @Awake(LifeCycle.DISABLE)
+        private fun release() {
+            pluginScope.cancel("服务器关闭")
+        }
     }
 }

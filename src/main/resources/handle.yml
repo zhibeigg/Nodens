@@ -17,14 +17,14 @@ onDamage: |-
     set a to math sub [ &a &i[value] ]
   }
   &a
-# healSources 治疗源列表
+# regainSources 治疗源列表
 # healer 治疗者
 # passive 受疗者
 # source[attribute] 源的属性所属名
 # source[value] 源的值
 # 此处可写更高级算式
-# 最后返回值为 finalHeal
-onHeal: |-
+# 最后返回值为 finalRegain
+onRegain: |-
   set a to 0
   for i in healSources then {
     set a to math add [ &a &i[value] ]

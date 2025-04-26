@@ -1,9 +1,11 @@
 package org.gitee.nodens.common
 
+import org.bukkit.attribute.Attribute
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
+import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.util.getBytes
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
@@ -26,7 +28,7 @@ object Handle {
         private set
 
     private const val SCRIPT_ON_DAMAGE = "nodens_onDamage"
-    private const val SCRIPT_ON_HEAL = "nodens_onHeal"
+    private const val SCRIPT_ON_REGAIN = "nodens_onRegain"
 
     private val ketherScriptLoader by lazy { KetherScriptLoader() }
     private val catchMap by lazy { hashMapOf<String, Script>() }
@@ -34,8 +36,8 @@ object Handle {
     val onDamage: Script
         get() = catchMap[SCRIPT_ON_DAMAGE]!!
 
-    val onHeal: Script
-        get() = catchMap[SCRIPT_ON_HEAL]!!
+    val onRegain: Script
+        get() = catchMap[SCRIPT_ON_REGAIN]!!
 
     private fun getScript(id: String, action: String): Script? {
         return try {
@@ -51,7 +53,7 @@ object Handle {
     private fun init() {
         catchMap.clear()
         catchMap[SCRIPT_ON_DAMAGE] = getScript(SCRIPT_ON_DAMAGE, handle.getString("onDamage")!!) ?: error("请补充handle.yml中的onDamage脚本")
-        catchMap[SCRIPT_ON_HEAL] = getScript(SCRIPT_ON_HEAL, handle.getString("onHeal")!!) ?: error("请补充handle.yml中的onHeal脚本")
+        catchMap[SCRIPT_ON_REGAIN] = getScript(SCRIPT_ON_REGAIN, handle.getString("onRegain")!!) ?: error("请补充handle.yml中的onRegain脚本")
         info("&e┣&7Handle loaded &a√".colored())
     }
 
@@ -65,12 +67,27 @@ object Handle {
         }.runActions().orNull().cdouble
     }
 
+    fun runProcessor(regainProcessor: RegainProcessor): Double {
+        return ScriptContext.create(onRegain).also {
+            it["regainSources"] = regainProcessor.regainSources.values.toList()
+            it["regainSources"] = regainProcessor.regainSources.values.toList()
+            it["healer"] = regainProcessor.healer
+            it["passive"] = regainProcessor.passive
+        }.runActions().orNull().cdouble
+    }
+
     fun doDamage(attacker: LivingEntity?, defender: LivingEntity, damageCause: DamageCause, damage: Double): EntityDamageByEntityEvent? {
         if (defender.noDamageTicks != 0) return null
         // 如果实体血量 - 预计伤害值 < 0 提前设置击杀者
         if (defender.health - damage <= 0 && attacker is Player) defender.setKiller(attacker)
         val event = if (attacker != null) EntityDamageByEntityEvent(attacker, defender, damageCause, damage).also { defender.lastDamageCause = it } else null
         defender.damage(damage)
+        return event
+    }
+
+    fun doHeal(passive: LivingEntity, regain: Double): EntityRegainHealthEvent? {
+        val event = EntityRegainHealthEvent(passive, regain, EntityRegainHealthEvent.RegainReason.CUSTOM)
+        passive.health = (passive.health + regain).coerceIn(0.0, passive.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: passive.maxHealth)
         return event
     }
 

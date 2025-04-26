@@ -1,5 +1,8 @@
 package org.gitee.nodens.core
 
+/**
+ * @param duration 持续时间，-1为永久
+ * */
 class TempAttributeData(val duration: Long, val attributeData: List<IAttributeData>, val deathRemove: Boolean = true) {
 
     private val timestamp = System.currentTimeMillis()
@@ -14,5 +17,5 @@ class TempAttributeData(val duration: Long, val attributeData: List<IAttributeDa
         get() = (timeStampClose - System.currentTimeMillis()).coerceAtLeast(0L)
 
     val closed: Boolean
-        get() = timeStampOver < duration
+        get() = if (duration == -1L) false else timeStampOver < duration
 }
