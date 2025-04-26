@@ -1,5 +1,6 @@
 package org.gitee.nodens.core.entity
 
+import eos.moe.dragoncore.api.SlotAPI
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -10,6 +11,7 @@ import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
+import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.api.NodensAPI.Companion.pluginScope
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
@@ -17,6 +19,7 @@ import org.gitee.nodens.core.*
 import org.gitee.nodens.core.attribute.Health
 import org.gitee.nodens.core.attribute.Mapping
 import org.gitee.nodens.core.reload.Reload
+import org.gitee.nodens.util.ConfigLazy
 import org.gitee.nodens.util.ensureSync
 import org.gitee.nodens.util.mergeValues
 import taboolib.common.LifeCycle
@@ -39,6 +42,8 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         internal val entityAttributeMemoriesMap = hashMapOf<UUID, EntityAttributeMemory>()
         private var regainTask: PlatformExecutor.PlatformTask? = null
+
+        private val attributeDragoncoreSlots by ConfigLazy(Nodens.config) { Nodens.config.getStringList("attribute-dragoncore-slots") }
 
         @Schedule(async = false, period = 1)
         private fun schedule() {
@@ -150,6 +155,11 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         entity.equipment?.boots?.getItemAttribute()?.also { list.addAll(it) }
         entity.equipment?.itemInMainHand?.getItemAttribute()?.also { list.addAll(it) }
         entity.equipment?.itemInOffHand?.getItemAttribute()?.also { list.addAll(it) }
+        if (entity is Player) {
+            attributeDragoncoreSlots.forEach { id ->
+                list.addAll(SlotAPI.getCacheSlotItem(entity, id).getItemAttribute())
+            }
+        }
         return list
     }
 
@@ -162,15 +172,13 @@ class EntityAttributeMemory(val entity: LivingEntity) {
                     iterator.remove()
                 }
             }
-            withContext(SyncDispatcher) {
-                syncAttributeToBukkit()
-            }
+            syncAttributeToBukkit()
         }
     }
 
     fun syncAttributeToBukkit() {
+        val attributeData = mergedAllAttribute()
         ensureSync {
-            val attributeData = mergedAllAttribute()
             entitySyncProfile.clearModifiers()
             attributeData.forEach {
                 it.key.sync(entitySyncProfile, it.value)

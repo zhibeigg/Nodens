@@ -12,6 +12,7 @@ import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.*
+import org.gitee.nodens.util.ConfigLazy
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.ReloadableLazy
 import org.gitee.nodens.util.addBukkitAttribute

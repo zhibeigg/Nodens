@@ -41,6 +41,10 @@ taboolib {
         contributors {
             name("纸杯")
         }
+        dependencies {
+            name("DragonCore").optional(true)
+            name("DragonArmourers").optional(true)
+        }
     }
     relocate("com.eatthepath.uuid", "org.gitee.nodens.eatthepath.uuid")
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
@@ -63,6 +67,7 @@ dependencies {
     compileOnly("ink.ptms:nms-all:1.0.0")
 
     compileOnly("org.eldergod.ext:DragonCore:2.6.2.9")
+    compileOnly("org.eldergod.ext:DragonArmourers:6.72")
     compileOnly("org.eldergod.ext:MythicMobs:4.11.0")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     compileOnly("com.eatthepath:fast-uuid:0.2.0")

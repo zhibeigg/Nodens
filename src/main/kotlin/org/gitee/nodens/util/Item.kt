@@ -3,12 +3,20 @@ package org.gitee.nodens.util
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.*
 import taboolib.module.nms.getItemTag
+import taboolib.platform.util.isAir
 
 const val CONTEXT_TAG = "NODENS_CONTEXT"
 
 @Suppress("UNCHECKED_CAST")
 fun <T: IItemContext> ItemStack.context(): T? {
+    if (isAir()) return null
     return getItemTag()[CONTEXT_TAG] as? T
+}
+
+@Suppress("UNCHECKED_CAST")
+fun ItemStack.context(): IItemContext? {
+    if (isAir()) return null
+    return getItemTag()[CONTEXT_TAG] as? IItemContext
 }
 
 fun Any.toVariable(): Variable<*> {

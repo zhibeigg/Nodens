@@ -35,6 +35,8 @@ class ItemConfig(val key: String, configurationSection: ConfigurationSection) {
 
     val sell = configurationSection.getString("sell")
 
+    val armourers = configurationSection.getStringList("armourers")
+
     // 标注版本
     val hashCode = configurationSection.toString().hashCode()
 
