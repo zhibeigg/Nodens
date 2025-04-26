@@ -1,22 +1,24 @@
 package org.gitee.nodens.util
 
+import kotlinx.serialization.json.Json
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.*
+import taboolib.module.nms.ItemTagData
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.isAir
 
 const val CONTEXT_TAG = "NODENS_CONTEXT"
 
 @Suppress("UNCHECKED_CAST")
-fun <T: IItemContext> ItemStack.context(): T? {
+inline fun <reified T: IItemContext> ItemStack.context(): T? {
     if (isAir()) return null
-    return getItemTag()[CONTEXT_TAG] as? T
+    return Json.decodeFromString<T>(getItemTag()[CONTEXT_TAG]?.asString() ?: return null)
 }
 
 @Suppress("UNCHECKED_CAST")
-fun ItemStack.context(): IItemContext? {
+fun ItemStack.context(): NormalContext? {
     if (isAir()) return null
-    return getItemTag()[CONTEXT_TAG] as? IItemContext
+    return Json.decodeFromString<NormalContext>(getItemTag()[CONTEXT_TAG]?.asString() ?: return null)
 }
 
 fun Any.toVariable(): Variable<*> {
