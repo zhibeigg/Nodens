@@ -33,5 +33,4 @@ object SuckBlood: IAttributeGroup {
             }
         }
     }
-
 }

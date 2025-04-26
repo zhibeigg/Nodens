@@ -3,6 +3,7 @@ package org.gitee.nodens.core.attribute
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
+import org.gitee.nodens.common.RegainProcessor
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.AttributeManager.ATTRIBUTE_MATCHING_MAP
@@ -10,6 +11,7 @@ import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files
 import taboolib.common.platform.function.info
+import taboolib.common5.cdouble
 import taboolib.common5.scriptEngine
 import taboolib.module.chat.colored
 import java.io.FileReader
@@ -45,6 +47,18 @@ object JavaScript: IAttributeGroup {
         override fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             (compile.engine as Invocable).invokeFunction("handleDefender", damageProcessor, valueMap)
         }
+
+        override fun handleHealer(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            (compile.engine as Invocable).invokeFunction("handleHealer", regainProcessor, valueMap)
+        }
+
+        override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            (compile.engine as Invocable).invokeFunction("handlePassive", regainProcessor, valueMap)
+        }
+
+        override fun combatPower(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
+            return (compile.engine as Invocable).invokeFunction("combatPower", valueMap).cdouble
+        }
     }
 
     internal fun reload() {
@@ -71,5 +85,4 @@ object JavaScript: IAttributeGroup {
             }
         }
     }
-
 }

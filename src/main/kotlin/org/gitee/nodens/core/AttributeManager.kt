@@ -1,11 +1,14 @@
 package org.gitee.nodens.core
 
 import org.gitee.nodens.common.DigitalParser
+import org.gitee.nodens.common.DigitalParser.Type.*
 import org.gitee.nodens.common.FastMatchingMap
+import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.*
 import org.gitee.nodens.core.attribute.JavaScript
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files
+import org.gitee.nodens.util.mergeValues
 import taboolib.common.LifeCycle
 import taboolib.common.io.runningClassesWithoutLibrary
 import taboolib.common.platform.Awake
@@ -79,5 +82,14 @@ object AttributeManager {
             val parser = DigitalParser(remain, matchResult.value)
             AttributeData(matchResult.value, parser.getValue())
         }
+    }
+
+    fun getCombatPower(vararg data: IAttributeData): Double {
+        var value = 0.0
+        data.groupBy { it.attributeNumber }.forEach {
+            val map = mergeValues(*it.value.map { d -> d.value }.toTypedArray())
+            value += it.key.combatPower(map)
+        }
+        return value
     }
 }

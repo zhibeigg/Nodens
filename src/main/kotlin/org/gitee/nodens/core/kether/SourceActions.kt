@@ -1,7 +1,6 @@
 package org.gitee.nodens.core.kether
 
 import org.gitee.nodens.common.Source
-import org.gitee.nodens.module.item.ItemConfig
 import taboolib.common.OpenResult
 import taboolib.common5.cdouble
 import taboolib.module.kether.KetherProperty
@@ -23,7 +22,10 @@ object SourceActions {
 
         override fun write(instance: Source, key: String, value: Any?): OpenResult {
             return when (key) {
-                "amount" -> OpenResult.successful(instance.amount = value.cdouble)
+                "amount" -> {
+                    instance.amount = value.cdouble
+                    OpenResult.successful()
+                }
                 else -> OpenResult.failed()
             }
         }

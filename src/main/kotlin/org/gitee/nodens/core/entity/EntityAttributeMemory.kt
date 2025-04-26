@@ -115,6 +115,13 @@ class EntityAttributeMemory(val entity: LivingEntity) {
             }
             info("&e┣&7RegainTask loaded &a√".colored())
         }
+
+        fun ItemStack.getItemAttribute(): List<IAttributeData> {
+            return itemMeta?.lore?.mapNotNull {
+                val match = AttributeManager.matchAttribute(it) ?: return@mapNotNull null
+                AttributeData(match.attributeNumber, match.value)
+            } ?: emptyList()
+        }
     }
 
     init {
@@ -133,13 +140,6 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         val remove = extendMemory.remove(name)
         updateAttributeAsync()
         return remove
-    }
-
-    fun ItemStack.getItemAttribute(): List<IAttributeData>? {
-        return itemMeta?.lore?.mapNotNull {
-            val match = AttributeManager.matchAttribute(it) ?: return@mapNotNull null
-            AttributeData(match.attributeNumber, match.value)
-        }
     }
 
     fun getItemsAttribute(): List<IAttributeData> {

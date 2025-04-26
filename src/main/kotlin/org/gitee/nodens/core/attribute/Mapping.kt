@@ -47,5 +47,4 @@ object Mapping: IAttributeGroup {
             return hashMap
         }
     }
-
 }

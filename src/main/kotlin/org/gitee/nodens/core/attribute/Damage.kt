@@ -55,7 +55,7 @@ object Damage: IAttributeGroup {
             IAttributeGroup.Number.ValueType.SINGLE -> {
                 valueMap.forEach { (type, double) ->
                     damage += when(type) {
-                        PERCENT -> (valueMap[DigitalParser.Type.COUNT]?.get(0) ?: 0.0) * double[0]
+                        PERCENT -> (valueMap[COUNT]?.get(0) ?: 0.0) * double[0]
                         COUNT -> double[0]
                     }
                 }
@@ -63,7 +63,7 @@ object Damage: IAttributeGroup {
             IAttributeGroup.Number.ValueType.RANGE -> {
                 valueMap.forEach { (type, double) ->
                     damage += when(type) {
-                        PERCENT -> (valueMap[DigitalParser.Type.COUNT]?.get(0) ?: 0.0) * random(double[0], double[1])
+                        PERCENT -> (valueMap[COUNT]?.get(0) ?: 0.0) * random(double[0], double[1])
                         COUNT -> random(double[0], double[1])
                     }
                 }

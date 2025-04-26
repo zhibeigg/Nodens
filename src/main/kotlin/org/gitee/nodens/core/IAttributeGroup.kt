@@ -26,6 +26,8 @@ interface IAttributeGroup {
 
         fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>)
 
+        fun combatPower(valueMap: Map<DigitalParser.Type, DoubleArray>): Double
+
         enum class ValueType {
             RANGE, SINGLE;
         }

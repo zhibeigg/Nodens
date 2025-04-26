@@ -3,6 +3,8 @@ package org.gitee.nodens.module.item.generator
 import kotlinx.serialization.json.Json
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.gitee.nodens.core.AttributeManager
+import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.getItemAttribute
 import org.gitee.nodens.module.item.*
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.context
@@ -16,6 +18,8 @@ import taboolib.common5.cint
 import taboolib.module.kether.*
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.ItemBuilder
+import taboolib.platform.util.replaceLore
+import kotlin.math.ceil
 
 object NormalGenerator: IItemGenerator {
 
@@ -53,6 +57,15 @@ object NormalGenerator: IItemGenerator {
             val tag = it.getItemTag()
             tag[NODENS_NAMESPACE] = Json.encodeToString(context)
             tag.saveTo(it)
+            it.replaceLore(
+                mapOf(
+                    "{CombatPower}" to ceil(
+                        AttributeManager.getCombatPower(
+                            *it.getItemAttribute().toTypedArray()
+                        )
+                    ).toString()
+                )
+            )
         }
         return builder.build()
     }

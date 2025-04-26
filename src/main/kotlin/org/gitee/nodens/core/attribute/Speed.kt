@@ -35,5 +35,4 @@ object Speed: IAttributeGroup {
             addBukkitAttribute(Speed, Attribute.GENERIC_MOVEMENT_SPEED, entitySyncProfile, valueMap)
         }
     }
-
 }

@@ -2,6 +2,8 @@ package org.gitee.nodens.core.attribute
 
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
+import org.gitee.nodens.common.DigitalParser.Type.COUNT
+import org.gitee.nodens.common.DigitalParser.Type.PERCENT
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
@@ -14,7 +16,7 @@ object Crit: IAttributeGroup {
 
     override val name: String = "Crit"
 
-    object PhysicalChance: AbstractNumber() {
+    object PhysicalChance: AbstractPercentNumber() {
 
         override val config: AttributeConfig
             get() = AttributeManager.getConfig(Crit.name, name)
@@ -26,7 +28,7 @@ object Crit: IAttributeGroup {
         }
     }
 
-    object MagicChance: AbstractNumber() {
+    object MagicChance: AbstractPercentNumber() {
 
         override val config: AttributeConfig
             get() = AttributeManager.getConfig(Crit.name, name)
@@ -40,20 +42,20 @@ object Crit: IAttributeGroup {
 
     private fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
         val chance = when (config.valueType) {
-            IAttributeGroup.Number.ValueType.SINGLE -> valueMap[DigitalParser.Type.PERCENT]!![0]
-            IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[DigitalParser.Type.PERCENT]!![0], valueMap[DigitalParser.Type.PERCENT]!![1])
+            IAttributeGroup.Number.ValueType.SINGLE -> valueMap[PERCENT]!![0]
+            IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])
         }
         val resistance = damageProcessor.defender.attributeMemory()?.mergedAttribute(CritChanceResistance)
         val resistanceChance = when (CritChanceResistance.config.valueType) {
-            IAttributeGroup.Number.ValueType.SINGLE -> resistance?.get(DigitalParser.Type.PERCENT)?.get(0) ?: 0.0
-            IAttributeGroup.Number.ValueType.RANGE -> resistance?.get(DigitalParser.Type.PERCENT)?.let { random(it[0], it[1]) } ?: 0.0
+            IAttributeGroup.Number.ValueType.SINGLE -> resistance?.get(PERCENT)?.get(0) ?: 0.0
+            IAttributeGroup.Number.ValueType.RANGE -> resistance?.get(PERCENT)?.let { random(it[0], it[1]) } ?: 0.0
         }
         if (random((chance - resistanceChance).coerceAtLeast(0.0).coerceAtMost(1.0))) {
             damageProcessor.crit = true
         }
     }
 
-    object Addon: AbstractNumber() {
+    object Addon: AbstractPercentNumber() {
 
         override val config: AttributeConfig
             get() = AttributeManager.getConfig(Crit.name, name)
@@ -61,21 +63,21 @@ object Crit: IAttributeGroup {
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.crit) {
                 val addon = when (MagicChance.config.valueType) {
-                    IAttributeGroup.Number.ValueType.SINGLE -> valueMap[DigitalParser.Type.PERCENT]!![0]
-                    IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[DigitalParser.Type.PERCENT]!![0], valueMap[DigitalParser.Type.PERCENT]!![1])
+                    IAttributeGroup.Number.ValueType.SINGLE -> valueMap[PERCENT]!![0]
+                    IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])
                 }
                 damageProcessor.addDamageSource("$NODENS_NAMESPACE${Crit.name}$name", this, damageProcessor.getFinalDamage() * addon)
             }
         }
     }
 
-    object CritChanceResistance: AbstractNumber() {
+    object CritChanceResistance: AbstractPercentNumber() {
 
         override val config: AttributeConfig
             get() = AttributeManager.getConfig(Crit.name, name)
     }
 
-    object CritAddonResistance: AbstractNumber() {
+    object CritAddonResistance: AbstractPercentNumber() {
 
         override val config: AttributeConfig
             get() = AttributeManager.getConfig(Crit.name, name)
@@ -83,8 +85,8 @@ object Crit: IAttributeGroup {
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.crit) {
                 val addon = when (MagicChance.config.valueType) {
-                    IAttributeGroup.Number.ValueType.SINGLE -> valueMap[DigitalParser.Type.PERCENT]!![0]
-                    IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[DigitalParser.Type.PERCENT]!![0], valueMap[DigitalParser.Type.PERCENT]!![1])
+                    IAttributeGroup.Number.ValueType.SINGLE -> valueMap[PERCENT]!![0]
+                    IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])
                 }
                 val damage = damageProcessor.getDamageSource("$NODENS_NAMESPACE${Crit.name}${Addon.name}")?.damage ?: return
                 damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Crit.name}$name", this, damage * addon)
