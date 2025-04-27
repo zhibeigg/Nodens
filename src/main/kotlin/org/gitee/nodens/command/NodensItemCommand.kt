@@ -12,7 +12,7 @@ object NodensItemCommand {
     @CommandBody
     val manager = subCommand {
         exec<Player> {
-            ItemConfigManagerUI(sender)
+            ItemConfigManagerUI(sender).open()
         }
     }
 }

@@ -17,7 +17,9 @@ onDamage: |-
     set a to math sub [ &a &i[value] ]
   }
   &a
+# reason 治疗原因
 # regainSources 治疗源列表
+# reduceSources 减疗源列表
 # healer 治疗者
 # passive 受疗者
 # source[attribute] 源的属性所属名
@@ -26,7 +28,10 @@ onDamage: |-
 # 最后返回值为 finalRegain
 onRegain: |-
   set a to 0
-  for i in healSources then {
+  for i in regainSources then {
     set a to math add [ &a &i[value] ]
+  }
+  for i in reduceSources then {
+    set a to math sub [ &a &i[value] ]
   }
   &a

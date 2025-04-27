@@ -69,8 +69,9 @@ object Handle {
 
     fun runProcessor(regainProcessor: RegainProcessor): Double {
         return ScriptContext.create(onRegain).also {
+            it["reason"] = regainProcessor.reason
             it["regainSources"] = regainProcessor.regainSources.values.toList()
-            it["regainSources"] = regainProcessor.regainSources.values.toList()
+            it["reduceSources"] = regainProcessor.reduceSources.values.toList()
             it["healer"] = regainProcessor.healer
             it["passive"] = regainProcessor.passive
         }.runActions().orNull().cdouble

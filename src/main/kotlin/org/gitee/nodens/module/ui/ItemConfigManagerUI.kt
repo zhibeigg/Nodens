@@ -51,6 +51,10 @@ class ItemConfigManagerUI(val viewer: Player) {
         }
     }
 
+    fun open() {
+        open(node)
+    }
+
     fun open(node: Node) {
         if (node is ParentNode) {
             viewer.openMenu<PageableChestImpl<Node>> {

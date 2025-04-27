@@ -2,6 +2,7 @@ package org.gitee.nodens.command
 
 import org.bukkit.entity.Player
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
+import org.gitee.nodens.core.reload.ReloadAPI
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.mainCommand
@@ -14,6 +15,11 @@ object NodensCommand {
     @CommandBody
     val main = mainCommand {
         createHelper()
+    }
+
+    @CommandBody
+    val reload = subCommand {
+        ReloadAPI.reload()
     }
 
     @CommandBody
