@@ -5,7 +5,12 @@ import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 
-class RegainProcessor(val healer: LivingEntity, val passive: LivingEntity) {
+// reason NATURAL
+class RegainProcessor(val reason: String, val healer: LivingEntity, val passive: LivingEntity) {
+
+    companion object {
+        const val NATURAL_REASON = "NATURAL"
+    }
 
     class PriorityRunnable(val priority: Int, val callback: (regain: Double) -> Unit)
     class RegainSource(override val key: String, override val attribute: IAttributeGroup.Number, val regain: Double): AbstractSource(regain)
@@ -51,9 +56,9 @@ class RegainProcessor(val healer: LivingEntity, val passive: LivingEntity) {
         }
     }
 
-    fun callback(damage: Double) {
+    fun callback(regain: Double) {
         runnableList.sortedBy { it.priority }.forEach {
-            it.callback(damage)
+            it.callback(regain)
         }
     }
 

@@ -15,6 +15,7 @@ import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.api.NodensAPI.Companion.pluginScope
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
+import org.gitee.nodens.common.RegainProcessor
 import org.gitee.nodens.core.*
 import org.gitee.nodens.core.attribute.Health
 import org.gitee.nodens.core.attribute.Mapping
@@ -111,11 +112,9 @@ class EntityAttributeMemory(val entity: LivingEntity) {
             regainTask?.cancel()
             regainTask = submitAsync(period = Health.Regain.period) {
                 onlinePlayers.forEach {
-                    val attributeData = it.attributeMemory()?.mergedAllAttribute() ?: return@forEach
-                    val regain = Health.Regain.getRegain(it, attributeData[Health.Regain] ?: return@forEach)
-                    submit {
-                        it.health = (it.health + regain).coerceAtMost(it.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: it.maxHealth)
-                    }
+                    val processor = RegainProcessor(RegainProcessor.NATURAL_REASON, it, it)
+                    processor.handle()
+                    submit { processor.callRegain() }
                 }
             }
             info("&e┣&7RegainTask loaded &a√".colored())

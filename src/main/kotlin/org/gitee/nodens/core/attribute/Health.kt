@@ -1,18 +1,19 @@
 package org.gitee.nodens.core.attribute
 
 import org.bukkit.attribute.Attribute
-import org.bukkit.attribute.AttributeModifier
-import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.DigitalParser.Type.COUNT
 import org.gitee.nodens.common.DigitalParser.Type.PERCENT
 import org.gitee.nodens.common.EntitySyncProfile
+import org.gitee.nodens.common.RegainProcessor
+import org.gitee.nodens.common.RegainProcessor.Companion.NATURAL_REASON
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
-import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.*
-import org.gitee.nodens.util.ConfigLazy
+import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.RANGE
+import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.SINGLE
+import org.gitee.nodens.core.attribute.Crit.MagicChance
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.ReloadableLazy
 import org.gitee.nodens.util.addBukkitAttribute
@@ -59,6 +60,27 @@ object Health: IAttributeGroup {
                 }
             }
             return regain
+        }
+
+        override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            if (regainProcessor.reason == NATURAL_REASON) {
+                regainProcessor.addRegainSource("$NODENS_NAMESPACE${Health.name}$name", this, getRegain(regainProcessor.passive, valueMap))
+            }
+        }
+    }
+
+    object GrievousWounds: AbstractNumber() {
+
+        override val config: AttributeConfig
+            get() = AttributeManager.getConfig(Health.name, name)
+
+        override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            val percent = when (MagicChance.config.valueType) {
+                SINGLE -> valueMap[PERCENT]!![0]
+                RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])
+            }
+            val damage = regainProcessor.getFinalRegain()
+            regainProcessor.addReduceSource("$NODENS_NAMESPACE${Health.name}$name", this, damage * percent)
         }
     }
 }

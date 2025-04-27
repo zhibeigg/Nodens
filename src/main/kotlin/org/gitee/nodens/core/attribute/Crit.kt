@@ -84,12 +84,12 @@ object Crit: IAttributeGroup {
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.crit) {
-                val addon = when (MagicChance.config.valueType) {
+                val percent = when (config.valueType) {
                     IAttributeGroup.Number.ValueType.SINGLE -> valueMap[PERCENT]!![0]
                     IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])
                 }
                 val damage = damageProcessor.getDamageSource("$NODENS_NAMESPACE${Crit.name}${Addon.name}")?.damage ?: return
-                damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Crit.name}$name", this, damage * addon)
+                damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Crit.name}$name", this, damage * percent)
             }
         }
     }
