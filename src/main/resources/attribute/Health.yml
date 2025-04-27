@@ -12,3 +12,9 @@ Regain:
   period: 20
   keys:
     - 生命恢复
+GrievousWounds:
+  combatPower: 1.0
+  valueType: SINGLE
+  priority: 2
+  keys:
+    - 重伤

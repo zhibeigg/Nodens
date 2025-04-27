@@ -17,6 +17,9 @@ object NodensCommand {
     }
 
     @CommandBody
+    val item = NodensItemCommand
+
+    @CommandBody
     val test = subCommand {
         exec<Player> {
             sender.attributeMemory()?.mergedAllAttribute()?.forEach {
@@ -24,5 +27,4 @@ object NodensCommand {
             }
         }
     }
-
 }

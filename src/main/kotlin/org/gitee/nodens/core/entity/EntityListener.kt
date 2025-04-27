@@ -1,5 +1,6 @@
 package org.gitee.nodens.core.entity
 
+import eos.moe.armourers.ev
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
@@ -8,6 +9,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.*
+import org.gitee.nodens.api.events.player.NodensPlayerExpChangeEvents
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser.Type.PERCENT
 import org.gitee.nodens.core.attribute.Damage
@@ -99,7 +101,11 @@ object EntityListener {
     @SubscribeEvent(EventPriority.LOWEST)
     private fun exp(e: PlayerExpChangeEvent) {
         val addon = e.player.attributeMemory()?.mergedAttribute(Exp.Addon) ?: return
-        val double = 1.0 + (addon[PERCENT]?.get(0) ?: 0.0)
-        e.amount = (double * e.amount.cdouble).cint
+        val addonValue = ((addon[PERCENT]?.get(0) ?: 0.0) * e.amount.cdouble).cint
+        val event = NodensPlayerExpChangeEvents.Pre(e.player, e.amount, addonValue)
+        if (event.call()) {
+            e.amount += event.addon
+            NodensPlayerExpChangeEvents.Post(e.player, event.amount, event.addon).call()
+        }
     }
 }

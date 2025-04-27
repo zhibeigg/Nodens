@@ -1,5 +1,8 @@
 package org.gitee.nodens.module.item
 
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import org.gitee.nodens.module.item.generator.NormalGenerator
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.xseries.XEnchantment
 import taboolib.library.xseries.XItemFlag
@@ -41,4 +44,8 @@ class ItemConfig(val key: String, configurationSection: ConfigurationSection) {
     val hashCode = configurationSection.toString().hashCode()
 
     class Variable(val key: String, val action: String)
+
+    fun generate(amount: Int, player: Player? = null, map: Map<String, Any> = emptyMap()): ItemStack {
+        return NormalGenerator.generate(this, amount, player, map)
+    }
 }

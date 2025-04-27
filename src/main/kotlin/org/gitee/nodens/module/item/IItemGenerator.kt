@@ -8,13 +8,13 @@ interface IItemGenerator {
 
     /**
      * 生成物品堆
-     * @param key 生成的物品堆配置名
+     * @param itemConfig 生成的物品堆配置
      * @param amount 物品堆的数量（1-64）
      * @param player 脚本执行玩家（null=[ConsoleCommandSender]）
      * @param map 额外数据
      * @return 物品堆
      * */
-    fun generate(key: String, amount: Int, player: Player?, map: Map<String, Any> = emptyMap()): ItemStack
+    fun generate(itemConfig: ItemConfig, amount: Int, player: Player?, map: Map<String, Any>): ItemStack
 
     /**
      * 重新刷新物品

@@ -23,12 +23,12 @@ Real:
 Monster:
   combatPower: 1.0
   valueType: SINGLE
-  priority: 1
+  priority: 2
   keys:
     - 小怪增伤
 Boss:
   combatPower: 1.0
   valueType: SINGLE
-  priority: 1
+  priority: 2
   keys:
     - 首领增伤

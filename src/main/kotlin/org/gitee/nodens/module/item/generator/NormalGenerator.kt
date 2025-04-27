@@ -25,10 +25,9 @@ object NormalGenerator: IItemGenerator {
 
     const val SELL_TAG = "NODENS@SELL"
 
-    override fun generate(key: String, amount: Int, player: Player?, map: Map<String, Any>): ItemStack {
+    override fun generate(itemConfig: ItemConfig, amount: Int, player: Player?, map: Map<String, Any>): ItemStack {
         val sender = player?.let { adaptPlayer(it) } ?: console()
-        val itemConfig = ItemManager.itemConfigs[key] ?: error("not found ItemConfig $key")
-        val context = NormalContext(key, hashMapOf(), itemConfig.hashCode)
+        val context = NormalContext(itemConfig.key, hashMapOf(), itemConfig.hashCode)
 
         context.variable.putAll(map.mapValues { it.toVariable() })
         itemConfig.variables.forEach {
@@ -135,6 +134,7 @@ object NormalGenerator: IItemGenerator {
 
     override fun update(player: Player?, itemStack: ItemStack): ItemStack? {
         val context = itemStack.context<NormalContext>() ?: return null
-        return generate(context.key, itemStack.amount, player, context.variable)
+        val config = ItemManager.getItemConfig(context.key) ?: return null
+        return generate(config, itemStack.amount, player, context.variable)
     }
 }
