@@ -6,10 +6,7 @@ import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.getItemAttribute
 import org.gitee.nodens.module.item.*
-import org.gitee.nodens.util.NODENS_NAMESPACE
-import org.gitee.nodens.util.context
-import org.gitee.nodens.util.nodensEnvironmentNamespaces
-import org.gitee.nodens.util.toVariable
+import org.gitee.nodens.util.*
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
@@ -22,8 +19,6 @@ import taboolib.platform.util.replaceLore
 import kotlin.math.ceil
 
 object NormalGenerator: IItemGenerator {
-
-    const val SELL_TAG = "NODENS@SELL"
 
     override fun generate(itemConfig: ItemConfig, amount: Int, player: Player?, map: Map<String, Any>): ItemStack {
         val sender = player?.let { adaptPlayer(it) } ?: console()
@@ -54,7 +49,7 @@ object NormalGenerator: IItemGenerator {
         builder.isUnbreakable = itemConfig.isUnBreakable
         builder.finishing = {
             val tag = it.getItemTag()
-            tag[NODENS_NAMESPACE] = Json.encodeToString(context)
+            tag[CONTEXT_TAG] = Json.encodeToString(context)
             tag.saveTo(it)
             it.replaceLore(
                 mapOf(
@@ -77,7 +72,7 @@ object NormalGenerator: IItemGenerator {
                 .sender(sender)
                 .sandbox(false)
                 .set("item", itemConfig)
-                .set("itemContext", context)
+                .set("context", context)
                 .build()
         )
     }
@@ -90,7 +85,7 @@ object NormalGenerator: IItemGenerator {
                 .sender(sender)
                 .sandbox(false)
                 .set("item", itemConfig)
-                .set("itemContext", context)
+                .set("context", context)
                 .build()
         )
     }
@@ -103,7 +98,7 @@ object NormalGenerator: IItemGenerator {
                 .sender(sender)
                 .sandbox(false)
                 .set("item", itemConfig)
-                .set("itemContext", context)
+                .set("context", context)
                 .build()
         ).orNull()
     }
@@ -122,7 +117,7 @@ object NormalGenerator: IItemGenerator {
                     .sender(sender)
                     .sandbox(false)
                     .set("item", itemConfig)
-                    .set("itemContext", context)
+                    .set("context", context)
                     .build()
             ).orNull() ?: error("not variable $key")
         } catch (e: Throwable) {

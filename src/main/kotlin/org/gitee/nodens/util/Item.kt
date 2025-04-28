@@ -3,11 +3,13 @@ package org.gitee.nodens.util
 import kotlinx.serialization.json.Json
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.*
+import taboolib.common.platform.function.info
 import taboolib.module.nms.ItemTagData
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.isAir
 
 const val CONTEXT_TAG = "NODENS_CONTEXT"
+const val SELL_TAG = "NODENS@SELL"
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T: IItemContext> ItemStack.context(): T? {

@@ -2,6 +2,7 @@ package org.gitee.nodens.core.kether
 
 import org.gitee.nodens.module.item.ItemConfig
 import org.gitee.nodens.module.item.NormalContext
+import org.gitee.nodens.module.item.Variable
 import org.gitee.nodens.module.random.RandomManager
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
@@ -9,6 +10,7 @@ import org.gitee.nodens.util.toVariable
 import taboolib.common.OpenResult
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
+import taboolib.module.chat.uncolored
 import taboolib.module.kether.*
 import java.util.concurrent.CompletableFuture
 
@@ -33,11 +35,12 @@ object ItemActions {
     }
 
     @KetherProperty(bind = NormalContext::class)
-    fun propertyContext() = object : ScriptProperty<NormalContext>("NormalGenerator.NormalContext.operator") {
+    fun propertyContext() = object : ScriptProperty<NormalContext>("NormalContext.operator") {
 
         override fun read(instance: NormalContext, key: String): OpenResult {
-            return when (key) {
-                "key" -> OpenResult.successful(instance.key)
+            return when {
+                key.startsWith("@") -> OpenResult.successful(instance.variable[key.substring(1)]?.value)
+                key == "key" -> OpenResult.successful(instance.key)
                 else -> OpenResult.successful(instance.variable[key])
             }
         }
@@ -52,13 +55,24 @@ object ItemActions {
         }
     }
 
+    @KetherParser(["unColor"], shared = true)
+    private fun unColor() = combinationParser {
+        it.group(
+            text()
+        ).apply(it) { text ->
+            now {
+                text.uncolored()
+            }
+        }
+    }
+
     @KetherParser(["randoms"], namespace = NODENS_NAMESPACE, shared = true)
     private fun randomsParser() = combinationParser {
         it.group(
             text()
         ).apply(it) { id ->
             future {
-                val context = script().get<NormalContext>("itemContext") ?: return@future completedFuture(null)
+                val context = script().get<NormalContext>("context") ?: return@future completedFuture(null)
                 randomsEval(script().sender, id, context)
             }
         }

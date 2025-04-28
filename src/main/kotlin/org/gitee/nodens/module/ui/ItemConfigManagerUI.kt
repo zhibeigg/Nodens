@@ -4,8 +4,6 @@ import org.bukkit.entity.Player
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.ItemConfig
 import org.gitee.nodens.module.item.ItemManager
-import taboolib.common.LifeCycle
-import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getDataFolder
 import taboolib.library.xseries.XMaterial
 import taboolib.module.configuration.Configuration
@@ -28,15 +26,13 @@ class ItemConfigManagerUI(val viewer: Player) {
         class ParentNode(val subNode: List<Node>, override val file: File) : Node
         class SubNode(val configs: List<ItemConfig>, override val file: File) : Node
 
-        @Reload(1)
-        @Awake(LifeCycle.ENABLE)
-        private fun load() {
+        internal fun load() {
             val file = File(getDataFolder(), "items")
             node = ParentNode(deepFind(file), file)
         }
 
         private fun deepFind(file: File): List<Node> {
-            return file.listFiles()?.map {
+            return file.listFiles()!!.map {
                 if (it.isDirectory) {
                     ParentNode(deepFind(it), it)
                 } else {
@@ -47,7 +43,7 @@ class ItemConfigManagerUI(val viewer: Player) {
                         it
                     )
                 }
-            } ?: emptyList()
+            }
         }
     }
 
@@ -59,6 +55,7 @@ class ItemConfigManagerUI(val viewer: Player) {
         if (node is ParentNode) {
             viewer.openMenu<PageableChestImpl<Node>> {
                 handLocked(false)
+                rows(6)
                 slots((0..44).toList())
                 elements { node.subNode }
                 setPreviousPage(45) { page, hasPreviousPage ->
@@ -109,6 +106,7 @@ class ItemConfigManagerUI(val viewer: Player) {
         } else if (node is SubNode) {
             viewer.openMenu<PageableChestImpl<ItemConfig>> {
                 handLocked(false)
+                rows(6)
                 slots((0..44).toList())
                 elements { node.configs }
                 setPreviousPage(45) { page, hasPreviousPage ->

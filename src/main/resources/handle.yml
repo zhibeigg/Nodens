@@ -10,10 +10,10 @@
 # 最后返回值为 finalDamage
 onDamage: |-
   set a to 0
-  for i in damageSources then {
+  for i in &damageSources then {
     set a to math add [ &a &i[value] ]
   }
-  for i in defenceSources then {
+  for i in &defenceSources then {
     set a to math sub [ &a &i[value] ]
   }
   &a
@@ -28,10 +28,10 @@ onDamage: |-
 # 最后返回值为 finalRegain
 onRegain: |-
   set a to 0
-  for i in regainSources then {
+  for i in &regainSources then {
     set a to math add [ &a &i[value] ]
   }
-  for i in reduceSources then {
+  for i in &reduceSources then {
     set a to math sub [ &a &i[value] ]
   }
   &a

@@ -59,5 +59,4 @@ object ReloadAPI: IReloadAPI, ClassVisitor(3) {
     fun init() {
         PlatformFactory.registerAPI<IReloadAPI>(ReloadAPI)
     }
-
 }

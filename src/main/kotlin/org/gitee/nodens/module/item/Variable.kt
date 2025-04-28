@@ -1,8 +1,9 @@
 package org.gitee.nodens.module.item
 
-import java.io.Serializable
+import kotlinx.serialization.Serializable
 
-interface Variable<T: Serializable>{
+@Serializable
+sealed interface Variable<T>{
     
     val value: T?
 }

@@ -9,17 +9,21 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.generator.NormalGenerator
+import org.gitee.nodens.module.ui.ItemConfigManagerUI
 import org.gitee.nodens.util.ConfigLazy
 import org.gitee.nodens.util.context
 import org.gitee.nodens.util.files
 import org.gitee.nodens.util.getConfig
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
+import taboolib.common.platform.Ghost
 import taboolib.common.platform.event.SubscribeEvent
+import taboolib.common.platform.function.info
 import taboolib.common.util.unsafeLazy
 import taboolib.module.configuration.Configuration
 import taboolib.platform.util.isAir
@@ -46,6 +50,7 @@ object ItemManager {
         onlinePlayers.forEach { player ->
             updateInventory(player)
         }
+        ItemConfigManagerUI.load()
     }
 
     @SubscribeEvent
@@ -54,6 +59,7 @@ object ItemManager {
         DragonAPI.updatePlayerSkin(e.player)
     }
 
+    @Ghost
     @SubscribeEvent
     private fun updateArmourers(e: PlayerSkinUpdateEvent) {
         e.skinList.addAll(heldItemArmourersMap[e.player.uniqueId] ?: return)
@@ -82,6 +88,11 @@ object ItemManager {
                 }
             })
         }
+    }
+
+    @SubscribeEvent
+    private fun quit(e: PlayerQuitEvent) {
+        heldItemArmourersMap.remove(e.player.uniqueId)
     }
 
     private fun updateInventory(player: Player) {

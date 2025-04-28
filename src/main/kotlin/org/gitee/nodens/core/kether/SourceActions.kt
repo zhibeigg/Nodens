@@ -15,14 +15,14 @@ object SourceActions {
             return when (key) {
                 "key" -> OpenResult.successful(instance.key)
                 "attribute" -> OpenResult.successful(instance.attribute.name)
-                "amount" -> OpenResult.successful(instance.amount)
+                "amount", "value" -> OpenResult.successful(instance.amount)
                 else -> OpenResult.failed()
             }
         }
 
         override fun write(instance: Source, key: String, value: Any?): OpenResult {
             return when (key) {
-                "amount" -> {
+                "amount", "value" -> {
                     instance.amount = value.cdouble
                     OpenResult.successful()
                 }

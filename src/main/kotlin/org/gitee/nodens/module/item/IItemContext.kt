@@ -1,6 +1,9 @@
 package org.gitee.nodens.module.item
 
-interface IItemContext {
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed interface IItemContext {
 
     val key: String
 
