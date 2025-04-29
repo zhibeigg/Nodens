@@ -3,6 +3,8 @@ package org.gitee.nodens.module.item.generator
 import kotlinx.serialization.json.Json
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.gitee.nodens.api.events.item.NodensItemGenerateEvent
+import org.gitee.nodens.api.events.item.NodensItemUpdateEvents
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.getItemAttribute
 import org.gitee.nodens.module.item.*
@@ -24,9 +26,9 @@ object NormalGenerator: IItemGenerator {
         val sender = player?.let { adaptPlayer(it) } ?: console()
         val context = NormalContext(itemConfig.key, hashMapOf(), itemConfig.hashCode)
 
-        context.variable.putAll(map.mapValues { it.toVariable() })
+        context.variable.putAll(map.mapValues { it.value.toVariable() })
         itemConfig.variables.forEach {
-            if (it.key in map.keys) return@forEach
+            if (map.containsKey(it.key)) return@forEach
             context.variable[it.key] = it.getVariable(sender, itemConfig, context)
         }
         context.variable[SELL_TAG] = (itemConfig.sell?.let { eval(sender, itemConfig, context, it).cdouble } ?: 0.0).toVariable()
@@ -61,7 +63,9 @@ object NormalGenerator: IItemGenerator {
                 )
             )
         }
-        return builder.build()
+        val event = NodensItemGenerateEvent(player, itemConfig, context, builder.build())
+        event.call()
+        return event.item
     }
 
     private fun parse(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, list: List<String>): List<String> {
@@ -130,6 +134,12 @@ object NormalGenerator: IItemGenerator {
     override fun update(player: Player?, itemStack: ItemStack): ItemStack? {
         val context = itemStack.context<NormalContext>() ?: return null
         val config = ItemManager.getItemConfig(context.key) ?: return null
-        return generate(config, itemStack.amount, player, context.variable)
+        val new = generate(config, itemStack.amount, player, context.variable)
+        val event = NodensItemUpdateEvents.Pre(itemStack, new)
+        return if (event.call()) {
+            event.new
+        } else {
+            event.old
+        }
     }
 }

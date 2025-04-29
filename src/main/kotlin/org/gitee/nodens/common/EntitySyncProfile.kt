@@ -4,7 +4,6 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.core.IAttributeGroup
-import taboolib.common.platform.function.info
 
 class EntitySyncProfile(val entity: LivingEntity) {
 

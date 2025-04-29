@@ -1,5 +1,6 @@
 package org.gitee.nodens.core.entity
 
+import eos.moe.armourers.ev
 import eos.moe.dragoncore.api.SlotAPI
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -13,6 +14,8 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.api.NodensAPI.Companion.pluginScope
+import org.gitee.nodens.api.events.player.NodensPlayerAttributeSyncEvent
+import org.gitee.nodens.api.events.player.NodensPlayerAttributeUpdateEvents
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.common.RegainProcessor
@@ -163,27 +166,34 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     }
 
     fun updateAttributeAsync() {
-        pluginScope.launch {
-            val iterator = extendMemory.iterator()
-            while (iterator.hasNext()) {
-                val entry = iterator.next()
-                if (entry.value.closed) {
-                    iterator.remove()
+        val event = NodensPlayerAttributeUpdateEvents.Pre(this)
+        if (event.call()) {
+            pluginScope.launch {
+                val iterator = extendMemory.iterator()
+                while (iterator.hasNext()) {
+                    val entry = iterator.next()
+                    if (entry.value.closed) {
+                        iterator.remove()
+                    }
                 }
+                syncAttributeToBukkit()
+                NodensPlayerAttributeUpdateEvents.Post(this@EntityAttributeMemory).call()
             }
-            syncAttributeToBukkit()
         }
     }
 
     fun syncAttributeToBukkit() {
         val attributeData = mergedAllAttribute()
         ensureSync {
-            entitySyncProfile.clearModifiers()
-            attributeData.forEach {
-                it.key.sync(entitySyncProfile, it.value)
+            val event = NodensPlayerAttributeSyncEvent(entitySyncProfile, attributeData)
+            if (event.call()) {
+                entitySyncProfile.clearModifiers()
+                attributeData.forEach {
+                    it.key.sync(entitySyncProfile, it.value)
+                }
+                entitySyncProfile.applyModifiers()
+                entitySyncProfile.resetHealth()
             }
-            entitySyncProfile.applyModifiers()
-            entitySyncProfile.resetHealth()
         }
     }
 

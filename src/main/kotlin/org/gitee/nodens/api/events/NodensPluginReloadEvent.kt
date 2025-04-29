@@ -20,5 +20,4 @@ class NodensPluginReloadEvent: BukkitProxyEvent() {
     internal fun getFunctions(): List<Func> {
         return functions
     }
-
 }

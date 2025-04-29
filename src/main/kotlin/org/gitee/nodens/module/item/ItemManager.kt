@@ -105,11 +105,13 @@ object ItemManager {
                 SlotAPI.setSlotItem(player, it, updateItem(player, item), false)
             }
         }
-        player.inventory.forEach {
-            if (it.isAir()) return@forEach
-            val context = it.context() ?: return@forEach
-            val config = getItemConfig(context.key) ?: return@forEach
-            if (config.isUpdate && config.hashCode == context.hashcode) updateItem(player, it)
+        player.inventory.contents.forEachIndexed { index, item ->
+            if (item.isAir()) return@forEachIndexed
+            val context = item.context() ?: return@forEachIndexed
+            val config = getItemConfig(context.key) ?: return@forEachIndexed
+            if (config.isUpdate && config.hashCode == context.hashcode) {
+                player.inventory.setItem(index, updateItem(player, item))
+            }
         }
     }
 

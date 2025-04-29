@@ -25,6 +25,7 @@ fun ItemStack.context(): NormalContext? {
 
 fun Any.toVariable(): Variable<*> {
     return when (this) {
+        is Variable<*> -> this
         is Byte -> ByteVariable(this)
         is Short -> ShortVariable(this)
         is Int -> IntVariable(this)
