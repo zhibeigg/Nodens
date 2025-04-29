@@ -59,6 +59,10 @@ class NodensAPI: INodensAPI {
         return attributes.mapNotNull { matchAttribute(it) }
     }
 
+    override fun updateAttribute(entity: LivingEntity) {
+        entity.attributeMemory()?.updateAttributeAsync()
+    }
+
     companion object {
         internal val pluginScope = CoroutineScope(AsyncDispatcher + SupervisorJob())
 

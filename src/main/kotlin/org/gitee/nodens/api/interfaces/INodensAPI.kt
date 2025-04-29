@@ -3,6 +3,7 @@ package org.gitee.nodens.api.interfaces
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.gitee.nodens.common.DamageProcessor
+import org.gitee.nodens.core.AttributeData
 import org.gitee.nodens.core.IAttributeData
 import org.gitee.nodens.core.TempAttributeData
 import org.gitee.nodens.core.entity.EntityAttributeMemory
@@ -53,4 +54,9 @@ interface INodensAPI {
      * @return 匹配到的属性数据列表
      * */
     fun matchAttributes(attributes: List<String>): List<IAttributeData>
+
+    /**
+     * 更新实体属性
+     * */
+    fun updateAttribute(entity: LivingEntity)
 }

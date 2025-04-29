@@ -23,12 +23,11 @@ import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.Ghost
 import taboolib.common.platform.event.SubscribeEvent
-import taboolib.common.platform.function.info
 import taboolib.common.util.unsafeLazy
 import taboolib.module.configuration.Configuration
 import taboolib.platform.util.isAir
 import taboolib.platform.util.onlinePlayers
-import java.util.UUID
+import java.util.*
 
 object ItemManager {
 
@@ -79,7 +78,7 @@ object ItemManager {
                     if (p0.isAir()) return
                     val context = p0.context() ?: return
                     val config = getItemConfig(context.key) ?: return
-                    if (config.isUpdate && config.hashCode == context.hashcode) {
+                    if (config.isUpdate && config.hashCode != context.hashcode) {
                         SlotAPI.setSlotItem(e.player, it, updateItem(e.player, p0), false)
                     }
                 }
@@ -88,6 +87,7 @@ object ItemManager {
                 }
             })
         }
+        updateBukkitInventory(e.player)
     }
 
     @SubscribeEvent
@@ -101,15 +101,19 @@ object ItemManager {
             if (item.isAir()) return
             val context = item.context() ?: return
             val config = getItemConfig(context.key) ?: return
-            if (config.isUpdate && config.hashCode == context.hashcode) {
+            if (config.isUpdate && config.hashCode != context.hashcode) {
                 SlotAPI.setSlotItem(player, it, updateItem(player, item), false)
             }
         }
+        updateBukkitInventory(player)
+    }
+
+    private fun updateBukkitInventory(player: Player) {
         player.inventory.contents.forEachIndexed { index, item ->
             if (item.isAir()) return@forEachIndexed
             val context = item.context() ?: return@forEachIndexed
             val config = getItemConfig(context.key) ?: return@forEachIndexed
-            if (config.isUpdate && config.hashCode == context.hashcode) {
+            if (config.isUpdate && config.hashCode != context.hashcode) {
                 player.inventory.setItem(index, updateItem(player, item))
             }
         }
