@@ -1,7 +1,6 @@
 package org.gitee.nodens.module.ui
 
 import org.bukkit.entity.Player
-import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.ItemConfig
 import org.gitee.nodens.module.item.ItemManager
 import taboolib.common.platform.function.getDataFolder

@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
+import org.gitee.nodens.api.events.item.NodensItemUpdateEvents
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.generator.NormalGenerator
 import org.gitee.nodens.module.ui.ItemConfigManagerUI
@@ -74,12 +75,14 @@ object ItemManager {
         dragoncoreSlots.forEach {
             SlotAPI.getSlotItem(e.player, it, object : IDataBase.Callback<ItemStack> {
 
-                override fun onResult(p0: ItemStack?) {
-                    if (p0.isAir()) return
-                    val context = p0.context() ?: return
+                override fun onResult(item: ItemStack?) {
+                    if (item.isAir()) return
+                    val context = item.context() ?: return
                     val config = getItemConfig(context.key) ?: return
                     if (config.isUpdate && config.hashCode != context.hashcode) {
-                        SlotAPI.setSlotItem(e.player, it, updateItem(e.player, p0), false)
+                        val new = updateItem(e.player, item)
+                        SlotAPI.setSlotItem(e.player, it, new, false)
+                        NodensItemUpdateEvents.Post(item, new).call()
                     }
                 }
 
@@ -102,7 +105,9 @@ object ItemManager {
             val context = item.context() ?: return
             val config = getItemConfig(context.key) ?: return
             if (config.isUpdate && config.hashCode != context.hashcode) {
-                SlotAPI.setSlotItem(player, it, updateItem(player, item), false)
+                val new = updateItem(player, item)
+                SlotAPI.setSlotItem(player, it, new, false)
+                NodensItemUpdateEvents.Post(item, new).call()
             }
         }
         updateBukkitInventory(player)
@@ -114,7 +119,9 @@ object ItemManager {
             val context = item.context() ?: return@forEachIndexed
             val config = getItemConfig(context.key) ?: return@forEachIndexed
             if (config.isUpdate && config.hashCode != context.hashcode) {
-                player.inventory.setItem(index, updateItem(player, item))
+                val new = updateItem(player, item)
+                player.inventory.setItem(index, new)
+                NodensItemUpdateEvents.Post(item, new).call()
             }
         }
     }

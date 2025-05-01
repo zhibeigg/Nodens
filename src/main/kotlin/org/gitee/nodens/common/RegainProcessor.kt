@@ -1,7 +1,10 @@
 package org.gitee.nodens.common
 
+import eos.moe.armourers.ev
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityRegainHealthEvent
+import org.gitee.nodens.api.events.entity.NodensEntityDamageEvents
+import org.gitee.nodens.api.events.entity.NodensEntityRegainEvents
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 
@@ -49,10 +52,16 @@ class RegainProcessor(val reason: String, val healer: LivingEntity, val passive:
      * @return [EntityRegainHealthEvent]实体恢复事件
      * */
     fun callRegain(): EntityRegainHealthEvent? {
-        return Handle.doHeal(passive, getFinalRegain())?.apply {
-            if (!isCancelled) {
-                callback(amount)
+        val event = NodensEntityRegainEvents.Pre(this)
+        return if (event.call()) {
+            Handle.doHeal(passive, getFinalRegain())?.apply {
+                if (!isCancelled) {
+                    callback(amount)
+                    NodensEntityRegainEvents.Post(amount, this@RegainProcessor).call()
+                }
             }
+        } else {
+            null
         }
     }
 

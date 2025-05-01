@@ -14,7 +14,7 @@ interface IItemGenerator {
      * @param map 额外数据
      * @return 物品堆
      * */
-    fun generate(itemConfig: ItemConfig, amount: Int, player: Player?, map: Map<String, Any>): ItemStack
+    fun generate(itemConfig: ItemConfig, amount: Int, player: Player?, map: Map<String, Any> = emptyMap()): ItemStack
 
     /**
      * 重新刷新物品

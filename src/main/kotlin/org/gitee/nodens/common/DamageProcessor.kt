@@ -3,6 +3,7 @@ package org.gitee.nodens.common
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import org.gitee.nodens.api.events.entity.NodensEntityDamageEvents
 import org.gitee.nodens.common.Handle.doDamage
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.attribute.Defence
@@ -55,10 +56,16 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
      * @return [EntityDamageByEntityEvent]实体攻击事件
      * */
     fun callDamage(): EntityDamageByEntityEvent? {
-        return doDamage(attacker, defender, EntityDamageEvent.DamageCause.CUSTOM, getFinalDamage())?.apply {
-            if (!isCancelled) {
-                callback(finalDamage)
+        val event = NodensEntityDamageEvents.Pre(this)
+        return if (event.call()) {
+            doDamage(attacker, defender, EntityDamageEvent.DamageCause.CUSTOM, getFinalDamage())?.apply {
+                if (!isCancelled) {
+                    callback(finalDamage)
+                    NodensEntityDamageEvents.Post(finalDamage, this@DamageProcessor).call()
+                }
             }
+        } else {
+            null
         }
     }
 
