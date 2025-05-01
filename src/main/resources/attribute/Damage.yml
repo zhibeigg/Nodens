@@ -20,6 +20,12 @@ Real:
   priority: 1
   keys:
     - 真实伤害
+Fire:
+  combatPower: 1.0
+  valueType: SINGLE
+  priority: 1
+  keys:
+    - 火焰伤害
 Monster:
   combatPower: 1.0
   valueType: SINGLE

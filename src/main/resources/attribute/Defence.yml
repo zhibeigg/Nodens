@@ -14,3 +14,9 @@ Magic:
   priority: 1
   keys:
     - 魔法防御
+Fire:
+  combatPower: 1.0
+  valueType: SINGLE
+  priority: 1
+  keys:
+    - 火焰防御

@@ -19,9 +19,7 @@ object Damage: IAttributeGroup {
             get() = AttributeManager.getConfig(Damage.name, name)
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            if (damageProcessor.damageType == name) {
-                damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
-            }
+            damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
         }
     }
 
@@ -31,9 +29,7 @@ object Damage: IAttributeGroup {
             get() = AttributeManager.getConfig(Damage.name, name)
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            if (damageProcessor.damageType == name) {
-                damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
-            }
+            damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
         }
     }
 
@@ -43,9 +39,17 @@ object Damage: IAttributeGroup {
             get() = AttributeManager.getConfig(Damage.name, name)
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            if (damageProcessor.damageType == name) {
-                damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
-            }
+            damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
+        }
+    }
+
+    object Fire: AbstractNumber() {
+
+        override val config: AttributeConfig
+            get() = AttributeManager.getConfig(Damage.name, name)
+
+        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
         }
     }
 

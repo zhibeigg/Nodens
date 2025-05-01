@@ -20,9 +20,7 @@ object Defence: IAttributeGroup {
             get() = AttributeManager.getConfig(Defence.name, name)
 
         override fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            if (damageProcessor.damageType == name) {
-                damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Defence.name}$name", this, getDefence(valueMap))
-            }
+            damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Defence.name}$name", this, getDefence(valueMap))
         }
     }
 
@@ -32,9 +30,17 @@ object Defence: IAttributeGroup {
             get() = AttributeManager.getConfig(Defence.name, name)
 
         override fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            if (damageProcessor.damageType == name) {
-                damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Defence.name}$name", this, getDefence(valueMap))
-            }
+            damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Defence.name}$name", this, getDefence(valueMap))
+        }
+    }
+
+    object Fire: AbstractNumber() {
+
+        override val config: AttributeConfig
+            get() = AttributeManager.getConfig(Defence.name, name)
+
+        override fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Defence.name}$name", this, getDefence(valueMap))
         }
     }
 
