@@ -7,9 +7,11 @@ import eos.moe.dragoncore.database.IDataBase
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryInteractEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.api.events.item.NodensItemUpdateEvents
@@ -55,8 +57,12 @@ object ItemManager {
 
     @SubscribeEvent
     private fun held(e: PlayerItemHeldEvent) {
-        heldItemArmourersMap[e.player.uniqueId] = e.player.inventory.getItem(e.newSlot)?.getConfig()?.armourers
-        DragonAPI.updatePlayerSkin(e.player)
+        updateSkin(e.player)
+    }
+
+    @SubscribeEvent
+    private fun drag(e: PlayerSwapHandItemsEvent) {
+        updateSkin(e.player)
     }
 
     @Ghost
@@ -67,7 +73,9 @@ object ItemManager {
 
     @SubscribeEvent
     private fun close(e: InventoryCloseEvent) {
-        updateInventory(Bukkit.getPlayer(e.player.uniqueId) ?: return)
+        val player = Bukkit.getPlayer(e.player.uniqueId) ?: return
+        updateInventory(player)
+        updateSkin(player)
     }
 
     @SubscribeEvent
@@ -91,11 +99,23 @@ object ItemManager {
             })
         }
         updateBukkitInventory(e.player)
+        updateSkin(e.player)
     }
 
     @SubscribeEvent
     private fun quit(e: PlayerQuitEvent) {
         heldItemArmourersMap.remove(e.player.uniqueId)
+    }
+
+    fun updateSkin(player: Player) {
+        val list = mutableListOf<String>()
+        player.inventory.itemInMainHand.getConfig()?.armourers?.let { list += it }
+        player.inventory.itemInOffHand.getConfig()?.armourers?.let { list += it }
+        player.inventory.armorContents.forEach { item ->
+            item.getConfig()?.armourers?.let { list += it }
+        }
+        heldItemArmourersMap[player.uniqueId] = list
+        DragonAPI.updatePlayerSkin(player)
     }
 
     private fun updateInventory(player: Player) {
