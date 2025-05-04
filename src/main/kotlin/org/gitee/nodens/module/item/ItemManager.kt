@@ -7,7 +7,6 @@ import eos.moe.dragoncore.database.IDataBase
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
-import org.bukkit.event.inventory.InventoryInteractEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -27,6 +26,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.Ghost
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.util.unsafeLazy
+import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.platform.util.isAir
 import taboolib.platform.util.onlinePlayers
@@ -43,11 +43,21 @@ object ItemManager {
     @Awake(LifeCycle.ENABLE)
     private fun reload() {
         itemConfigs.clear()
+        val cloneMap = hashMapOf<String, ConfigurationSection>()
         files("items", "example.yml") {
             val configuration = Configuration.loadFromFile(it)
             configuration.getKeys(false).forEach { key ->
-                itemConfigs[key] = ItemConfig(key, configuration.getConfigurationSection(key)!!)
+                val configurationSection = configuration.getConfigurationSection(key)!!
+                if (configurationSection.contains("clone")) {
+                    cloneMap[key] = configurationSection
+                } else {
+                    itemConfigs[key] = ItemConfig(key, configurationSection)
+                }
             }
+        }
+        cloneMap.forEach {
+            val clone = it.value.getString("clone") ?: return@forEach
+            itemConfigs[it.key] = CloneItemConfig(it.key, itemConfigs[clone] ?: return@forEach, it.value)
         }
         onlinePlayers.forEach { player ->
             updateInventory(player)
@@ -57,7 +67,14 @@ object ItemManager {
 
     @SubscribeEvent
     private fun held(e: PlayerItemHeldEvent) {
-        updateSkin(e.player)
+        val list = mutableListOf<String>()
+        e.player.inventory.getItem(e.newSlot)?.getConfig()?.armourers?.let { list += it }
+        e.player.inventory.itemInOffHand.getConfig()?.armourers?.let { list += it }
+        e.player.inventory.armorContents.forEach { item ->
+            item?.getConfig()?.armourers?.let { list += it }
+        }
+        heldItemArmourersMap[e.player.uniqueId] = list
+        DragonAPI.updatePlayerSkin(e.player)
     }
 
     @SubscribeEvent
@@ -112,7 +129,7 @@ object ItemManager {
         player.inventory.itemInMainHand.getConfig()?.armourers?.let { list += it }
         player.inventory.itemInOffHand.getConfig()?.armourers?.let { list += it }
         player.inventory.armorContents.forEach { item ->
-            item.getConfig()?.armourers?.let { list += it }
+            item?.getConfig()?.armourers?.let { list += it }
         }
         heldItemArmourersMap[player.uniqueId] = list
         DragonAPI.updatePlayerSkin(player)
