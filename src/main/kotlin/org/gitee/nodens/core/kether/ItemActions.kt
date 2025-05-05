@@ -1,10 +1,12 @@
 package org.gitee.nodens.core.kether
 
+import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.ItemConfig
 import org.gitee.nodens.module.item.NormalContext
 import org.gitee.nodens.module.item.Variable
 import org.gitee.nodens.module.random.RandomManager
 import org.gitee.nodens.util.NODENS_NAMESPACE
+import org.gitee.nodens.util.context
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
 import org.gitee.nodens.util.toVariable
 import taboolib.common.OpenResult
@@ -62,6 +64,17 @@ object ItemActions {
         ).apply(it) { text ->
             now {
                 text.uncolored()
+            }
+        }
+    }
+
+    @KetherParser(["itemVariable"], shared = true)
+    private fun variable() = scriptParser {
+        val key = it.nextToken()
+        val itemStack = it.nextParsedAction()
+        actionFuture { future ->
+            newFrame(itemStack).run<ItemStack>().thenApply { itemStack ->
+                future.complete(itemStack.context()?.variable[key])
             }
         }
     }
