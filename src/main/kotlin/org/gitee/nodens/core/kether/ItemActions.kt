@@ -73,8 +73,9 @@ object ItemActions {
         val key = it.nextToken()
         val itemStack = it.nextParsedAction()
         actionFuture { future ->
-            newFrame(itemStack).run<ItemStack>().thenApply { itemStack ->
-                future.complete(itemStack.context()?.variable[key])
+            run(itemStack).thenApply { itemStack ->
+                val itemStack = itemStack as ItemStack?
+                future.complete(itemStack?.context()?.variable[key]?.value)
             }
         }
     }
