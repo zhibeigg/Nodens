@@ -21,6 +21,12 @@ import taboolib.expansion.AsyncDispatcher
 
 @RuntimeDependencies(
     RuntimeDependency(
+        "!com.github.ben-manes.caffeine:caffeine:2.9.3",
+        test = "!org.gitee.nodens.caffeine.cache.Caffeine",
+        relocate = ["!com.github.benmanes.caffeine", "!org.gitee.nodens.caffeine"],
+        transitive = false
+    ),
+    RuntimeDependency(
         "!org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.8.1",
         test = "!org.gitee.nodens.serialization.Serializer",
         relocate = ["!kotlin.", "!kotlin2120.", "!kotlinx.serialization.", "!org.gitee.nodens.serialization."],

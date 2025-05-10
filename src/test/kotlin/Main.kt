@@ -55,5 +55,4 @@ object Main {
     object Speed: Attribute
     object AttackSpeed: Attribute
     object Defence: Attribute
-
 }

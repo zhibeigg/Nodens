@@ -166,6 +166,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     }
 
     fun updateAttributeAsync() {
+        if (entity.isDead) return
         val event = NodensPlayerAttributeUpdateEvents.Pre(this)
         if (event.call()) {
             pluginScope.launch {
@@ -183,6 +184,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     }
 
     fun syncAttributeToBukkit() {
+        if (entity.isDead) return
         val attributeData = mergedAllAttribute()
         ensureSync {
             val event = NodensPlayerAttributeSyncEvent(entitySyncProfile, attributeData)

@@ -46,6 +46,7 @@ taboolib {
             name("DragonArmourers").optional(true)
         }
     }
+    relocate("com.github.benmanes.caffeine", "org.gitee.nodens.caffeine")
     relocate("com.eatthepath.uuid", "org.gitee.nodens.eatthepath.uuid")
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
     version {
@@ -71,6 +72,7 @@ dependencies {
     compileOnly("org.eldergod.ext:MythicMobs:4.11.0")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     compileOnly("com.eatthepath:fast-uuid:0.2.0")
+    compileOnly("com.github.ben-manes.caffeine:caffeine:2.9.3")
 
     compileOnly(kotlin("stdlib"))
     compileOnly(kotlin("reflect"))

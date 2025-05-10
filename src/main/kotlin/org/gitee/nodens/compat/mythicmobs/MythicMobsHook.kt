@@ -15,6 +15,7 @@ object MythicMobsHook {
 
     private const val ATTRIBUTE_TAG = "Nodens@MythicMobs"
 
+
     @Ghost
     @SubscribeEvent
     private fun spawn(e: MythicMobSpawnEvent) {
@@ -36,5 +37,7 @@ object MythicMobsHook {
     @SubscribeEvent
     private fun death(e: MythicMobDeathEvent) {
         entityAttributeMemoriesMap.remove(e.entity.uniqueId)
+        val drops = e.mob.type.config.getStringList("noDrops")
+
     }
 }
