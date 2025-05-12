@@ -21,10 +21,18 @@ object PRD {
         var now = c
         var success = 0
         var times = 0
+        var min = 0
+        var max = 0
         repeat(100_000) {
             times ++
             if (random(now.coerceAtMost(1.0))) {
                 println("第${times}次尝试 -> 掉落成功 (真实概率: ${"%2f".format(now*100)}%) √")
+                if (min == 0 || times < min) {
+                    min = times
+                }
+                if (max == 0 || times > max) {
+                    max = times
+                }
                 success ++
                 now = c
                 times = 0
@@ -34,7 +42,9 @@ object PRD {
             }
         }
         println(success / 100_000.000)
-        println(timeout)
+        println("耗时 $timeout")
+        println("运气最好的情况 $min 次")
+        println("运气最坏的情况 $max 次")
     }
 
     fun pFromC(c: Double): Double {

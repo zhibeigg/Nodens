@@ -34,7 +34,7 @@ object PRDAlgorithm {
             info("&e┣&7写入C值缓存文件成功 &a√".colored())
         } else {
             cacheMap = Json.Default.decodeFromString(file.readText())
-            info("&e┣&检测到PRD算法C值缓存 加载成功 &a√".colored())
+            info("&e┣&7检测到PRD算法C值缓存 加载成功 &a√".colored())
         }
     }
 
