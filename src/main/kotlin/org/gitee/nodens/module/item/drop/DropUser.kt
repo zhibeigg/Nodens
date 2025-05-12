@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import org.bukkit.Bukkit
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
+import org.gitee.nodens.core.database.RedisManager
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -35,12 +36,35 @@ class DropUser(val uuid: UUID) {
     }
 
     fun addItem(item: Item, dropSurvival: Long) {
+
         dropMap += Info(item, dropSurvival)
     }
 
-    fun hasDrop(mob: String, item: String, percent: Double): Boolean {
-        return chanceMap.get("$mob@$item") {
-            DropChance(percent)
-        }!!.hasDrop()
+    fun hasDrop(mob: String, item: String, percent: Double, global: Boolean = false): Boolean {
+
+        val key = "$mob@$item"
+        var set = true
+
+        val cache = if (global) {
+            DropManager.chanceMap
+        } else {
+            chanceMap
+        }
+
+        val chance = cache.get(key) {
+            DropChance(percent).apply {
+                set = false
+                RedisManager.getDropTimes(player, key, global).thenAccept {
+                    times = it
+                }
+            }
+        }
+
+        val drop = chance!!.hasDrop()
+        if (set) {
+            RedisManager.setDropTimes(player, key, chance.times, global)
+        }
+
+        return drop
     }
 }

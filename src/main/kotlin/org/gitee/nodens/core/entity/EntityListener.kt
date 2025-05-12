@@ -1,6 +1,5 @@
 package org.gitee.nodens.core.entity
 
-import eos.moe.armourers.ev
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent

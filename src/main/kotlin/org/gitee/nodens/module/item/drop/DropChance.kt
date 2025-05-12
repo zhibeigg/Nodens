@@ -11,6 +11,7 @@ class DropChance(percent: Double) {
     var times = 0
 
     fun hasDrop(): Boolean {
+        times ++
         if (random(c * times)) {
             times = 0
             return true

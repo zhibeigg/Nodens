@@ -1,5 +1,7 @@
 package org.gitee.nodens.module.item.drop
 
+import com.github.benmanes.caffeine.cache.Cache
+import com.github.benmanes.caffeine.cache.Caffeine
 import org.bukkit.Location
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
@@ -10,16 +12,26 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.common.PRDAlgorithm
+import org.gitee.nodens.module.item.ItemManager
+import org.gitee.nodens.module.item.generator.NormalGenerator
 import org.gitee.nodens.util.ConfigLazy
 import taboolib.common.platform.Schedule
 import taboolib.common.platform.event.SubscribeEvent
+import taboolib.common.util.random
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 
 object DropManager {
 
     val dropCancel by ConfigLazy(Nodens.config) { Nodens.config.getBoolean("drop.cancel", false) }
     val dropSurvival by ConfigLazy(Nodens.config) { Duration.parse(Nodens.config.getString("drop.survival", "P5M")!!).inWholeMilliseconds }
+
+    val chanceMap: Cache<String, DropChance> = Caffeine.newBuilder()
+        .initialCapacity(30)
+        .maximumSize(100)
+        .expireAfterAccess(60, TimeUnit.MINUTES)
+        .build()
 
     @Schedule(false, period =  20)
     private fun clearDrops() {
@@ -48,6 +60,22 @@ object DropManager {
     fun drop(player: Player, item: Item, dropSurvival: Long = DropManager.dropSurvival) {
         item.customName = "${item.customName} * ${item.itemStack.amount}"
         dropMap.getOrPut(player.uniqueId) { DropUser(player.uniqueId) }.addItem(item, dropSurvival)
+    }
+
+    fun tryDrop(player: Player, mob: String, item: String, percent: Double, location: Location, amount: Int, globalPrd: Boolean = false, map: Map<String, Any> = emptyMap()): Boolean {
+        return if (percent > 0.5) {
+            if (random(percent)) {
+                val itemStack = NormalGenerator.generate(ItemManager.getItemConfig(item)!!, amount, player, map)
+                drop(player, location, itemStack)
+                true
+            } else false
+        } else {
+            if (dropMap.getOrPut(player.uniqueId) { DropUser(player.uniqueId) }.hasDrop(mob, item, percent, globalPrd)) {
+                val itemStack = NormalGenerator.generate(ItemManager.getItemConfig(item)!!, amount, player, map)
+                drop(player, location, itemStack)
+                true
+            } else false
+        }
     }
 
     @SubscribeEvent
