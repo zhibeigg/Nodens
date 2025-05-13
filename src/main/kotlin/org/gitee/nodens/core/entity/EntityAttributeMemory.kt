@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.api.NodensAPI.Companion.pluginScope
+import org.gitee.nodens.api.events.entity.NodensEntityRegainEvents
 import org.gitee.nodens.api.events.player.NodensPlayerAttributeSyncEvent
 import org.gitee.nodens.api.events.player.NodensPlayerAttributeUpdateEvents
 import org.gitee.nodens.common.DigitalParser
@@ -93,6 +94,13 @@ class EntityAttributeMemory(val entity: LivingEntity) {
                 }
             }
             entityAttributeMemoriesMap.remove(event.entity.uniqueId)
+        }
+
+        @SubscribeEvent
+        private fun deathHeal(event: NodensEntityRegainEvents.Pre) {
+            if (event.processor.passive.isDead) {
+                event.isCancelled = true
+            }
         }
 
         fun LivingEntity.attributeMemory(): EntityAttributeMemory? {
