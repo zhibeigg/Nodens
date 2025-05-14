@@ -3,7 +3,9 @@ package org.gitee.nodens.common
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
 import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.util.maxHealth
 
 class EntitySyncProfile(val entity: LivingEntity) {
 
@@ -35,10 +37,13 @@ class EntitySyncProfile(val entity: LivingEntity) {
         modifierMap.values.sortedBy { it.priority }.forEach {
             it.apply(entity)
         }
+        if (entity is Player) {
+            entity.healthScale = 20.0 / (entity.health / entity.maxHealth())
+        }
     }
 
     fun resetHealth() {
-        val max = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: return
+        val max = entity.maxHealth()
         if (entity.health > max) {
             entity.health = max
         }

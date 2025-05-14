@@ -8,6 +8,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause
 import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.util.getBytes
+import org.gitee.nodens.util.maxHealth
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
@@ -88,7 +89,7 @@ object Handle {
 
     fun doHeal(passive: LivingEntity, regain: Double): EntityRegainHealthEvent? {
         val event = EntityRegainHealthEvent(passive, regain, EntityRegainHealthEvent.RegainReason.CUSTOM)
-        passive.health = (passive.health + regain).coerceIn(0.0, passive.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: passive.maxHealth)
+        passive.health = (passive.health + regain).coerceIn(0.0, passive.maxHealth())
         return event
     }
 

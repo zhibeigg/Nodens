@@ -17,6 +17,7 @@ import org.gitee.nodens.core.attribute.Crit.MagicChance
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.ReloadableLazy
 import org.gitee.nodens.util.addBukkitAttribute
+import org.gitee.nodens.util.maxHealth
 import taboolib.common.util.random
 
 object Health: IAttributeGroup {
@@ -46,14 +47,14 @@ object Health: IAttributeGroup {
                 regain += when(config.valueType) {
                     RANGE -> {
                         when (key) {
-                            PERCENT -> (entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: entity.maxHealth) * random(value[0], value[1])
+                            PERCENT -> entity.maxHealth() * random(value[0], value[1])
                             COUNT -> random(value[0], value[1])
                         }
                     }
 
                     SINGLE -> {
                         when (key) {
-                            PERCENT -> (entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: entity.maxHealth) * value[0]
+                            PERCENT -> entity.maxHealth() * value[0]
                             COUNT -> value[0]
                         }
                     }

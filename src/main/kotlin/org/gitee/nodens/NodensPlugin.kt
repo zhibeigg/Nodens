@@ -5,7 +5,7 @@ import org.gitee.nodens.api.NodensAPI
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Plugin
 import taboolib.common.platform.function.disablePlugin
-import taboolib.common.platform.function.info
+import taboolib.common.platform.function.pluginVersion
 import taboolib.common.platform.function.registerLifeCycleTask
 
 object NodensPlugin : Plugin() {
@@ -22,6 +22,12 @@ object NodensPlugin : Plugin() {
     }
 
     override fun onEnable() {
-        info("Successfully running Nodens!")
+        println()
+        println("§9    /|    / /")
+        println("§9   //|   / /      ___        ___   /      ___         __        ___")
+        println("§9  // |  / /     //   ) )   //   ) /     //___) )   //   ) )   ((   ) )  §8Nodens §eversion§7: §e$pluginVersion")
+        println("§9 //  | / /     //   / /   //   / /     //         //   / /     \\ \\    §7by. §bzhibei")
+        println("§9//   |/ /     ((___/ /   ((___/ /     ((____     //   / /   //   ) )")
+        println()
     }
 }

@@ -1,5 +1,7 @@
 package org.gitee.nodens.util
 
+import org.bukkit.attribute.Attribute
+import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DigitalParser
 import taboolib.module.configuration.Configuration
 import kotlin.properties.ReadOnlyProperty
@@ -55,4 +57,8 @@ class ConfigLazy<T>(val config: Configuration, private val initializer: () -> T)
         @Suppress("UNCHECKED_CAST")
         return cached as T
     }
+}
+
+fun LivingEntity.maxHealth(): Double {
+    return getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: maxHealth
 }

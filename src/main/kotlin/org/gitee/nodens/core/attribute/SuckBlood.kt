@@ -8,6 +8,7 @@ import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.*
+import org.gitee.nodens.util.maxHealth
 import taboolib.common.util.random
 
 object SuckBlood: IAttributeGroup {
@@ -29,7 +30,7 @@ object SuckBlood: IAttributeGroup {
                 SINGLE -> valueMap[PERCENT]?.get(0)
             } ?: 0.0
             damageProcessor.onDamage(config.handlePriority) {
-                damageProcessor.attacker.health = (damageProcessor.attacker.health + suckCount + it * suckPercent).coerceAtMost(damageProcessor.attacker.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: damageProcessor.attacker.maxHealth)
+                damageProcessor.attacker.health = (damageProcessor.attacker.health + suckCount + it * suckPercent).coerceAtMost(damageProcessor.attacker.maxHealth())
             }
         }
     }
