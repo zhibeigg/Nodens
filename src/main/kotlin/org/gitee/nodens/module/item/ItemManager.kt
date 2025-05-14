@@ -37,7 +37,7 @@ object ItemManager {
     val itemConfigs = mutableMapOf<String, ItemConfig>()
     private val heldItemArmourersMap by unsafeLazy { mutableMapOf<UUID, List<String>?>() }
 
-    val dragoncoreSlots by ConfigLazy(Nodens.config) { Nodens.config.getStringList("update-dragoncore-slots") }
+    val dragoncoreSlots by ConfigLazy(Nodens.config) { getStringList("update-dragoncore-slots") }
 
     @Reload(0)
     @Awake(LifeCycle.ENABLE)

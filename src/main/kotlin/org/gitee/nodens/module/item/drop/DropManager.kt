@@ -24,8 +24,8 @@ import kotlin.time.Duration
 
 object DropManager {
 
-    val dropCancel by ConfigLazy(Nodens.config) { Nodens.config.getBoolean("drop.cancel", false) }
-    val dropSurvival by ConfigLazy(Nodens.config) { Duration.parse(Nodens.config.getString("drop.survival", "P5M")!!).inWholeMilliseconds }
+    val dropCancel by ConfigLazy(Nodens.config) { getBoolean("drop.cancel", false) }
+    val dropSurvival by ConfigLazy(Nodens.config) { Duration.parse(getString("drop.survival", "P5M")!!).inWholeMilliseconds }
 
     val chanceMap: Cache<String, DropChance> = Caffeine.newBuilder()
         .initialCapacity(30)

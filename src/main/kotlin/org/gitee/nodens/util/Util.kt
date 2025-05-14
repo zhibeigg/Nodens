@@ -42,7 +42,7 @@ fun mergeValues(vararg values: DigitalParser.Value): Map<DigitalParser.Type, Dou
     return map
 }
 
-class ConfigLazy<T>(val config: Configuration, private val initializer: () -> T) : ReadOnlyProperty<Any?, T> {
+class ConfigLazy<T>(val config: Configuration, private val initializer: Configuration.() -> T) : ReadOnlyProperty<Any?, T> {
     private var cached: T? = null
     private var initialized: Boolean = false
     private var lastHash: Int? = null
@@ -50,7 +50,7 @@ class ConfigLazy<T>(val config: Configuration, private val initializer: () -> T)
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         val currentHash = config.toString().hashCode()
         if (!initialized || lastHash != currentHash) {
-            cached = initializer()
+            cached = initializer(config)
             initialized = true
             lastHash = currentHash
         }

@@ -1,10 +1,7 @@
 package org.gitee.nodens.core.entity
 
-import eos.moe.armourers.ev
 import eos.moe.dragoncore.api.SlotAPI
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
@@ -35,7 +32,6 @@ import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import taboolib.common.platform.service.PlatformExecutor
-import taboolib.expansion.SyncDispatcher
 import taboolib.module.chat.colored
 import taboolib.platform.util.onlinePlayers
 import java.util.*
@@ -48,7 +44,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         internal val entityAttributeMemoriesMap = hashMapOf<UUID, EntityAttributeMemory>()
         private var regainTask: PlatformExecutor.PlatformTask? = null
 
-        private val attributeDragoncoreSlots by ConfigLazy(Nodens.config) { Nodens.config.getStringList("attribute-dragoncore-slots") }
+        private val attributeDragoncoreSlots by ConfigLazy(Nodens.config) { getStringList("attribute-dragoncore-slots") }
 
         @Schedule(async = false, period = 1)
         private fun schedule() {
@@ -64,11 +60,11 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         @SubscribeEvent
         private fun onPlayerJoinEvent(event: PlayerJoinEvent) {
-            event.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.let { instance ->
-                instance.modifiers.forEach {
-                    instance.removeModifier(it)
-                }
-            }
+//            event.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.let { instance ->
+//                instance.modifiers.forEach {
+//                    instance.removeModifier(it)
+//                }
+//            }
             entityAttributeMemoriesMap[event.player.uniqueId] = EntityAttributeMemory(event.player).apply {
                 syncAttributeToBukkit()
             }
@@ -77,7 +73,6 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         @SubscribeEvent
         private fun onPlayerQuitEvent(event: PlayerQuitEvent) {
             entityAttributeMemoriesMap.remove(event.player.uniqueId)?.entitySyncProfile?.apply {
-                clearModifiers()
                 resetHealth()
             }
         }
@@ -111,7 +106,6 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         private fun disable() {
             entityAttributeMemoriesMap.forEach {
                 it.value.entitySyncProfile.apply {
-                    clearModifiers()
                     resetHealth()
                 }
             }
@@ -185,6 +179,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
                         iterator.remove()
                     }
                 }
+            }.invokeOnCompletion {
                 syncAttributeToBukkit()
                 NodensPlayerAttributeUpdateEvents.Post(this@EntityAttributeMemory).call()
             }
@@ -195,14 +190,14 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         if (entity.isDead) return
         val attributeData = mergedAllAttribute()
         ensureSync {
-            val event = NodensPlayerAttributeSyncEvent(entitySyncProfile, attributeData)
+            val event = NodensPlayerAttributeSyncEvent.Pre(entitySyncProfile, attributeData)
             if (event.call()) {
-                entitySyncProfile.clearModifiers()
                 attributeData.forEach {
                     it.key.sync(entitySyncProfile, it.value)
                 }
                 entitySyncProfile.applyModifiers()
                 entitySyncProfile.resetHealth()
+                NodensPlayerAttributeSyncEvent.Post(entitySyncProfile, attributeData).call()
             }
         }
     }

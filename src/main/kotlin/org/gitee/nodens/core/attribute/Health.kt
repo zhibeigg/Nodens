@@ -30,7 +30,7 @@ object Health: IAttributeGroup {
             get() = AttributeManager.getConfig(Health.name, name)
 
         override fun sync(entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            addBukkitAttribute(Health, Attribute.GENERIC_MAX_HEALTH, entitySyncProfile, valueMap)
+            addBukkitAttribute(Attribute.GENERIC_MAX_HEALTH, entitySyncProfile, valueMap)
         }
     }
 

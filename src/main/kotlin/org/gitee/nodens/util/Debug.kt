@@ -5,7 +5,7 @@ import taboolib.common.platform.PlatformFactory
 import taboolib.common.platform.service.PlatformIO
 import taboolib.module.chat.colored
 
-val debug: Boolean by ConfigLazy(Nodens.config) { Nodens.config.getBoolean("debug") }
+val debug: Boolean by ConfigLazy(Nodens.config) { getBoolean("debug") }
 
 fun debug(vararg message: Any?) {
     if (debug) PlatformFactory.getService<PlatformIO>().info(*message.map { "&6[debug] $it".colored() }.toTypedArray())

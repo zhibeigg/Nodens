@@ -1,4 +1,5 @@
 debug: false
+healthScaled: true
 drop:
   cancel: false
   survival: P3M

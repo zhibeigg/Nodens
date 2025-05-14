@@ -1,11 +1,14 @@
 package org.gitee.nodens.core
 
+import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.DigitalParser.Type.*
 import org.gitee.nodens.common.FastMatchingMap
 import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.*
 import org.gitee.nodens.core.attribute.JavaScript
 import org.gitee.nodens.core.reload.Reload
+import org.gitee.nodens.util.ConfigLazy
+import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files
 import org.gitee.nodens.util.mergeValues
@@ -16,11 +19,14 @@ import taboolib.common.platform.function.info
 import taboolib.module.chat.colored
 import taboolib.module.configuration.Configuration
 import java.lang.reflect.Modifier
+import java.math.BigDecimal
 
 object AttributeManager {
 
     private val attributeNumberConfigs = hashMapOf<String, HashMap<String, AttributeConfig>>()
     internal val ATTRIBUTE_MATCHING_MAP = FastMatchingMap<IAttributeGroup.Number>()
+
+    val healthScaled by ConfigLazy(Nodens.config) { getBoolean("healthScaled", true) }
 
     @Reload(0)
     @Awake(LifeCycle.ENABLE)
@@ -90,6 +96,6 @@ object AttributeManager {
             val map = mergeValues(*it.value.map { d -> d.value }.toTypedArray())
             value += it.key.combatPower(map)
         }
-        return value
+        return BigDecimal.valueOf(value).setScale(2).toDouble()
     }
 }
