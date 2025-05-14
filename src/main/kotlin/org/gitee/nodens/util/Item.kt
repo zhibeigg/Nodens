@@ -1,12 +1,16 @@
 package org.gitee.nodens.util
 
 import kotlinx.serialization.json.Json
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.*
+import org.gitee.nodens.module.item.drop.DropManager
+import org.gitee.nodens.module.item.generator.NormalGenerator.generate
 import taboolib.common.platform.function.info
 import taboolib.module.nms.ItemTagData
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.isAir
+import taboolib.platform.util.isNotAir
 
 const val CONTEXT_TAG = "NODENS_CONTEXT"
 const val SELL_TAG = "NODENS@SELL"
@@ -42,4 +46,21 @@ fun Any.toVariable(): Variable<*> {
 fun ItemStack.getConfig(): ItemConfig? {
     val context = context<NormalContext>() ?: return null
     return ItemManager.itemConfigs[context.key]
+}
+
+fun Player.giveItems(item: String, amount: Int, map: Map<String, Any> = emptyMap()): ItemStack? {
+    val item = ItemManager.getItemConfig(item) ?: return null
+    val itemStack = generate(item, amount, this, map)
+
+    if (itemStack.isNotAir()) {
+        val preAmount = itemStack.amount
+
+        inventory.addItem(itemStack).values.forEach {
+            DropManager.drop(this, location, it)
+            world.dropItem(location, it)
+        }
+        itemStack.amount = preAmount
+    }
+
+    return itemStack
 }

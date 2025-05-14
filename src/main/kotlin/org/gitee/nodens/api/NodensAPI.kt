@@ -6,6 +6,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.gitee.nodens.api.interfaces.IItemAPI
 import org.gitee.nodens.api.interfaces.INodensAPI
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.core.AttributeManager
@@ -17,6 +18,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.env.RuntimeDependencies
 import taboolib.common.env.RuntimeDependency
 import taboolib.common.platform.Awake
+import taboolib.common.platform.PlatformFactory
 import taboolib.expansion.AsyncDispatcher
 
 @RuntimeDependencies(
@@ -40,6 +42,9 @@ import taboolib.expansion.AsyncDispatcher
     )
 )
 class NodensAPI: INodensAPI {
+
+    override val itemAPI: IItemAPI
+        get() = PlatformFactory.getAPI<IItemAPI>()
 
     override fun attackEntity(damageProcessor: DamageProcessor): EntityDamageByEntityEvent? {
         return damageProcessor.callDamage()
