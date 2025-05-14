@@ -15,8 +15,8 @@ object Damage: IAttributeGroup {
 
     object Physics: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Damage.name, name)
+        override val group: IAttributeGroup
+            get() = Damage
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
@@ -25,8 +25,8 @@ object Damage: IAttributeGroup {
 
     object Magic: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Damage.name, name)
+        override val group: IAttributeGroup
+            get() = Damage
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
@@ -35,8 +35,8 @@ object Damage: IAttributeGroup {
 
     object Real: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Damage.name, name)
+        override val group: IAttributeGroup
+            get() = Damage
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
@@ -45,8 +45,8 @@ object Damage: IAttributeGroup {
 
     object Fire: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Damage.name, name)
+        override val group: IAttributeGroup
+            get() = Damage
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
@@ -78,8 +78,8 @@ object Damage: IAttributeGroup {
 
     object Monster: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Damage.name, name)
+        override val group: IAttributeGroup
+            get() = Damage
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
@@ -88,8 +88,8 @@ object Damage: IAttributeGroup {
 
     object Boss: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Damage.name, name)
+        override val group: IAttributeGroup
+            get() = Damage
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))

@@ -33,6 +33,9 @@ object JavaScript: IAttributeGroup {
 
     class JsAttribute(override val name: String, val compile: CompiledScript): IAttributeGroup.Number {
 
+        override val group: IAttributeGroup
+            get() = JavaScript
+
         override val config: AttributeConfig
             get() = AttributeManager.getConfig(JavaScript.name, name)
 

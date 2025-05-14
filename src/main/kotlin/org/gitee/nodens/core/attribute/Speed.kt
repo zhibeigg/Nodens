@@ -14,8 +14,8 @@ object Speed: IAttributeGroup {
 
     object Attack: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Speed.name, name)
+        override val group: IAttributeGroup
+            get() = Speed
 
         override fun sync(entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             addBukkitAttribute(Attribute.GENERIC_ATTACK_SPEED, entitySyncProfile, valueMap)
@@ -24,8 +24,8 @@ object Speed: IAttributeGroup {
 
     object Move: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Speed.name, name)
+        override val group: IAttributeGroup
+            get() = Speed
 
         override fun sync(entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             addBukkitAttribute(Attribute.GENERIC_MOVEMENT_SPEED, entitySyncProfile, valueMap)

@@ -17,8 +17,8 @@ object SuckBlood: IAttributeGroup {
 
     object Addon: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(SuckBlood.name, name)
+        override val group: IAttributeGroup
+            get() = SuckBlood
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             val suckCount = when (config.valueType) {

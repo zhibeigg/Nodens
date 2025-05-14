@@ -20,8 +20,8 @@ object Mapping: IAttributeGroup {
 
     class MappingAttribute : AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Mapping.name, name)
+        override val group: IAttributeGroup
+            get() = Mapping
 
         private val attributes by ReloadableLazy({ config }) { config.getStringList("attributes") }
 

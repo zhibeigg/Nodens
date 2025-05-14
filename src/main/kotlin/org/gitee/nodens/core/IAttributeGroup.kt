@@ -12,6 +12,8 @@ interface IAttributeGroup {
 
     interface Number {
 
+        val group: IAttributeGroup
+
         val name: String
 
         val config: AttributeConfig

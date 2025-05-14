@@ -18,8 +18,8 @@ object Crit: IAttributeGroup {
 
     object PhysicalChance: AbstractPercentNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Crit.name, name)
+        override val group: IAttributeGroup
+            get() = Crit
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.damageType == Damage.Physics.name) {
@@ -30,8 +30,8 @@ object Crit: IAttributeGroup {
 
     object MagicChance: AbstractPercentNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Crit.name, name)
+        override val group: IAttributeGroup
+            get() = Crit
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.damageType == Damage.Magic.name) {
@@ -57,8 +57,8 @@ object Crit: IAttributeGroup {
 
     object Addon: AbstractPercentNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Crit.name, name)
+        override val group: IAttributeGroup
+            get() = Crit
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.crit) {
@@ -73,14 +73,14 @@ object Crit: IAttributeGroup {
 
     object CritChanceResistance: AbstractPercentNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Crit.name, name)
+        override val group: IAttributeGroup
+            get() = Crit
     }
 
     object CritAddonResistance: AbstractPercentNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Crit.name, name)
+        override val group: IAttributeGroup
+            get() = Crit
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.crit) {

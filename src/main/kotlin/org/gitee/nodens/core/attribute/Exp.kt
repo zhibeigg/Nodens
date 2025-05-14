@@ -10,7 +10,7 @@ object Exp: IAttributeGroup {
 
     object Addon: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Exp.name, name)
+        override val group: IAttributeGroup
+            get() = Exp
     }
 }

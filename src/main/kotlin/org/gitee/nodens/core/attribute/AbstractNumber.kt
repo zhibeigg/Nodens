@@ -6,12 +6,17 @@ import org.gitee.nodens.common.DigitalParser.Type.COUNT
 import org.gitee.nodens.common.DigitalParser.Type.PERCENT
 import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.common.RegainProcessor
+import org.gitee.nodens.core.AttributeConfig
+import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
 
 abstract class AbstractNumber: IAttributeGroup.Number {
 
     override val name: String
         get() = this::class.java.simpleName
+
+    override val config: AttributeConfig
+        get() = AttributeManager.getConfig(group.name, name)
 
     override fun sync(
         entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>) {

@@ -16,8 +16,8 @@ object Defence: IAttributeGroup {
 
     object Physics: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Defence.name, name)
+        override val group: IAttributeGroup
+            get() = Defence
 
         override fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Defence.name}$name", this, getDefence(valueMap))
@@ -26,8 +26,8 @@ object Defence: IAttributeGroup {
 
     object Magic: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Defence.name, name)
+        override val group: IAttributeGroup
+            get() = Defence
 
         override fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Defence.name}$name", this, getDefence(valueMap))
@@ -36,8 +36,8 @@ object Defence: IAttributeGroup {
 
     object Fire: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Defence.name, name)
+        override val group: IAttributeGroup
+            get() = Defence
 
         override fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Defence.name}$name", this, getDefence(valueMap))

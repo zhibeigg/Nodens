@@ -26,8 +26,8 @@ object Health: IAttributeGroup {
 
     object Max: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Health.name, name)
+        override val group: IAttributeGroup
+            get() = Health
 
         override fun sync(entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             addBukkitAttribute(Attribute.GENERIC_MAX_HEALTH, entitySyncProfile, valueMap)
@@ -36,8 +36,8 @@ object Health: IAttributeGroup {
 
     object Regain: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Health.name, name)
+        override val group: IAttributeGroup
+            get() = Health
 
         val period by ReloadableLazy({ config }) { config.getLong("period", 20) }
 
@@ -72,8 +72,8 @@ object Health: IAttributeGroup {
 
     object GrievousWounds: AbstractNumber() {
 
-        override val config: AttributeConfig
-            get() = AttributeManager.getConfig(Health.name, name)
+        override val group: IAttributeGroup
+            get() = Health
 
         override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             val percent = when (MagicChance.config.valueType) {
