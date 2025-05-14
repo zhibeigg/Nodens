@@ -1,6 +1,8 @@
 # Nodens
 
 > 稳定高效的属性插件
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zhibeigg/Nodens)
 ## 构建发行版本
 
 [<img src="https://camo.githubusercontent.com/a654761ad31039a9c29df9b92b1dc2be62d419f878bf665c3288f90254d58693/68747470733a2f2f77696b692e70746d732e696e6b2f696d616765732f362f36392f5461626f6f6c69622d706e672d626c75652d76322e706e67" alt="" width="300">](https://github.com/TabooLib/taboolib)
