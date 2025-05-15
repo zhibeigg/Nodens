@@ -1,10 +1,7 @@
 package org.gitee.nodens.common
 
-import net.minecraft.server.v1_12_R1.GenericAttributes
-import net.minecraft.server.v1_12_R1.IAttribute
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.gitee.nodens.core.AttributeManager
@@ -15,10 +12,20 @@ class EntitySyncProfile(val entity: LivingEntity) {
 
     private val modifierMap = hashMapOf<IAttributeGroup.Number, PriorityModifier>()
 
-    class PriorityModifier(val attribute: IAttribute, val value: Double, val priority: Int) {
+    class PriorityModifier(val attribute: Attribute, val number: IAttributeGroup.Number, val value: Double, val priority: Int) {
 
         fun apply(entity: LivingEntity) {
-            (entity as CraftPlayer).handle.getAttributeInstance(attribute).value = value
+            val attributeInstant = entity.getAttribute(attribute) ?: return
+            val name = "${number.group.name}${number.name}"
+            val modifier = attributeInstant.modifiers.firstOrNull { it.name == name }
+            if (modifier?.amount != value) {
+                modifier?.also {
+                    attributeInstant.removeModifier(it)
+                }
+                attributeInstant.addModifier(
+                    AttributeModifier(name, value, AttributeModifier.Operation.ADD_NUMBER)
+                )
+            }
         }
     }
 

@@ -2,7 +2,6 @@ package org.gitee.nodens.core.entity
 
 import eos.moe.dragoncore.api.SlotAPI
 import kotlinx.coroutines.launch
-import org.bukkit.attribute.Attribute
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDeathEvent
@@ -19,7 +18,9 @@ import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.common.RegainProcessor
 import org.gitee.nodens.core.*
 import org.gitee.nodens.core.attribute.Health
+import org.gitee.nodens.core.attribute.JavaScript
 import org.gitee.nodens.core.attribute.Mapping
+import org.gitee.nodens.core.attribute.Speed
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.util.ConfigLazy
 import org.gitee.nodens.util.ensureSync
@@ -60,11 +61,6 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         @SubscribeEvent
         private fun onPlayerJoinEvent(event: PlayerJoinEvent) {
-//            event.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.let { instance ->
-//                instance.modifiers.forEach {
-//                    instance.removeModifier(it)
-//                }
-//            }
             entityAttributeMemoriesMap[event.player.uniqueId] = EntityAttributeMemory(event.player).apply {
                 syncAttributeToBukkit()
             }
@@ -192,8 +188,14 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         ensureSync {
             val event = NodensPlayerAttributeSyncEvent.Pre(entitySyncProfile, attributeData)
             if (event.call()) {
-                attributeData.forEach {
-                    it.key.sync(entitySyncProfile, it.value)
+                Health.Max.sync(entitySyncProfile, attributeData[Health.Max] ?: emptyMap())
+                Speed.Attack.sync(entitySyncProfile, attributeData[Speed.Attack] ?: emptyMap())
+                Speed.Move.sync(entitySyncProfile, attributeData[Speed.Move] ?: emptyMap())
+                JavaScript.numbers.values.forEach {
+                    try {
+                        it.sync(entitySyncProfile, attributeData[it] ?: emptyMap())
+                    } catch (_: Throwable) {
+                    }
                 }
                 entitySyncProfile.applyModifiers()
                 entitySyncProfile.resetHealth()

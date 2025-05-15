@@ -24,6 +24,8 @@ object JavaScript: IAttributeGroup {
 
     override val name: String = "JavaScript"
 
+    val numbers = hashMapOf<String, JsAttribute>()
+
     private fun createBindings(config: AttributeConfig) = SimpleBindings(mapOf(
         "keys" to config.keys,
         "valueType" to config.valueType.name,
@@ -65,6 +67,7 @@ object JavaScript: IAttributeGroup {
     }
 
     internal fun reload() {
+        numbers.clear()
         files("js", "Fire.js") { file ->
             try {
                 FileReader(file).use { reader ->
@@ -75,6 +78,7 @@ object JavaScript: IAttributeGroup {
 
                     val attributeName = file.nameWithoutExtension
                     val attribute = JsAttribute(attributeName, compile)
+                    numbers[attribute.name] = attribute
                     compile.eval(createBindings(attribute.config))
 
                     attribute.config.keys.forEach { key ->

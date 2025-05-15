@@ -8,8 +8,6 @@ import org.gitee.nodens.common.DigitalParser.Type.PERCENT
 import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.common.RegainProcessor
 import org.gitee.nodens.common.RegainProcessor.Companion.NATURAL_REASON
-import org.gitee.nodens.core.AttributeConfig
-import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.RANGE
 import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.SINGLE

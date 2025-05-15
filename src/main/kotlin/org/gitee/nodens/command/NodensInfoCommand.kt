@@ -20,7 +20,7 @@ object NodensInfoCommand {
                     val player = Bukkit.getPlayer(ctx["player"]) ?: return@exec
                     sender.sendLang("info-attribute")
                     player.attributeMemory()?.mergedAllAttribute(true)?.forEach { (key, value) ->
-                        val value = "${value[DigitalParser.Type.COUNT]?.joinToString("-")} + ${value[DigitalParser.Type.PERCENT]?.joinToString("-")}%"
+                        val value = "${value[DigitalParser.Type.COUNT]?.joinToString("-") ?: 0} + ${value[DigitalParser.Type.PERCENT]?.joinToString("-") { (it * 100).toString() } ?: 0}%"
                         sender.sendLang("info-attribute-argument", "${key.group.name}:${key.name}", value, key.config.keys.joinToString(", "))
                     }
                 }
