@@ -7,7 +7,7 @@ import taboolib.module.lang.sendLang
 class Plugin(val name: String, val extensionFunction: () -> Unit = {}) {
 
     val isEnabled
-        get() = Bukkit.getPluginManager().isPluginEnabled(name)
+        get() = Bukkit.getPluginManager().getPlugin(name) != null
 
     fun load() {
         if (isEnabled) {
@@ -20,3 +20,5 @@ class Plugin(val name: String, val extensionFunction: () -> Unit = {}) {
 }
 
 val MythicMobsPlugin = Plugin("MythicMobs")
+
+val GlowAPIPlugin = Plugin("GlowAPI")

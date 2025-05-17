@@ -2,7 +2,7 @@ debug: false
 healthScaled: true
 drop:
   cancel: false
-  survival: P3M
+  survival: PT3M
 update-dragoncore-slots:
   - "example-1"
 attribute-dragoncore-slots:

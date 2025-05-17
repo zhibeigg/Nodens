@@ -44,6 +44,7 @@ taboolib {
         dependencies {
             name("DragonCore").optional(true)
             name("DragonArmourers").optional(true)
+            name("GlowAPI").optional(true)
         }
     }
     relocate("com.github.benmanes.caffeine", "org.gitee.nodens.caffeine")
@@ -71,6 +72,7 @@ dependencies {
     compileOnly("org.eldergod.ext:DragonCore:2.6.2.9")
     compileOnly("org.eldergod.ext:DragonArmourers:6.72")
     compileOnly("org.eldergod.ext:MythicMobs:4.11.0")
+    compileOnly("org.eldergod.ext:GlowAPI:1.4.6")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     compileOnly("com.eatthepath:fast-uuid:0.2.0")

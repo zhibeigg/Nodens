@@ -20,8 +20,8 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
     var crit = false
 
     class PriorityRunnable(val priority: Int, val callback: (damage: Double) -> Unit)
-    class DamageSource(override val key: String, override val attribute: IAttributeGroup.Number, val damage: Double): AbstractSource(damage)
-    class DefenceSource(override val key: String, override val attribute: IAttributeGroup.Number, val defence: Double): AbstractSource(defence)
+    class DamageSource(override val key: String, override val attribute: IAttributeGroup.Number, var damage: Double): AbstractSource(damage)
+    class DefenceSource(override val key: String, override val attribute: IAttributeGroup.Number, var defence: Double): AbstractSource(defence)
 
     internal val damageSources = hashMapOf<String, DamageSource>()
     internal val defenceSources = hashMapOf<String, DefenceSource>()
@@ -80,7 +80,7 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
         handleDefender()
     }
 
-    private fun handleAttacker() {
+    fun handleAttacker() {
         attacker.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
             o1.config.handlePriority.compareTo(o2.config.handlePriority)
         }?.forEach {
@@ -88,7 +88,7 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
         }
     }
 
-    private fun handleDefender() {
+    fun handleDefender() {
         defender.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
             o1.config.handlePriority.compareTo(o2.config.handlePriority)
         }?.forEach {

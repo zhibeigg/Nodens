@@ -2,6 +2,7 @@ package org.gitee.nodens.module.item.drop
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
+import eos.moe.dragoncore.api.event.EntityJoinWorldEvent
 import org.bukkit.Location
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
@@ -11,10 +12,12 @@ import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
-import org.gitee.nodens.common.PRDAlgorithm
 import org.gitee.nodens.module.item.ItemManager
 import org.gitee.nodens.module.item.generator.NormalGenerator
 import org.gitee.nodens.util.ConfigLazy
+import org.gitee.nodens.util.GlowAPIPlugin
+import org.inventivetalent.glow.GlowAPI
+import taboolib.common.platform.Ghost
 import taboolib.common.platform.Schedule
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.util.random
@@ -53,11 +56,13 @@ object DropManager {
 
     fun drop(player: Player, location: Location, itemStack: ItemStack, dropSurvival: Long = DropManager.dropSurvival) {
         val item = location.world!!.dropItem(location, itemStack)
+        updateGlow(player, item)
         item.customName = "${item.customName} * ${item.itemStack.amount}"
         dropMap.getOrPut(player.uniqueId) { DropUser(player.uniqueId) }.addItem(item, dropSurvival)
     }
 
     fun drop(player: Player, item: Item, dropSurvival: Long = DropManager.dropSurvival) {
+        updateGlow(player, item)
         item.customName = "${item.customName} * ${item.itemStack.amount}"
         dropMap.getOrPut(player.uniqueId) { DropUser(player.uniqueId) }.addItem(item, dropSurvival)
     }
@@ -75,6 +80,34 @@ object DropManager {
                 drop(player, location, itemStack)
                 true
             } else false
+        }
+    }
+
+    fun updateGlow(player: Player, item: Item) {
+        if (!GlowAPIPlugin.isEnabled) return
+        player.world.players.forEach {
+            if (it == player) {
+                GlowAPI.setGlowing(item, GlowAPI.Color.GREEN, it)
+            } else {
+                GlowAPI.setGlowing(item, GlowAPI.Color.RED, it)
+            }
+        }
+    }
+
+    @Ghost
+    @SubscribeEvent
+    private fun join(e: EntityJoinWorldEvent) {
+        dropMap.forEach { (key, user) ->
+            val item = user.dropMap.firstOrNull { info ->
+                info.item.uniqueId == e.entityUUID
+            }
+            if (!GlowAPIPlugin.isEnabled && item != null) {
+                if (key == e.player.uniqueId) {
+                    GlowAPI.setGlowing(item.item, GlowAPI.Color.GREEN, e.player)
+                } else {
+                    GlowAPI.setGlowing(item.item, GlowAPI.Color.RED, e.player)
+                }
+            }
         }
     }
 
