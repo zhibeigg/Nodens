@@ -1,6 +1,7 @@
 package org.gitee.nodens.core.entity
 
 import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause.*
@@ -68,8 +69,9 @@ object EntityListener {
     /**
      * 攻击检测
      * */
-    @SubscribeEvent(EventPriority.LOWEST)
+    @SubscribeEvent
     private fun attack(e: EntityDamageByEntityEvent) {
+        if (e.isCancelled) return
         val processor: DamageProcessor = when (e.cause) {
             ENTITY_ATTACK, ENTITY_SWEEP_ATTACK  -> {
                 DamageProcessor(Damage.Physics.name, e.attacker ?: return, e.entity as? LivingEntity ?: return)
@@ -82,10 +84,12 @@ object EntityListener {
         processor.handle()
         e.setDamage(EntityDamageEvent.DamageModifier.ABSORPTION, 0.0)
         e.setDamage(EntityDamageEvent.DamageModifier.ARMOR, 0.0)
-        e.setDamage(EntityDamageEvent.DamageModifier.BLOCKING, 0.0)
-        e.setDamage(EntityDamageEvent.DamageModifier.HARD_HAT, 0.0)
         e.setDamage(EntityDamageEvent.DamageModifier.MAGIC, 0.0)
         e.setDamage(EntityDamageEvent.DamageModifier.RESISTANCE, 0.0)
+        if (e.entity is Player) {
+            e.setDamage(EntityDamageEvent.DamageModifier.BLOCKING, 0.0)
+            e.setDamage(EntityDamageEvent.DamageModifier.HARD_HAT, 0.0)
+        }
         e.setDamage(EntityDamageEvent.DamageModifier.BASE, processor.getFinalDamage())
         submit {
             if (!e.isCancelled) {
