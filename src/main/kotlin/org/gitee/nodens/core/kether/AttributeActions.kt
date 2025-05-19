@@ -1,8 +1,11 @@
 package org.gitee.nodens.core.kether
 
+import org.gitee.nodens.common.DamageProcessor
+import org.gitee.nodens.common.RegainProcessor
 import org.gitee.nodens.core.AttributeManager.groupMap
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.*
+import taboolib.common.OpenResult
 import taboolib.module.kether.*
 import java.util.concurrent.CompletableFuture
 
@@ -143,6 +146,47 @@ object AttributeActions {
                     }
                 }
             }
+        }
+    }
+
+    @KetherProperty(bind = RegainProcessor::class, true)
+    fun propertyRegainProcessor() = object : ScriptProperty<RegainProcessor>("RegainProcessor.operator") {
+
+        override fun read(instance: RegainProcessor, key: String): OpenResult {
+            return when (key) {
+                "regainSources" -> OpenResult.successful(instance.regainSources)
+                "reduceSources" -> OpenResult.successful(instance.reduceSources)
+                "healer" -> OpenResult.successful(instance.healer)
+                "passive" -> OpenResult.successful(instance.passive)
+                "reason" -> OpenResult.successful(instance.reason)
+                "regain" -> OpenResult.successful(instance.getFinalRegain())
+                else -> OpenResult.failed()
+            }
+        }
+
+        override fun write(instance: RegainProcessor, key: String, value: Any?): OpenResult {
+            return OpenResult.failed()
+        }
+    }
+
+    @KetherProperty(bind = DamageProcessor::class, true)
+    fun propertyDamageProcessor() = object : ScriptProperty<DamageProcessor>("DamageProcessor.operator") {
+
+        override fun read(instance: DamageProcessor, key: String): OpenResult {
+            return when (key) {
+                "damageSources" -> OpenResult.successful(instance.damageSources)
+                "defenceSources" -> OpenResult.successful(instance.defenceSources)
+                "attacker" -> OpenResult.successful(instance.attacker)
+                "defender" -> OpenResult.successful(instance.defender)
+                "type" -> OpenResult.successful(instance.damageType)
+                "crit" -> OpenResult.successful(instance.crit)
+                "damage" -> OpenResult.successful(instance.getFinalDamage())
+                else -> OpenResult.failed()
+            }
+        }
+
+        override fun write(instance: DamageProcessor, key: String, value: Any?): OpenResult {
+            return OpenResult.failed()
         }
     }
 }
