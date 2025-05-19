@@ -6,12 +6,19 @@ import org.gitee.nodens.common.DigitalParser.Type.*
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.attribute.Crit.Addon
+import org.gitee.nodens.core.attribute.Crit.CritAddonResistance
+import org.gitee.nodens.core.attribute.Crit.CritChanceResistance
+import org.gitee.nodens.core.attribute.Crit.MagicChance
+import org.gitee.nodens.core.attribute.Crit.PhysicalChance
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import taboolib.common.util.random
 
 object Damage: IAttributeGroup {
 
     override val name: String = "Damage"
+
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Physics, Magic, Real, Fire, Monster, Boss).associateBy { it.name }
 
     object Physics: AbstractNumber() {
 

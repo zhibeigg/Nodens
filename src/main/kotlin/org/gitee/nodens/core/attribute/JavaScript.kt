@@ -24,7 +24,7 @@ object JavaScript: IAttributeGroup {
 
     override val name: String = "JavaScript"
 
-    val numbers = hashMapOf<String, JsAttribute>()
+    override val numbers = hashMapOf<String, JsAttribute>()
 
     private fun createBindings(config: AttributeConfig) = SimpleBindings(mapOf(
         "keys" to config.keys,

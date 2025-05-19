@@ -264,4 +264,10 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         }
         return mutableMap
     }
+
+    fun getCombatPower(): Map<IAttributeGroup.Number, Double> {
+        return mergedAllAttribute(true).map {
+            it.key to it.key.combatPower(it.value)
+        }.toMap()
+    }
 }

@@ -16,6 +16,8 @@ object Crit: IAttributeGroup {
 
     override val name: String = "Crit"
 
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(PhysicalChance, MagicChance, Addon, CritChanceResistance, CritAddonResistance).associateBy { it.name }
+
     object PhysicalChance: AbstractPercentNumber() {
 
         override val group: IAttributeGroup

@@ -4,11 +4,14 @@ import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.common.RegainProcessor
+import java.math.BigDecimal
 
 interface IAttributeGroup {
 
     // 属性组名
     val name: String
+
+    val numbers : Map<String, Number>
 
     interface Number {
 

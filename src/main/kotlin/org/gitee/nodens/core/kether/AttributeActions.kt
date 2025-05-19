@@ -1,0 +1,148 @@
+package org.gitee.nodens.core.kether
+
+import org.gitee.nodens.core.AttributeManager.groupMap
+import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
+import org.gitee.nodens.util.*
+import taboolib.module.kether.*
+import java.util.concurrent.CompletableFuture
+
+object AttributeActions {
+
+    @KetherParser(["attribute"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun attribute() = combinationParser {
+        it.group(
+            text(),
+            text()
+        ).apply(it) { group, key ->
+            future {
+                val number = groupMap[group]?.numbers?.get(key) ?: return@future CompletableFuture.completedFuture(null)
+                CompletableFuture.completedFuture(number)
+            }
+        }
+    }
+
+    @KetherParser(["handleAttacker"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun handleAttacker() = combinationParser {
+        it.group(
+            number(),
+            damageProcessors()
+        ).apply(it) { number, processors ->
+            future {
+                val attribute = livingEntity().attributeMemory()?.mergedAttribute(number, true) ?: return@future CompletableFuture.completedFuture(processors)
+                processors.forEach { processor ->
+                    number.handleAttacker(processor, attribute)
+                }
+                CompletableFuture.completedFuture(processors)
+            }
+        }
+    }
+
+    @KetherParser(["handleDefender"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun handleDefender() = combinationParser {
+        it.group(
+            number(),
+            damageProcessors()
+        ).apply(it) { number, processors ->
+            future {
+                val attribute = livingEntity().attributeMemory()?.mergedAttribute(number, true) ?: return@future CompletableFuture.completedFuture(processors)
+                processors.forEach { processor ->
+                    number.handleDefender(processor, attribute)
+                }
+                CompletableFuture.completedFuture(processors)
+            }
+        }
+    }
+
+    @KetherParser(["handleHealer"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun handleHealer() = combinationParser {
+        it.group(
+            number(),
+            regainProcessors()
+        ).apply(it) { number, processors ->
+            future {
+                val attribute = livingEntity().attributeMemory()?.mergedAttribute(number, true) ?: return@future CompletableFuture.completedFuture(processors)
+                processors.forEach { processor ->
+                    number.handleHealer(processor, attribute)
+                }
+                CompletableFuture.completedFuture(processors)
+            }
+        }
+    }
+
+    @KetherParser(["handlePassive"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun handlePassive() = combinationParser {
+        it.group(
+            number(),
+            regainProcessors()
+        ).apply(it) { number, processors ->
+            future {
+                val attribute = livingEntity().attributeMemory()?.mergedAttribute(number, true) ?: return@future CompletableFuture.completedFuture(processors)
+                processors.forEach { processor ->
+                    number.handlePassive(processor, attribute)
+                }
+                CompletableFuture.completedFuture(processors)
+            }
+        }
+    }
+
+    @KetherParser(["callDamage"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun callDamage() = combinationParser {
+        it.group(
+            damageProcessors()
+        ).apply(it) { processors ->
+            future {
+                processors.forEach { processor ->
+                    processor.callDamage()
+                }
+                CompletableFuture.completedFuture(processors)
+            }
+        }
+    }
+
+    @KetherParser(["callRegain"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun callRegain() = combinationParser {
+        it.group(
+            regainProcessors()
+        ).apply(it) { processors ->
+            future {
+                processors.forEach { processor ->
+                    processor.callRegain()
+                }
+                CompletableFuture.completedFuture(processors)
+            }
+        }
+    }
+
+    @KetherParser(["combatPower"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun combatPower() = scriptParser {
+        it.switch {
+            case("all") {
+                actionNow {
+                    val memory = livingEntity().attributeMemory() ?: return@actionNow 0
+                    memory.getCombatPower().values.sum()
+                }
+            }
+            case("group") {
+                val group = it.nextParsedAction()
+                actionFuture { future ->
+                    val memory = livingEntity().attributeMemory() ?: return@actionFuture future.complete(0.0)
+                    run(group).str { group ->
+                        future.complete(memory.getCombatPower().filter { it.key.group.name == group }.values.sum())
+                    }
+                }
+            }
+            case("number") {
+                val group = it.nextParsedAction()
+                val number = it.nextParsedAction()
+                actionFuture { future ->
+                    val memory = livingEntity().attributeMemory() ?: return@actionFuture future.complete(0.0)
+                    run(group).str { group ->
+                        run(number).str { number ->
+                            future.complete(memory.getCombatPower().filter { (n, _) -> n.group.name == group && n.name == number }.values.sum())
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

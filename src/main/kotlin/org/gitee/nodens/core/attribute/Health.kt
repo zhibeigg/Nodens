@@ -22,6 +22,8 @@ object Health: IAttributeGroup {
 
     override val name: String = "Health"
 
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Max, Regain, GrievousWounds).associateBy { it.name }
+
     object Max: AbstractNumber() {
 
         override val group: IAttributeGroup

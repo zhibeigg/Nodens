@@ -3,14 +3,14 @@ package org.gitee.nodens.core.attribute
 import org.bukkit.attribute.Attribute
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
-import org.gitee.nodens.core.AttributeConfig
-import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.util.addBukkitAttribute
 
 object Speed: IAttributeGroup {
 
     override val name: String = "Speed"
+
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Attack, Move).associateBy { it.name }
 
     object Attack: AbstractNumber() {
 

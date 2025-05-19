@@ -7,12 +7,17 @@ import org.gitee.nodens.common.DigitalParser.Type.PERCENT
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.AttributeManager
+import org.gitee.nodens.core.attribute.Damage.Boss
+import org.gitee.nodens.core.attribute.Damage.Monster
+import org.gitee.nodens.core.attribute.Damage.Real
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import taboolib.common.util.random
 
 object Defence: IAttributeGroup {
 
     override val name: String = "Defence"
+
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Physics, Magic, Fire).associateBy { it.name }
 
     object Physics: AbstractNumber() {
 

@@ -1,11 +1,11 @@
 package org.gitee.nodens.core.attribute
 
 import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.attribute.JavaScript.JsAttribute
 import org.gitee.nodens.util.ReloadableLazy
 import org.gitee.nodens.util.mergeValues
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
@@ -18,7 +18,12 @@ object Mapping: IAttributeGroup {
 
     override val name: String = "Mapping"
 
-    class MappingAttribute : AbstractNumber() {
+    override val numbers = hashMapOf<String, MappingAttribute>()
+
+    class MappingAttribute(override val name: String) : AbstractNumber() {
+
+        override val config: AttributeConfig
+            get() = AttributeManager.getConfig(group.name, name)
 
         override val group: IAttributeGroup
             get() = Mapping

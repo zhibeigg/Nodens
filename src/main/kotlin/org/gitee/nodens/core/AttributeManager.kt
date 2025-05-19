@@ -23,6 +23,8 @@ import java.math.BigDecimal
 
 object AttributeManager {
 
+    internal val groupMap = hashMapOf<String, IAttributeGroup>()
+
     private val attributeNumberConfigs = hashMapOf<String, HashMap<String, AttributeConfig>>()
     internal val ATTRIBUTE_MATCHING_MAP = FastMatchingMap<IAttributeGroup.Number>()
 
@@ -31,11 +33,14 @@ object AttributeManager {
     @Reload(0)
     @Awake(LifeCycle.ENABLE)
     private fun load() {
+        groupMap.clear()
         attributeNumberConfigs.clear()
         val list = mutableListOf<String>()
         runningClassesWithoutLibrary.forEach {
             if (it.hasInterface(IAttributeGroup::class.java)) {
-                list += (it.getInstance() as IAttributeGroup).name + ".yml"
+                val group = (it.getInstance() as IAttributeGroup)
+                groupMap[group.name] = group
+                list += group.name + ".yml"
             }
         }
         files("attribute", *list.toTypedArray()) {
