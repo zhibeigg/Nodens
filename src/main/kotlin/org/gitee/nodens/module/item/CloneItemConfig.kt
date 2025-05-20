@@ -8,8 +8,11 @@ import kotlin.jvm.optionals.getOrElse
 
 class CloneItemConfig(override val key: String, val copy: ItemConfig, configurationSection: ConfigurationSection): ItemConfig(key, configurationSection) {
 
-    override val isUpdate: Boolean
-        get() = super.isUpdate
+    override val isUpdate: Boolean = if (configurationSection.contains("update")) {
+        configurationSection.getBoolean("update", false)
+    } else {
+        copy.isUpdate
+    }
 
     override val material: XMaterial = if (configurationSection.contains("material")) {
         XMaterial.matchXMaterial(configurationSection.getString("material", "stone")!!).getOrElse { XMaterial.STONE }

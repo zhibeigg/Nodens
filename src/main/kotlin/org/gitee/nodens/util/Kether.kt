@@ -5,6 +5,7 @@ import org.bukkit.entity.Player
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.RegainProcessor
 import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.entity.EntityAttributeMemory
 import taboolib.common.platform.function.isPrimaryThread
 import taboolib.common.platform.function.submit
 import taboolib.library.kether.Parser
@@ -52,6 +53,17 @@ internal fun number(): Parser<IAttributeGroup.Number> {
         Action {
             it.run(action).thenApply { number ->
                 number as IAttributeGroup.Number
+            }
+        }
+    }
+}
+
+internal fun attributeMemory(): Parser<EntityAttributeMemory> {
+    return Parser.frame { r ->
+        val action = r.nextParsedAction()
+        Action {
+            it.run(action).thenApply { number ->
+                number as EntityAttributeMemory
             }
         }
     }

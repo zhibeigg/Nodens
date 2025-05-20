@@ -14,6 +14,7 @@ import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
 import taboolib.common5.cdouble
 import taboolib.common5.cint
+import taboolib.module.chat.colored
 import taboolib.module.kether.*
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.ItemBuilder
@@ -49,6 +50,7 @@ object NormalGenerator: IItemGenerator {
             } ?: 1
         }
         builder.isUnbreakable = itemConfig.isUnBreakable
+        builder.colored()
         builder.finishing = {
             val tag = it.getItemTag()
             tag[CONTEXT_TAG] = Json.encodeToString(context)

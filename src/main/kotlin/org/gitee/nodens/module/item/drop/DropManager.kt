@@ -57,12 +57,14 @@ object DropManager {
     fun drop(player: Player, location: Location, itemStack: ItemStack, dropSurvival: Long = DropManager.dropSurvival) {
         val item = location.world!!.dropItem(location, itemStack)
         updateGlow(player, item)
+        item.isCustomNameVisible = true
         item.customName = "${item.customName} * ${item.itemStack.amount}"
         dropMap.getOrPut(player.uniqueId) { DropUser(player.uniqueId) }.addItem(item, dropSurvival)
     }
 
     fun drop(player: Player, item: Item, dropSurvival: Long = DropManager.dropSurvival) {
         updateGlow(player, item)
+        item.isCustomNameVisible = true
         item.customName = "${item.customName} * ${item.itemStack.amount}"
         dropMap.getOrPut(player.uniqueId) { DropUser(player.uniqueId) }.addItem(item, dropSurvival)
     }

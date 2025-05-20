@@ -11,8 +11,8 @@ import java.util.concurrent.CompletableFuture
 
 object AttributeActions {
 
-    @KetherParser(["attribute"], namespace = NODENS_NAMESPACE, shared = true)
-    private fun attribute() = combinationParser {
+    @KetherParser(["attributeNumber"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun attributeNumber() = combinationParser {
         it.group(
             text(),
             text()
@@ -21,6 +21,13 @@ object AttributeActions {
                 val number = groupMap[group]?.numbers?.get(key) ?: return@future CompletableFuture.completedFuture(null)
                 CompletableFuture.completedFuture(number)
             }
+        }
+    }
+
+    @KetherParser(["attributeMemory"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun memory() = scriptParser {
+        actionNow {
+            livingEntity().attributeMemory()
         }
     }
 
