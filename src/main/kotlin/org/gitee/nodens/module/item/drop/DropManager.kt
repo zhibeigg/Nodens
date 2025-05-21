@@ -21,6 +21,8 @@ import taboolib.common.platform.Ghost
 import taboolib.common.platform.Schedule
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.util.random
+import taboolib.module.nms.getName
+import taboolib.platform.util.hasName
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
@@ -57,16 +59,21 @@ object DropManager {
     fun drop(player: Player, location: Location, itemStack: ItemStack, dropSurvival: Long = DropManager.dropSurvival) {
         val item = location.world!!.dropItem(location, itemStack)
         updateGlow(player, item)
-        item.isCustomNameVisible = true
-        item.customName = "${item.customName} * ${item.itemStack.amount}"
+        showName(player, item)
         dropMap.getOrPut(player.uniqueId) { DropUser(player.uniqueId) }.addItem(item, dropSurvival)
     }
 
     fun drop(player: Player, item: Item, dropSurvival: Long = DropManager.dropSurvival) {
         updateGlow(player, item)
-        item.isCustomNameVisible = true
-        item.customName = "${item.customName} * ${item.itemStack.amount}"
+        showName(player, item)
         dropMap.getOrPut(player.uniqueId) { DropUser(player.uniqueId) }.addItem(item, dropSurvival)
+    }
+
+    fun showName(player: Player, item: Item) {
+        if (item.itemStack.hasName()) {
+            item.isCustomNameVisible = true
+            item.customName = "${item.itemStack.getName(player)} * ${item.itemStack.amount}"
+        }
     }
 
     fun tryDrop(player: Player, mob: String, item: String, percent: Double, location: Location, amount: Int, globalPrd: Boolean = false, map: Map<String, Any> = emptyMap()): Boolean {

@@ -3,9 +3,11 @@ package org.gitee.nodens.core.kether
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.RegainProcessor
 import org.gitee.nodens.core.AttributeManager.groupMap
+import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.*
 import taboolib.common.OpenResult
+import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
 import java.util.concurrent.CompletableFuture
 
@@ -28,6 +30,94 @@ object AttributeActions {
     private fun memory() = scriptParser {
         actionNow {
             livingEntity().attributeMemory()
+        }
+    }
+
+    @KetherParser(["attribute"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun addAttribute() = scriptParser {
+        it.switch {
+            case("add") {
+                it.switch {
+                    case("attacker") {
+                        it.addDamageSource { id, number, processors, value ->
+                            val source = DamageProcessor.DamageSource(id, number, value)
+                            processors.forEach { processor ->
+                                processor.damageSources[id] = source
+                            }
+                        }
+                    }
+                    case("defender") {
+                        actionNow {
+                            it.addDamageSource { id, number, processors, value ->
+                                val source = DamageProcessor.DefenceSource(id, number, value)
+                                processors.forEach { processor ->
+                                    processor.defenceSources[id] = source
+                                }
+                            }
+                        }
+                    }
+                    case("healer") {
+                        it.addRegainSource { id, number, processors, value ->
+                            val source = RegainProcessor.RegainSource(id, number, value)
+                            processors.forEach { processor ->
+                                processor.regainSources[id] = source
+                            }
+                        }
+                    }
+                    case("passive") {
+                        actionNow {
+                            it.addRegainSource { id, number, processors, value ->
+                                val source = RegainProcessor.ReduceSource(id, number, value)
+                                processors.forEach { processor ->
+                                    processor.reduceSources[id] = source
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun QuestReader.addDamageSource(function: (id: String, number: IAttributeGroup.Number, processors: List<DamageProcessor>, value: Double) -> Unit): ScriptAction<Any?> {
+        val number = nextParsedAction()
+        val processors = nextParsedAction()
+        val id = nextParsedAction()
+        val value = nextParsedAction()
+        return actionNow {
+            run(number).thenAccept { number ->
+                val number = number as IAttributeGroup.Number
+                run(processors).thenAccept { processors ->
+                    val list = processors as List<DamageProcessor>
+                    run(id).str { id ->
+                        run(value).double { value ->
+                            function(id, number, list, value)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun QuestReader.addRegainSource(function: (id: String, number: IAttributeGroup.Number, processors: List<RegainProcessor>, value: Double) -> Unit): ScriptAction<Any?> {
+        val number = nextParsedAction()
+        val processors = nextParsedAction()
+        val id = nextParsedAction()
+        val value = nextParsedAction()
+        return actionNow {
+            run(number).thenAccept { number ->
+                val number = number as IAttributeGroup.Number
+                run(processors).thenAccept { processors ->
+                    val list = processors as List<RegainProcessor>
+                    run(id).str { id ->
+                        run(value).double { value ->
+                            function(id, number, list, value)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -117,6 +207,34 @@ object AttributeActions {
             future {
                 processors.forEach { processor ->
                     processor.callRegain()
+                }
+                CompletableFuture.completedFuture(processors)
+            }
+        }
+    }
+
+    @KetherParser(["handleDamage"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun handleDamage() = combinationParser {
+        it.group(
+            damageProcessors()
+        ).apply(it) { processors ->
+            future {
+                processors.forEach { processor ->
+                    processor.handle()
+                }
+                CompletableFuture.completedFuture(processors)
+            }
+        }
+    }
+
+    @KetherParser(["handleRegain"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun handleRegain() = combinationParser {
+        it.group(
+            regainProcessors()
+        ).apply(it) { processors ->
+            future {
+                processors.forEach { processor ->
+                    processor.handle()
                 }
                 CompletableFuture.completedFuture(processors)
             }
