@@ -1,7 +1,6 @@
 package org.gitee.nodens.api
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import org.bukkit.entity.LivingEntity
@@ -38,6 +37,12 @@ import taboolib.expansion.AsyncDispatcher
         "!org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.1",
         test = "!org.gitee.nodens.serialization.json.Json",
         relocate = ["!kotlin.", "!kotlin2120.", "!kotlinx.serialization.", "!org.gitee.nodens.serialization."],
+        transitive = false
+    ),
+    RuntimeDependency(
+        "!com.eatthepath:fast-uuid:0.2.0",
+        test = "!org.gitee.nodens.eatthepath.uuid.FastUUID",
+        relocate = ["!com.eatthepath.uuid", "!org.gitee.nodens.eatthepath.uuid"],
         transitive = false
     )
 )

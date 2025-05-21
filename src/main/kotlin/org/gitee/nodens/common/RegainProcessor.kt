@@ -1,9 +1,7 @@
 package org.gitee.nodens.common
 
-import eos.moe.armourers.ev
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityRegainHealthEvent
-import org.gitee.nodens.api.events.entity.NodensEntityDamageEvents
 import org.gitee.nodens.api.events.entity.NodensEntityRegainEvents
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
@@ -16,8 +14,20 @@ class RegainProcessor(val reason: String, val healer: LivingEntity, val passive:
     }
 
     class PriorityRunnable(val priority: Int, val callback: (regain: Double) -> Unit)
-    class RegainSource(override val key: String, override val attribute: IAttributeGroup.Number, val regain: Double): AbstractSource(regain)
-    class ReduceSource(override val key: String, override val attribute: IAttributeGroup.Number, val reduce: Double): AbstractSource(reduce)
+
+    class RegainSource(override val key: String, override val attribute: IAttributeGroup.Number, val regain: Double): AbstractSource(regain) {
+
+        override fun toString(): String {
+            return "RegainSource{key: $key, attribute: $attribute, regain: $regain}"
+        }
+    }
+
+    class ReduceSource(override val key: String, override val attribute: IAttributeGroup.Number, val reduce: Double): AbstractSource(reduce) {
+
+        override fun toString(): String {
+            return "ReduceSource{key: $key, attribute: $attribute, reduce: $reduce}"
+        }
+    }
 
     internal val regainSources = hashMapOf<String, RegainSource>()
     internal val reduceSources = hashMapOf<String, ReduceSource>()
@@ -90,5 +100,9 @@ class RegainProcessor(val reason: String, val healer: LivingEntity, val passive:
         }?.forEach {
             it.key.handlePassive(this, it.value)
         }
+    }
+
+    override fun toString(): String {
+        return "RegainProcessor{reason: $reason, healer: $healer, passive: $passive}"
     }
 }

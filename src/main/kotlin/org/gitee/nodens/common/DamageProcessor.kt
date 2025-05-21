@@ -20,8 +20,20 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
     var crit = false
 
     class PriorityRunnable(val priority: Int, val callback: (damage: Double) -> Unit)
-    class DamageSource(override val key: String, override val attribute: IAttributeGroup.Number, var damage: Double): AbstractSource(damage)
-    class DefenceSource(override val key: String, override val attribute: IAttributeGroup.Number, var defence: Double): AbstractSource(defence)
+
+    class DamageSource(override val key: String, override val attribute: IAttributeGroup.Number, var damage: Double): AbstractSource(damage) {
+
+        override fun toString(): String {
+            return "ReduceSource{key: $key, attribute: $attribute, damage: $damage}"
+        }
+    }
+
+    class DefenceSource(override val key: String, override val attribute: IAttributeGroup.Number, var defence: Double): AbstractSource(defence) {
+
+        override fun toString(): String {
+            return "ReduceSource{key: $key, attribute: $attribute, defence: $defence}"
+        }
+    }
 
     internal val damageSources = hashMapOf<String, DamageSource>()
     internal val defenceSources = hashMapOf<String, DefenceSource>()
@@ -94,5 +106,9 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
         }?.forEach {
             it.key.handleDefender(this, it.value)
         }
+    }
+
+    override fun toString(): String {
+        return "DamageProcessor{damageType: $damageType, crit: $crit, attacker: $attacker, defender: $defender}"
     }
 }

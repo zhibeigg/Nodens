@@ -1,6 +1,6 @@
 package org.gitee.nodens.common
 
-import org.bukkit.attribute.Attribute
+import com.eatthepath.uuid.FastUUID
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
@@ -12,6 +12,7 @@ import org.gitee.nodens.util.maxHealth
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.adaptCommandSender
 import taboolib.common.platform.function.info
 import taboolib.common5.cdouble
 import taboolib.library.reflex.Reflex.Companion.getProperty
@@ -21,6 +22,7 @@ import taboolib.module.configuration.Config
 import taboolib.module.configuration.ConfigFile
 import taboolib.module.kether.*
 import taboolib.module.nms.MinecraftVersion
+import java.util.*
 
 object Handle {
 
@@ -59,22 +61,26 @@ object Handle {
     }
 
     fun runProcessor(damageProcessor: DamageProcessor): Double {
-        return ScriptContext.create(onDamage).also {
-            it["damageType"] = damageProcessor.damageType
-            it["damageSources"] = damageProcessor.damageSources.values.toList()
-            it["defenceSources"] = damageProcessor.defenceSources.values.toList()
-            it["attacker"] = damageProcessor.attacker
-            it["defender"] = damageProcessor.defender
+        return ScriptContext.create(onDamage) {
+            sender = adaptCommandSender(damageProcessor.attacker)
+            id = FastUUID.toString(UUID.randomUUID())
+            this["damageType"] = damageProcessor.damageType
+            this["damageSources"] = damageProcessor.damageSources.values.toList()
+            this["defenceSources"] = damageProcessor.defenceSources.values.toList()
+            this["attacker"] = damageProcessor.attacker
+            this["defender"] = damageProcessor.defender
         }.runActions().orNull().cdouble
     }
 
     fun runProcessor(regainProcessor: RegainProcessor): Double {
-        return ScriptContext.create(onRegain).also {
-            it["reason"] = regainProcessor.reason
-            it["regainSources"] = regainProcessor.regainSources.values.toList()
-            it["reduceSources"] = regainProcessor.reduceSources.values.toList()
-            it["healer"] = regainProcessor.healer
-            it["passive"] = regainProcessor.passive
+        return ScriptContext.create(onRegain) {
+            sender = adaptCommandSender(regainProcessor.healer)
+            id = FastUUID.toString(UUID.randomUUID())
+            this["reason"] = regainProcessor.reason
+            this["regainSources"] = regainProcessor.regainSources.values.toList()
+            this["reduceSources"] = regainProcessor.reduceSources.values.toList()
+            this["healer"] = regainProcessor.healer
+            this["passive"] = regainProcessor.passive
         }.runActions().orNull().cdouble
     }
 
