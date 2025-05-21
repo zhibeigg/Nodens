@@ -6,8 +6,9 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.gitee.nodens.api.events.entity.NodensEntityDamageEvents
 import org.gitee.nodens.common.Handle.doDamage
 import org.gitee.nodens.core.IAttributeGroup
-import org.gitee.nodens.core.attribute.Defence
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
+import org.gitee.nodens.util.comparePriority
+import taboolib.common.platform.function.info
 
 /**
  * @param damageType 攻击类型，一般来自[org.gitee.nodens.core.attribute.Damage]中的[IAttributeGroup.Number.name]
@@ -87,23 +88,25 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
         }
     }
 
-    fun handle() {
-        handleAttacker()
-        handleDefender()
+    fun handle(vararg skipNumber: IAttributeGroup.Number) {
+        handleAttacker(*skipNumber)
+        handleDefender(*skipNumber)
     }
 
-    fun handleAttacker() {
+    fun handleAttacker(vararg skipNumber: IAttributeGroup.Number) {
         attacker.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            o1.config.handlePriority.compareTo(o2.config.handlePriority)
+            comparePriority(o1.config.handlePriority, o2.config.handlePriority)
         }?.forEach {
+            if (it.key in skipNumber) return@forEach
             it.key.handleAttacker(this, it.value)
         }
     }
 
-    fun handleDefender() {
+    fun handleDefender(vararg skipNumber: IAttributeGroup.Number) {
         defender.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            o1.config.handlePriority.compareTo(o2.config.handlePriority)
+            comparePriority(o1.config.handlePriority, o2.config.handlePriority)
         }?.forEach {
+            if (it.key in skipNumber) return@forEach
             it.key.handleDefender(this, it.value)
         }
     }

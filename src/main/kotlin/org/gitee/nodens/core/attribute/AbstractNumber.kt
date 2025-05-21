@@ -50,4 +50,8 @@ abstract class AbstractNumber: IAttributeGroup.Number {
         }
         return value * config.combatPower
     }
+
+    override fun toString(): String {
+        return "AttributeNumber{name: $name}"
+    }
 }

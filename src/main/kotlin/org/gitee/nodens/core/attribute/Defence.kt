@@ -4,12 +4,7 @@ import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.DigitalParser.Type.COUNT
 import org.gitee.nodens.common.DigitalParser.Type.PERCENT
-import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.IAttributeGroup
-import org.gitee.nodens.core.AttributeManager
-import org.gitee.nodens.core.attribute.Damage.Boss
-import org.gitee.nodens.core.attribute.Damage.Monster
-import org.gitee.nodens.core.attribute.Damage.Real
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import taboolib.common.util.random
 

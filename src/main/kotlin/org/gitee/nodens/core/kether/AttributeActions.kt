@@ -7,6 +7,7 @@ import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.*
 import taboolib.common.OpenResult
+import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
 import java.util.concurrent.CompletableFuture
@@ -255,7 +256,7 @@ object AttributeActions {
                 actionFuture { future ->
                     val memory = livingEntity().attributeMemory() ?: return@actionFuture future.complete(0.0)
                     run(group).str { group ->
-                        future.complete(memory.getCombatPower().filter { it.key.group.name == group }.values.sum())
+                        future.complete(memory.getCombatPower().filter { entry -> entry.key.group.name == group }.values.sum())
                     }
                 }
             }
@@ -311,6 +312,26 @@ object AttributeActions {
         }
 
         override fun write(instance: DamageProcessor, key: String, value: Any?): OpenResult {
+            return OpenResult.failed()
+        }
+    }
+
+    @KetherProperty(bind = IAttributeGroup.Number::class, true)
+    fun propertyNumber() = object : ScriptProperty<IAttributeGroup.Number>("IAttributeGroup.Number.operator") {
+
+        override fun read(instance: IAttributeGroup.Number, key: String): OpenResult {
+            return when (key) {
+                "name" -> OpenResult.successful(instance.name)
+                "group" -> OpenResult.successful(instance.group.name)
+                "combatPower" -> OpenResult.successful(instance.config.combatPower)
+                "valueType" -> OpenResult.successful(instance.config.valueType.name)
+                "handlePriority" -> OpenResult.successful(instance.config.handlePriority)
+                "syncPriority" -> OpenResult.successful(instance.config.syncPriority)
+                else -> OpenResult.failed()
+            }
+        }
+
+        override fun write(instance: IAttributeGroup.Number, key: String, value: Any?): OpenResult {
             return OpenResult.failed()
         }
     }

@@ -2,10 +2,7 @@ package org.gitee.nodens.core.attribute
 
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
-import org.gitee.nodens.common.DigitalParser.Type.COUNT
 import org.gitee.nodens.common.DigitalParser.Type.PERCENT
-import org.gitee.nodens.core.AttributeConfig
-import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.attribute.Crit.PhysicalChance.config
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
@@ -24,7 +21,7 @@ object Crit: IAttributeGroup {
             get() = Crit
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            if (damageProcessor.damageType == Damage.Physics.name) {
+            if (damageProcessor.damageType == Damage.Physics.name.uppercase()) {
                 Crit.handleAttacker(damageProcessor, valueMap)
             }
         }
@@ -36,7 +33,7 @@ object Crit: IAttributeGroup {
             get() = Crit
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            if (damageProcessor.damageType == Damage.Magic.name) {
+            if (damageProcessor.damageType == Damage.Magic.name.uppercase()) {
                 Crit.handleAttacker(damageProcessor, valueMap)
             }
         }

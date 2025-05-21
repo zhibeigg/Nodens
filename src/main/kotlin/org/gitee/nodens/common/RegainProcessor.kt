@@ -5,9 +5,12 @@ import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.gitee.nodens.api.events.entity.NodensEntityRegainEvents
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
+import org.gitee.nodens.util.comparePriority
 
 // reason NATURAL
-class RegainProcessor(val reason: String, val healer: LivingEntity, val passive: LivingEntity) {
+class RegainProcessor(reason: String, val healer: LivingEntity, val passive: LivingEntity) {
+
+    val reason = reason.uppercase()
 
     companion object {
         const val NATURAL_REASON = "NATURAL"
@@ -81,23 +84,25 @@ class RegainProcessor(val reason: String, val healer: LivingEntity, val passive:
         }
     }
 
-    fun handle() {
-        handleHealer()
-        handlePassive()
+    fun handle(vararg skipNumber: IAttributeGroup.Number) {
+        handleHealer(*skipNumber)
+        handlePassive(*skipNumber)
     }
 
-    private fun handleHealer() {
+    private fun handleHealer(vararg skipNumber: IAttributeGroup.Number) {
         healer.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            o1.config.handlePriority.compareTo(o2.config.handlePriority)
+            comparePriority(o1.config.handlePriority, o2.config.handlePriority)
         }?.forEach {
+            if (it.key in skipNumber) return@forEach
             it.key.handleHealer(this, it.value)
         }
     }
 
-    private fun handlePassive() {
+    private fun handlePassive(vararg skipNumber: IAttributeGroup.Number) {
         passive.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            o1.config.handlePriority.compareTo(o2.config.handlePriority)
+            comparePriority(o1.config.handlePriority, o2.config.handlePriority)
         }?.forEach {
+            if (it.key in skipNumber) return@forEach
             it.key.handlePassive(this, it.value)
         }
     }

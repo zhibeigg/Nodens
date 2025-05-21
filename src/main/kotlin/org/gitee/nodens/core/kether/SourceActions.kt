@@ -8,7 +8,7 @@ import taboolib.module.kether.ScriptProperty
 
 object SourceActions {
 
-    @KetherProperty(bind = Source::class)
+    @KetherProperty(bind = Source::class, shared = true)
     fun propertySource() = object : ScriptProperty<Source>("Source.operator") {
 
         override fun read(instance: Source, key: String): OpenResult {

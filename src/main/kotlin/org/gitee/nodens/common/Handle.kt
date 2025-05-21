@@ -51,7 +51,7 @@ object Handle {
         }
     }
 
-    @Reload(0)
+    @Reload(1)
     @Awake(LifeCycle.ENABLE)
     private fun init() {
         catchMap.clear()

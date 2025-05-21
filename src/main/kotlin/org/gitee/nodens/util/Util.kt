@@ -62,3 +62,9 @@ class ConfigLazy<T>(val config: Configuration, private val initializer: Configur
 fun LivingEntity.maxHealth(): Double {
     return getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: maxHealth
 }
+
+fun comparePriority(o1: Int, o2: Int): Int {
+    if (o1 == o2) return 1
+    if (o1 > o2) return 1
+    return o1 - o2
+}

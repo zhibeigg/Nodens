@@ -10,7 +10,6 @@ import org.gitee.nodens.core.AttributeManager.ATTRIBUTE_MATCHING_MAP
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files
-import taboolib.common.platform.function.info
 import taboolib.common5.cdouble
 import taboolib.common5.scriptEngine
 import taboolib.module.chat.colored
@@ -63,6 +62,10 @@ object JavaScript: IAttributeGroup {
 
         override fun combatPower(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
             return (compile.engine as Invocable).invokeFunction("combatPower", valueMap).cdouble
+        }
+
+        override fun toString(): String {
+            return "JavaScriptAttributeNumber{name: ${name}}"
         }
     }
 

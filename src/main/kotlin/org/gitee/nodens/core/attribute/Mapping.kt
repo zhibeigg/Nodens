@@ -5,7 +5,6 @@ import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
-import org.gitee.nodens.core.attribute.JavaScript.JsAttribute
 import org.gitee.nodens.util.ReloadableLazy
 import org.gitee.nodens.util.mergeValues
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
@@ -50,6 +49,10 @@ object Mapping: IAttributeGroup {
                 hashMap[key] = mergeValues(*values.toTypedArray())
             }
             return hashMap
+        }
+
+        override fun toString(): String {
+            return "MappingAttributeNumber{name: ${name}}"
         }
     }
 }
