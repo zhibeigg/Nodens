@@ -6,9 +6,10 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.gitee.nodens.api.events.entity.NodensEntityDamageEvents
 import org.gitee.nodens.common.Handle.doDamage
 import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.attribute.Crit
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
+import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.comparePriority
-import taboolib.common.platform.function.info
 
 /**
  * @param damageType 攻击类型，一般来自[org.gitee.nodens.core.attribute.Damage]中的[IAttributeGroup.Number.name]
@@ -18,7 +19,22 @@ import taboolib.common.platform.function.info
 class DamageProcessor(damageType: String, val attacker: LivingEntity, val defender: LivingEntity) {
 
     val damageType = damageType.uppercase()
-    var crit = false
+
+    var crit: Boolean = false
+        set(value) {
+            if (crit != value) {
+                if (value) {
+                    val memory = attacker.attributeMemory() ?: return
+                    Crit.Addon.handleAttacker(this, memory.mergedAttribute(Crit.Addon))
+                    Crit.CritAddonResistance.handleDefender(this, memory.mergedAttribute(Crit.CritAddonResistance))
+                    crit = true
+                } else {
+                    damageSources.remove("$NODENS_NAMESPACE${Crit.name}${Crit.Addon.name}")
+                    defenceSources.remove("$NODENS_NAMESPACE${Crit.name}${Crit.CritAddonResistance.name}")
+                    crit = false
+                }
+            }
+        }
 
     class PriorityRunnable(val priority: Int, val callback: (damage: Double) -> Unit)
 

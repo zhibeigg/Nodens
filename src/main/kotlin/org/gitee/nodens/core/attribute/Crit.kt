@@ -81,7 +81,7 @@ object Crit: IAttributeGroup {
         override val group: IAttributeGroup
             get() = Crit
 
-        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+        override fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.crit) {
                 val percent = when (config.valueType) {
                     IAttributeGroup.Number.ValueType.SINGLE -> valueMap[PERCENT]!![0]
