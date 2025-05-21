@@ -22,7 +22,7 @@ object Crit: IAttributeGroup {
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.damageType == Damage.Physics.name.uppercase()) {
-                Crit.handleAttacker(damageProcessor, valueMap)
+                handleCrit(damageProcessor, valueMap)
             }
         }
     }
@@ -34,12 +34,12 @@ object Crit: IAttributeGroup {
 
         override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (damageProcessor.damageType == Damage.Magic.name.uppercase()) {
-                Crit.handleAttacker(damageProcessor, valueMap)
+                handleCrit(damageProcessor, valueMap)
             }
         }
     }
 
-    private fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+    private fun handleCrit(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
         val chance = when (config.valueType) {
             IAttributeGroup.Number.ValueType.SINGLE -> valueMap[PERCENT]!![0]
             IAttributeGroup.Number.ValueType.RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])

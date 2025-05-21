@@ -4,37 +4,37 @@ Physics:
   # 类型：单个 或 范围
   valueType: RANGE
   # 优先级，优先计算值小的属性
-  priority: 1
+  handlePriority: 1
   # 识别关键字
   keys:
     - 物理攻击
 Magic:
   combatPower: 1.0
   valueType: RANGE
-  priority: 1
+  handlePriority: 1
   keys:
     - 魔法攻击
 Real:
   combatPower: 1.0
   valueType: SINGLE
-  priority: 1
+  handlePriority: 1
   keys:
     - 真实伤害
 Fire:
   combatPower: 1.0
   valueType: SINGLE
-  priority: 1
+  handlePriority: 1
   keys:
     - 火焰伤害
 Monster:
   combatPower: 1.0
   valueType: SINGLE
-  priority: 2
+  handlePriority: 2
   keys:
     - 小怪增伤
 Boss:
   combatPower: 1.0
   valueType: SINGLE
-  priority: 2
+  handlePriority: 2
   keys:
     - 首领增伤

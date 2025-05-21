@@ -21,20 +21,22 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
     val damageType = damageType.uppercase()
 
     var crit: Boolean = false
-        set(value) {
-            if (crit != value) {
-                if (value) {
-                    val memory = attacker.attributeMemory() ?: return
-                    Crit.Addon.handleAttacker(this, memory.mergedAttribute(Crit.Addon))
-                    Crit.CritAddonResistance.handleDefender(this, memory.mergedAttribute(Crit.CritAddonResistance))
-                    crit = true
-                } else {
-                    damageSources.remove("$NODENS_NAMESPACE${Crit.name}${Crit.Addon.name}")
-                    defenceSources.remove("$NODENS_NAMESPACE${Crit.name}${Crit.CritAddonResistance.name}")
-                    crit = false
-                }
+        internal set
+
+    fun setCrit(crit: Boolean) {
+        if (this.crit != crit) {
+            if (crit) {
+                val memory = attacker.attributeMemory() ?: return
+                Crit.Addon.handleAttacker(this, memory.mergedAttribute(Crit.Addon))
+                Crit.CritAddonResistance.handleDefender(this, memory.mergedAttribute(Crit.CritAddonResistance))
+                this.crit = true
+            } else {
+                damageSources.remove("$NODENS_NAMESPACE${Crit.name}${Crit.Addon.name}")
+                defenceSources.remove("$NODENS_NAMESPACE${Crit.name}${Crit.CritAddonResistance.name}")
+                this.crit = false
             }
         }
+    }
 
     class PriorityRunnable(val priority: Int, val callback: (damage: Double) -> Unit)
 
