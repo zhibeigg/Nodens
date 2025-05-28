@@ -68,7 +68,7 @@ dependencies {
     compileOnly("ink.ptms.core:v11200:11200")
     compileOnly("ink.ptms:nms-all:1.0.0")
 
-    compileOnly("com.gitee.redischannel:RedisChannel:1.5.2:api")
+    compileOnly("com.gitee.redischannel:RedisChannel:1.9.5:api")
     compileOnly("org.eldergod.ext:DragonCore:2.6.2.9")
     compileOnly("org.eldergod.ext:DragonArmourers:6.72")
     compileOnly("org.eldergod.ext:MythicMobs:4.11.0")

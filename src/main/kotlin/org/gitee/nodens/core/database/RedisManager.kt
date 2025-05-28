@@ -2,30 +2,37 @@ package org.gitee.nodens.core.database
 
 import com.eatthepath.uuid.FastUUID
 import com.gitee.redischannel.RedisChannelPlugin
+import com.gitee.redischannel.util.proxyAsyncCommand
+import io.lettuce.core.HSetExArgs
 import org.bukkit.entity.Player
 import taboolib.common5.cint
+import java.time.Duration
 import java.util.concurrent.CompletableFuture
 
 object RedisManager {
 
-    const val SECOND_3_HOURS = 3 * 60 * 60L
+    private val exArgs = HSetExArgs().ex(Duration.ofHours(3))
     const val GLOBAL_DROP = "nodens@global@drop"
 
     fun setDropTimes(player: Player, key: String, times: Int, global: Boolean = false) {
-        if (global) {
-            RedisChannelPlugin.api.hSet(GLOBAL_DROP, key, times.toString(), SECOND_3_HOURS, true)
-        } else {
-            RedisChannelPlugin.api.hSet(FastUUID.toString(player.uniqueId), key, times.toString(), SECOND_3_HOURS, true)
+        RedisChannelPlugin.api.proxyAsyncCommand().thenAccept {
+            if (global) {
+                it.hsetex(GLOBAL_DROP, exArgs, mapOf(key to times.toString()))
+            } else {
+                it.hsetex(FastUUID.toString(player.uniqueId), exArgs, mapOf(key to times.toString()))
+            }
         }
     }
 
     fun getDropTimes(player: Player, key: String, global: Boolean = false): CompletableFuture<Int> {
-        return if (global) {
-            RedisChannelPlugin.api.hAsyncGet(GLOBAL_DROP, key)
-        } else {
-            RedisChannelPlugin.api.hAsyncGet(FastUUID.toString(player.uniqueId), key)
-        }.thenApply {
-            it.cint
+        return RedisChannelPlugin.api.proxyAsyncCommand().thenCompose {
+            if (global) {
+                it.hget(GLOBAL_DROP, key)
+            } else {
+                it.hget(FastUUID.toString(player.uniqueId), key)
+            }.thenApply { value ->
+                value.cint
+            }
         }
     }
 }
