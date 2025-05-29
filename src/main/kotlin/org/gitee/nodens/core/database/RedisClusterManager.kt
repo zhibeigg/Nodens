@@ -2,15 +2,18 @@ package org.gitee.nodens.core.database
 
 import com.eatthepath.uuid.FastUUID
 import com.gitee.redischannel.RedisChannelPlugin
+import com.gitee.redischannel.util.clusterCommandAPI
 import com.gitee.redischannel.util.commandAPI
+import io.lettuce.core.HSetExArgs
 import org.bukkit.entity.Player
 import org.gitee.nodens.core.database.ISyncCache.Companion.GLOBAL_DROP
 import taboolib.common5.cint
+import java.time.Duration
 import java.util.concurrent.CompletableFuture
 
-class RedisManager: ISyncCache {
+class RedisClusterManager: ISyncCache {
 
-    private val api by lazy { RedisChannelPlugin.api.commandAPI() }
+    private val api by lazy { RedisChannelPlugin.api.clusterCommandAPI() }
 
     override fun setDropTimes(player: Player, key: String, times: Int, global: Boolean) {
         api.useAsyncCommands { commands ->

@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import org.bukkit.Bukkit
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
+import org.gitee.nodens.core.database.ISyncCache
 import org.gitee.nodens.core.database.RedisManager
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -54,7 +55,7 @@ class DropUser(val uuid: UUID) {
         val chance = cache.get(key) {
             DropChance(percent).apply {
                 set = false
-                RedisManager.getDropTimes(player, key, global).thenAccept {
+                ISyncCache.INSTANCE.getDropTimes(player, key, global).thenAccept {
                     times = it
                 }
             }
@@ -62,7 +63,7 @@ class DropUser(val uuid: UUID) {
 
         val drop = chance!!.hasDrop()
         if (set) {
-            RedisManager.setDropTimes(player, key, chance.times, global)
+            ISyncCache.INSTANCE.setDropTimes(player, key, chance.times, global)
         }
 
         return drop
