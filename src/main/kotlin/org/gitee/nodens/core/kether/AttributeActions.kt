@@ -7,7 +7,6 @@ import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.*
 import taboolib.common.OpenResult
-import taboolib.common.platform.function.info
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
 import java.util.concurrent.CompletableFuture
