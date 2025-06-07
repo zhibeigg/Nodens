@@ -50,10 +50,7 @@ taboolib {
     relocate("com.github.benmanes.caffeine", "org.gitee.nodens.caffeine")
     relocate("com.eatthepath.uuid", "org.gitee.nodens.eatthepath.uuid")
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
-    version {
-        taboolib = "6.2.3-8cc2f66"
-        coroutines = "1.8.0"
-    }
+    version { taboolib = "6.2.3-test9" }
 }
 
 repositories {

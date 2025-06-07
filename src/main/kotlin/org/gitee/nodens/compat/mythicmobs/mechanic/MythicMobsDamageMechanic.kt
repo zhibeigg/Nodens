@@ -15,6 +15,7 @@ import taboolib.common.platform.Ghost
 class MythicMobsDamageMechanic(line: String, mlc: MythicLineConfig) : SkillMechanic(line, mlc), ITargetedEntitySkill {
 
     private val type = mlc.getString(arrayOf("type", "t"))
+    private val nPower = mlc.getDouble(arrayOf("power", "p"), 1.0)
 
     override fun castAtEntity(data: SkillMetadata, target: AbstractEntity): Boolean {
         return if (target.isPlayer) {
@@ -22,10 +23,10 @@ class MythicMobsDamageMechanic(line: String, mlc: MythicLineConfig) : SkillMecha
             processor.handleAttacker()
             processor.damageSources.forEach {
                 when(it.key) {
-                    "$NODENS_NAMESPACE${Damage.name}${Damage.Physics.name}" -> it.value.damage *= power
-                    "$NODENS_NAMESPACE${Damage.name}${Damage.Magic.name}" -> it.value.damage *= power
-                    "$NODENS_NAMESPACE${Damage.name}${Damage.Real.name}" -> it.value.damage *= power
-                    "$NODENS_NAMESPACE${Damage.name}${Damage.Fire.name}" -> it.value.damage *= power
+                    "$NODENS_NAMESPACE${Damage.name}${Damage.Physics.name}" -> it.value.damage *= nPower
+                    "$NODENS_NAMESPACE${Damage.name}${Damage.Magic.name}" -> it.value.damage *= nPower
+                    "$NODENS_NAMESPACE${Damage.name}${Damage.Real.name}" -> it.value.damage *= nPower
+                    "$NODENS_NAMESPACE${Damage.name}${Damage.Fire.name}" -> it.value.damage *= nPower
                 }
             }
             processor.handleDefender()

@@ -85,7 +85,7 @@ object Handle {
     }
 
     fun doDamage(attacker: LivingEntity?, defender: LivingEntity, damageCause: DamageCause, damage: Double): EntityDamageByEntityEvent? {
-        if (defender.noDamageTicks != 0) return null
+        if (defender.noDamageTicks != 0) defender.noDamageTicks = 0
         // 如果实体血量 - 预计伤害值 < 0 提前设置击杀者
         if (defender.health - damage <= 0 && attacker is Player) defender.setKiller(attacker)
         val event = if (attacker != null) EntityDamageByEntityEvent(attacker, defender, damageCause, damage).also { defender.lastDamageCause = it } else null

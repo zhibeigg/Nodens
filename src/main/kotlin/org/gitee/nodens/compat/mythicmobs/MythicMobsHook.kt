@@ -1,5 +1,6 @@
 package org.gitee.nodens.compat.mythicmobs
 
+import io.lumine.xikage.mythicmobs.MythicMobs
 import io.lumine.xikage.mythicmobs.adapters.bukkit.BukkitAdapter
 import io.lumine.xikage.mythicmobs.api.bukkit.events.MythicMechanicLoadEvent
 import io.lumine.xikage.mythicmobs.api.bukkit.events.MythicMobDeathEvent
@@ -13,6 +14,9 @@ import org.gitee.nodens.core.TempAttributeData
 import org.gitee.nodens.core.entity.EntityAttributeMemory
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.entityAttributeMemoriesMap
 import org.gitee.nodens.module.item.drop.DropManager
+import org.gitee.nodens.util.MythicMobsPlugin
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.common.platform.Ghost
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.util.random
@@ -23,6 +27,17 @@ import taboolib.common5.cint
 object MythicMobsHook {
 
     private const val ATTRIBUTE_TAG = "Nodens@MythicMobs"
+
+    @Awake(LifeCycle.ENABLE)
+    private fun loadActive() {
+        if (!MythicMobsPlugin.isEnabled) return
+        MythicMobs.inst().mobManager.activeMobs.forEach {
+            val attributes = Nodens.api().matchAttributes(it.type.config.getStringList("Nodens"))
+            entityAttributeMemoriesMap[it.uniqueId] = EntityAttributeMemory(it.entity.bukkitEntity as? LivingEntity ?: return).apply {
+                addAttribute(ATTRIBUTE_TAG, TempAttributeData(-1, attributes, true))
+            }
+        }
+    }
 
     @Ghost
     @SubscribeEvent
