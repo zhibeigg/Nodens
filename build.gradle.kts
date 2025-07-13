@@ -34,6 +34,7 @@ taboolib {
         install(Kether)
         install(JavaScript)
         install(Jexl)
+        //repoTabooLib = "https://www.mcwar.cn/nexus/repository/maven-public/"
     }
     description {
         name = "Nodens"
@@ -50,7 +51,7 @@ taboolib {
     relocate("com.github.benmanes.caffeine", "org.gitee.nodens.caffeine")
     relocate("com.eatthepath.uuid", "org.gitee.nodens.eatthepath.uuid")
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
-    version { taboolib = "6.2.3-test9" }
+    version { taboolib = "6.2.3-b217935" }
 }
 
 repositories {

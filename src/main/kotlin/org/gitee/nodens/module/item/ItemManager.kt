@@ -36,6 +36,7 @@ object ItemManager {
 
     val itemConfigs = mutableMapOf<String, ItemConfig>()
     private val heldItemArmourersMap by unsafeLazy { mutableMapOf<UUID, List<String>?>() }
+    private val enableArmourers by lazy { Bukkit.getPluginManager().isPluginEnabled("DragonArmourers") }
 
     val dragoncoreSlots by ConfigLazy(Nodens.config) { getStringList("update-dragoncore-slots") }
 
@@ -125,6 +126,7 @@ object ItemManager {
     }
 
     fun updateSkin(player: Player) {
+        if (!enableArmourers) return
         val list = mutableListOf<String>()
         player.inventory.itemInMainHand.getConfig()?.armourers?.let { list += it }
         player.inventory.itemInOffHand.getConfig()?.armourers?.let { list += it }

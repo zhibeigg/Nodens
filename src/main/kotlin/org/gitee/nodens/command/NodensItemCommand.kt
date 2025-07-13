@@ -13,6 +13,7 @@ import taboolib.common.platform.command.player
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.command.suggest
 import taboolib.common5.cint
+import taboolib.platform.util.giveItem
 
 @CommandHeader("item", description = "Nodens属性插件物品指令")
 object NodensItemCommand {
@@ -34,7 +35,7 @@ object NodensItemCommand {
                         val player = Bukkit.getPlayerExact(ctx["player"]) ?: return@exec
                         val item = ItemManager.getItemConfig(ctx["item"]) ?: return@exec
                         val amount = ctx["amount"].cint
-                        NormalGenerator.generate(item, amount, player)
+                        player.giveItem(NormalGenerator.generate(item, amount, player))
                     }
                     dynamic("variable") {
                         exec<ProxyCommandSender> {
@@ -45,7 +46,7 @@ object NodensItemCommand {
                                 val split = it.split("=")
                                 split[0] to split[1]
                             }
-                            NormalGenerator.generate(item, amount, player, variable)
+                            player.giveItem(NormalGenerator.generate(item, amount, player, variable))
                         }
                     }
                 }

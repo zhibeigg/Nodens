@@ -157,7 +157,8 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         entity.equipment?.itemInOffHand?.getItemAttribute()?.also { list.addAll(it) }
         if (entity is Player) {
             attributeDragoncoreSlots.forEach { id ->
-                list.addAll(SlotAPI.getCacheSlotItem(entity, id).getItemAttribute())
+                val item = SlotAPI.getCacheSlotItem(entity, id) ?: return@forEach
+                list.addAll(item.getItemAttribute())
             }
         }
         return list
