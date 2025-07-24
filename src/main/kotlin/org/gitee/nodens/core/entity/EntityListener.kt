@@ -88,7 +88,7 @@ object EntityListener {
         e.setDamage(EntityDamageEvent.DamageModifier.RESISTANCE, 0.0)
         if (e.entity is Player) {
             e.setDamage(EntityDamageEvent.DamageModifier.BLOCKING, 0.0)
-            e.setDamage(EntityDamageEvent.DamageModifier.HARD_HAT, 0.0)
+            runCatching { e.setDamage(EntityDamageEvent.DamageModifier.HARD_HAT, 0.0) }
         }
         e.setDamage(EntityDamageEvent.DamageModifier.BASE, processor.getFinalDamage())
         submit {

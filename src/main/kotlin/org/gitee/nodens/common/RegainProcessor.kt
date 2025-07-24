@@ -11,6 +11,7 @@ import org.gitee.nodens.util.comparePriority
 class RegainProcessor(reason: String, val healer: LivingEntity, val passive: LivingEntity) {
 
     val reason = reason.uppercase()
+    var scale = 1.0
 
     companion object {
         const val NATURAL_REASON = "NATURAL"

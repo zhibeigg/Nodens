@@ -6,6 +6,7 @@
 # source[id] 源的ID
 # source[attribute] 源的属性所属名
 # source[value] 源的值
+# scale 缩放系数
 # 此处可写更高级算式
 # 最后返回值为 finalDamage
 onDamage: |-
@@ -16,7 +17,7 @@ onDamage: |-
   for i in &defenceSources then {
     set a to math sub [ &a &i[value] ]
   }
-  &a
+  math mul [ &scale &a ]
 # reason 治疗原因
 # regainSources 治疗源列表
 # reduceSources 减疗源列表
@@ -24,6 +25,7 @@ onDamage: |-
 # passive 受疗者
 # source[attribute] 源的属性所属名
 # source[value] 源的值
+# scale 缩放系数
 # 此处可写更高级算式
 # 最后返回值为 finalRegain
 onRegain: |-
@@ -34,4 +36,4 @@ onRegain: |-
   for i in &reduceSources then {
     set a to math sub [ &a &i[value] ]
   }
-  &a
+  math mul [ &scale &a ]

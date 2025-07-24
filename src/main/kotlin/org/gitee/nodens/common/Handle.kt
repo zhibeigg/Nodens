@@ -69,6 +69,7 @@ object Handle {
             this["defenceSources"] = damageProcessor.defenceSources.values.toList()
             this["attacker"] = damageProcessor.attacker
             this["defender"] = damageProcessor.defender
+            this["scale"] = damageProcessor.scale
         }.runActions().orNull().cdouble
     }
 
@@ -81,6 +82,7 @@ object Handle {
             this["reduceSources"] = regainProcessor.reduceSources.values.toList()
             this["healer"] = regainProcessor.healer
             this["passive"] = regainProcessor.passive
+            this["scale"] = regainProcessor.scale
         }.runActions().orNull().cdouble
     }
 

@@ -19,6 +19,7 @@ import org.gitee.nodens.util.comparePriority
 class DamageProcessor(damageType: String, val attacker: LivingEntity, val defender: LivingEntity) {
 
     val damageType = damageType.uppercase()
+    var scale = 1.0
 
     var crit: Boolean = false
         internal set

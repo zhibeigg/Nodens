@@ -7,6 +7,7 @@ import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.*
 import taboolib.common.OpenResult
+import taboolib.common5.cdouble
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
 import java.util.concurrent.CompletableFuture
@@ -285,12 +286,19 @@ object AttributeActions {
                 "passive" -> OpenResult.successful(instance.passive)
                 "reason" -> OpenResult.successful(instance.reason)
                 "regain" -> OpenResult.successful(instance.getFinalRegain())
+                "scale" -> OpenResult.successful(instance.scale)
                 else -> OpenResult.failed()
             }
         }
 
         override fun write(instance: RegainProcessor, key: String, value: Any?): OpenResult {
-            return OpenResult.failed()
+            return when (key) {
+                "scale" -> {
+                    instance.scale = value!!.cdouble
+                    OpenResult.successful()
+                }
+                else -> OpenResult.failed()
+            }
         }
     }
 
@@ -306,12 +314,19 @@ object AttributeActions {
                 "type" -> OpenResult.successful(instance.damageType)
                 "crit" -> OpenResult.successful(instance.crit)
                 "damage" -> OpenResult.successful(instance.getFinalDamage())
+                "scale" -> OpenResult.successful(instance.scale)
                 else -> OpenResult.failed()
             }
         }
 
         override fun write(instance: DamageProcessor, key: String, value: Any?): OpenResult {
-            return OpenResult.failed()
+            return when (key) {
+                "scale" -> {
+                    instance.scale = value!!.cdouble
+                    OpenResult.successful()
+                }
+                else -> OpenResult.failed()
+            }
         }
     }
 
