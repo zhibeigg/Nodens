@@ -12,7 +12,7 @@ object Damage: IAttributeGroup {
 
     override val name: String = "Damage"
 
-    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Physics, Magic, Real, Fire, Monster, Boss).associateBy { it.name }
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Physics, Magic, Real, Fire, Monster, Boss, Enhancement).associateBy { it.name }
 
     object Physics: AbstractNumber() {
 
@@ -54,6 +54,36 @@ object Damage: IAttributeGroup {
         }
     }
 
+    object Monster: AbstractNumber() {
+
+        override val group: IAttributeGroup
+            get() = Damage
+
+        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
+        }
+    }
+
+    object Boss: AbstractNumber() {
+
+        override val group: IAttributeGroup
+            get() = Damage
+
+        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
+        }
+    }
+
+    object Enhancement: AbstractNumber() {
+
+        override val group: IAttributeGroup
+            get() = Damage
+
+        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
+        }
+    }
+
     private fun IAttributeGroup.Number.getDamage(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
         var damage = 0.0
         when(config.valueType) {
@@ -75,25 +105,5 @@ object Damage: IAttributeGroup {
             }
         }
         return damage
-    }
-
-    object Monster: AbstractNumber() {
-
-        override val group: IAttributeGroup
-            get() = Damage
-
-        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
-        }
-    }
-
-    object Boss: AbstractNumber() {
-
-        override val group: IAttributeGroup
-            get() = Damage
-
-        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            damageProcessor.addDamageSource("$NODENS_NAMESPACE${Damage.name}$name", this, getDamage(valueMap))
-        }
     }
 }

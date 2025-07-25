@@ -38,3 +38,9 @@ Boss:
   handlePriority: 2
   keys:
     - 首领增伤
+Enhancement:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 3
+  keys:
+    - 伤害提升

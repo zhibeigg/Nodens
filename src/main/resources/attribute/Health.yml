@@ -19,3 +19,9 @@ GrievousWounds:
   handlePriority: 2
   keys:
     - 重伤
+Healer:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 2
+  keys:
+    - 治疗能力提升

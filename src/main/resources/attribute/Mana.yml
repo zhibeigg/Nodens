@@ -1,0 +1,15 @@
+# 仅支持OR
+Max:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 1
+  syncPriority: 1
+  keys:
+    - 灵力值
+Regain:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 1
+  syncPriority: 1
+  keys:
+    - 灵力回复

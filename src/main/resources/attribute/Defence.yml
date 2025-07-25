@@ -20,3 +20,9 @@ Fire:
   handlePriority: 1
   keys:
     - 火焰防御
+Reduction:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 2
+  keys:
+    - 伤害减免

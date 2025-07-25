@@ -75,6 +75,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     compileOnly("com.eatthepath:fast-uuid:0.2.0")
     compileOnly("com.github.ben-manes.caffeine:caffeine:2.9.3")
+    compileOnly("org.gitee.orryx:Orryx:1.22.54:api")
 
     compileOnly(kotlin("stdlib"))
     compileOnly(kotlin("reflect"))

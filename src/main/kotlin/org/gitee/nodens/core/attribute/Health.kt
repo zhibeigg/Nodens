@@ -22,7 +22,7 @@ object Health: IAttributeGroup {
 
     override val name: String = "Health"
 
-    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Max, Regain, GrievousWounds).associateBy { it.name }
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Max, Regain, GrievousWounds, Healer).associateBy { it.name }
 
     object Max: AbstractNumber() {
 
@@ -80,8 +80,23 @@ object Health: IAttributeGroup {
                 SINGLE -> valueMap[PERCENT]!![0]
                 RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])
             }
-            val damage = regainProcessor.getFinalRegain()
-            regainProcessor.addReduceSource("$NODENS_NAMESPACE${Health.name}$name", this, damage * percent)
+            val value = regainProcessor.getFinalRegain()
+            regainProcessor.addReduceSource("$NODENS_NAMESPACE${Health.name}$name", this, value * percent)
+        }
+    }
+
+    object Healer: AbstractNumber() {
+
+        override val group: IAttributeGroup
+            get() = Health
+
+        override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            val percent = when (MagicChance.config.valueType) {
+                SINGLE -> valueMap[PERCENT]!![0]
+                RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])
+            }
+            val value = regainProcessor.getFinalRegain()
+            regainProcessor.addRegainSource("$NODENS_NAMESPACE${Health.name}$name", this, value * percent)
         }
     }
 }

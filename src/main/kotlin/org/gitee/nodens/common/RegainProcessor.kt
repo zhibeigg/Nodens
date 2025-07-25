@@ -109,6 +109,6 @@ class RegainProcessor(reason: String, val healer: LivingEntity, val passive: Liv
     }
 
     override fun toString(): String {
-        return "RegainProcessor{reason: $reason, healer: $healer, passive: $passive}"
+        return "RegainProcessor{reason: $reason, healer: $healer, passive: $passive, scale: $scale}"
     }
 }

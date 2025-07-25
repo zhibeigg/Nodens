@@ -131,6 +131,6 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
     }
 
     override fun toString(): String {
-        return "DamageProcessor{damageType: $damageType, crit: $crit, attacker: $attacker, defender: $defender}"
+        return "DamageProcessor{damageType: $damageType, crit: $crit, attacker: $attacker, defender: $defender, scale: $scale}"
     }
 }
