@@ -70,7 +70,7 @@ object Health: IAttributeGroup {
         }
     }
 
-    object GrievousWounds: AbstractNumber() {
+    object GrievousWounds: AbstractPercentNumber() {
 
         override val group: IAttributeGroup
             get() = Health
@@ -85,7 +85,7 @@ object Health: IAttributeGroup {
         }
     }
 
-    object Healer: AbstractNumber() {
+    object Healer: AbstractPercentNumber() {
 
         override val group: IAttributeGroup
             get() = Health

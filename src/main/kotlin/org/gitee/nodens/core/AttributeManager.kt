@@ -2,13 +2,10 @@ package org.gitee.nodens.core
 
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.common.DigitalParser
-import org.gitee.nodens.common.DigitalParser.Type.*
 import org.gitee.nodens.common.FastMatchingMap
-import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.*
 import org.gitee.nodens.core.attribute.JavaScript
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.util.ConfigLazy
-import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files
 import org.gitee.nodens.util.mergeValues
@@ -69,7 +66,7 @@ object AttributeManager {
                                     debug("&e┣&7AttributeKey $key loaded &a√".colored())
                                 }
                             }
-                        } catch (e: NoSuchFieldException) {
+                        } catch (_: NoSuchFieldException) {
                             // 没有INSTANCE字段，说明不是object，跳过
                         } catch (e: IllegalAccessException) {
                             // 处理访问异常
@@ -102,5 +99,13 @@ object AttributeManager {
             value += it.key.combatPower(map)
         }
         return BigDecimal.valueOf(value).setScale(2).toDouble()
+    }
+
+    fun getGroup(group: String): IAttributeGroup? {
+        return groupMap[group]
+    }
+
+    fun getNumber(group: String, key: String): IAttributeGroup.Number? {
+        return groupMap[group]?.numbers[key]
     }
 }

@@ -2,6 +2,7 @@ package org.gitee.nodens.core.kether
 
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.RegainProcessor
+import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.AttributeManager.groupMap
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
@@ -10,6 +11,7 @@ import taboolib.common.OpenResult
 import taboolib.common5.cdouble
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
+import java.util.Locale
 import java.util.concurrent.CompletableFuture
 
 object AttributeActions {
@@ -75,6 +77,15 @@ object AttributeActions {
                             }
                         }
                     }
+                }
+            }
+            case("get") {
+                val group = it.nextToken().lowercase().replaceFirstChar { char -> char.titlecase(Locale.getDefault()) }
+                val number = it.nextToken().lowercase().replaceFirstChar { char -> char.titlecase(Locale.getDefault()) }
+                actionNow {
+                    val attribute = bukkitPlayer().attributeMemory() ?: return@actionNow 0
+                    val number = AttributeManager.getNumber(group, number) ?: return@actionNow 0
+                    number.getFinalValue(attribute.mergedAttribute(number))
                 }
             }
         }
@@ -346,6 +357,23 @@ object AttributeActions {
         }
 
         override fun write(instance: IAttributeGroup.Number, key: String, value: Any?): OpenResult {
+            return OpenResult.failed()
+        }
+    }
+
+    @KetherProperty(bind = IAttributeGroup.Number.FinalValue::class, true)
+    fun propertyNumberFinalValue() = object : ScriptProperty<IAttributeGroup.Number.FinalValue>("IAttributeGroup.Number.FinalValue.operator") {
+
+        override fun read(instance: IAttributeGroup.Number.FinalValue, key: String): OpenResult {
+            return when (key) {
+                "type" -> OpenResult.successful(instance.type.name)
+                "value" -> OpenResult.successful(instance.value)
+                "rangeValue" -> OpenResult.successful(instance.rangeValue)
+                else -> OpenResult.failed()
+            }
+        }
+
+        override fun write(instance: IAttributeGroup.Number.FinalValue, key: String, value: Any?): OpenResult {
             return OpenResult.failed()
         }
     }

@@ -12,7 +12,7 @@ object Speed: IAttributeGroup {
 
     override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Attack, Move).associateBy { it.name }
 
-    object Attack: AbstractNumber() {
+    object Attack: AbstractPercentNumber() {
 
         override val group: IAttributeGroup
             get() = Speed
@@ -22,7 +22,7 @@ object Speed: IAttributeGroup {
         }
     }
 
-    object Move: AbstractNumber() {
+    object Move: AbstractPercentNumber() {
 
         override val group: IAttributeGroup
             get() = Speed

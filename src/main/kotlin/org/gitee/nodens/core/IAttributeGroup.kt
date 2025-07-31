@@ -4,6 +4,8 @@ import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.common.RegainProcessor
+import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.*
+import org.gitee.nodens.core.attribute.AbstractNumber
 import java.math.BigDecimal
 
 interface IAttributeGroup {
@@ -32,6 +34,17 @@ interface IAttributeGroup {
         fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>)
 
         fun combatPower(valueMap: Map<DigitalParser.Type, DoubleArray>): Double
+
+        fun getFinalValue(valueMap: Map<DigitalParser.Type, DoubleArray>): FinalValue
+
+        interface FinalValue {
+
+            val type: ValueType
+
+            val value: Double?
+
+            val rangeValue: Pair<Double, Double>?
+        }
 
         enum class ValueType {
             RANGE, SINGLE;

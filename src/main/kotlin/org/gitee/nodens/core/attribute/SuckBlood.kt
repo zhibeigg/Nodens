@@ -14,9 +14,9 @@ object SuckBlood: IAttributeGroup {
 
     override val name: String = "SuckBlood"
 
-    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Addon).associateBy { it.name }
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Value, Addon).associateBy { it.name }
 
-    object Addon: AbstractNumber() {
+    object Value: AbstractNumber() {
 
         override val group: IAttributeGroup
             get() = SuckBlood
@@ -26,12 +26,24 @@ object SuckBlood: IAttributeGroup {
                 RANGE -> valueMap[COUNT]?.let { random(it[0], it[1]) }
                 SINGLE -> valueMap[COUNT]?.get(0)
             } ?: 0.0
+            damageProcessor.onDamage(config.handlePriority) {
+                damageProcessor.attacker.health = (damageProcessor.attacker.health + suckCount).coerceAtMost(damageProcessor.attacker.maxHealth())
+            }
+        }
+    }
+
+    object Addon: AbstractPercentNumber() {
+
+        override val group: IAttributeGroup
+            get() = SuckBlood
+
+        override fun handleAttacker(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             val suckPercent = when (config.valueType) {
                 RANGE -> valueMap[PERCENT]?.let { random(it[0], it[1]) }
                 SINGLE -> valueMap[PERCENT]?.get(0)
             } ?: 0.0
             damageProcessor.onDamage(config.handlePriority) {
-                damageProcessor.attacker.health = (damageProcessor.attacker.health + suckCount + it * suckPercent).coerceAtMost(damageProcessor.attacker.maxHealth())
+                damageProcessor.attacker.health = (damageProcessor.attacker.health + it * suckPercent).coerceAtMost(damageProcessor.attacker.maxHealth())
             }
         }
     }

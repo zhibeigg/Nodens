@@ -8,7 +8,7 @@ object Exp: IAttributeGroup {
 
     override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Addon).associateBy { it.name }
 
-    object Addon: AbstractNumber() {
+    object Addon: AbstractPercentNumber() {
 
         override val group: IAttributeGroup
             get() = Exp

@@ -1,3 +1,9 @@
+Value:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 1
+  keys:
+    - 吸血值
 Addon:
   combatPower: 1.0
   valueType: SINGLE

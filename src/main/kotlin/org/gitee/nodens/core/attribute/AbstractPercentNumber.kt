@@ -1,10 +1,11 @@
 package org.gitee.nodens.core.attribute
 
 import org.gitee.nodens.common.DigitalParser
+import org.gitee.nodens.core.IAttributeGroup
 
 abstract class AbstractPercentNumber(): AbstractNumber() {
 
-    override fun combatPower(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
+    fun getValue(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
         var value = 0.0
         val percent = valueMap[DigitalParser.Type.PERCENT]
         if (percent != null) {
@@ -14,6 +15,23 @@ abstract class AbstractPercentNumber(): AbstractNumber() {
                 percent[0] * 100
             }
         }
-        return value * config.combatPower
+        return value
+    }
+
+    override fun combatPower(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
+        return getValue(valueMap) * config.combatPower
+    }
+
+    override fun getFinalValue(valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
+
+        return object : IAttributeGroup.Number.FinalValue {
+
+            override val type: IAttributeGroup.Number.ValueType
+                get() = this@AbstractPercentNumber.config.valueType
+
+            override val value: Double = getValue(valueMap)
+
+            override val rangeValue: Pair<Double, Double>? = null
+        }
     }
 }

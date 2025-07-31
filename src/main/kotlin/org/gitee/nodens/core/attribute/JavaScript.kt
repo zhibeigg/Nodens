@@ -8,6 +8,8 @@ import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.AttributeManager.ATTRIBUTE_MATCHING_MAP
 import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.RANGE
+import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.SINGLE
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files
 import taboolib.common5.cdouble
@@ -62,6 +64,10 @@ object JavaScript: IAttributeGroup {
 
         override fun combatPower(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
             return (compile.engine as Invocable).invokeFunction("combatPower", valueMap).cdouble
+        }
+
+        override fun getFinalValue(valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
+            TODO()
         }
 
         override fun toString(): String {
