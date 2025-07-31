@@ -8,6 +8,7 @@ import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.*
 import taboolib.common.OpenResult
+import taboolib.common.platform.function.info
 import taboolib.common5.cdouble
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
@@ -23,6 +24,8 @@ object AttributeActions {
             text()
         ).apply(it) { group, key ->
             future {
+                val group = group.lowercase().replaceFirstChar { char -> char.titlecase(Locale.getDefault()) }
+                val key = key.lowercase().replaceFirstChar { char -> char.titlecase(Locale.getDefault()) }
                 val number = groupMap[group]?.numbers?.get(key) ?: return@future CompletableFuture.completedFuture(null)
                 CompletableFuture.completedFuture(number)
             }
@@ -36,8 +39,8 @@ object AttributeActions {
         }
     }
 
-    @KetherParser(["attribute"], namespace = NODENS_NAMESPACE, shared = true)
-    private fun addAttribute() = scriptParser {
+    @KetherParser(["nodens"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun attribute() = scriptParser {
         it.switch {
             case("add") {
                 it.switch {
@@ -83,8 +86,8 @@ object AttributeActions {
                 val group = it.nextToken().lowercase().replaceFirstChar { char -> char.titlecase(Locale.getDefault()) }
                 val number = it.nextToken().lowercase().replaceFirstChar { char -> char.titlecase(Locale.getDefault()) }
                 actionNow {
-                    val attribute = bukkitPlayer().attributeMemory() ?: return@actionNow 0
-                    val number = AttributeManager.getNumber(group, number) ?: return@actionNow 0
+                    val attribute = livingEntity().attributeMemory() ?: return@actionNow null
+                    val number = AttributeManager.getNumber(group, number) ?: return@actionNow null
                     number.getFinalValue(attribute.mergedAttribute(number))
                 }
             }

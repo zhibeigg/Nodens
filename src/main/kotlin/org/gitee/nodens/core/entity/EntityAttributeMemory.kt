@@ -239,7 +239,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         val itemsData = getItemsAttribute()
         val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
         (extData + itemsData).groupBy { it.attributeNumber }.forEach { (number, list) ->
-            if (number is Mapping.MappingAttribute) {
+            if (number === attribute || number is Mapping.MappingAttribute) {
                 mergeData[number] = mergeValues(*list.map { it.value }.toTypedArray())
             }
         }
