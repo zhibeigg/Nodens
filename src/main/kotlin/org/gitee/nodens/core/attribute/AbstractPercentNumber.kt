@@ -5,7 +5,7 @@ import org.gitee.nodens.core.IAttributeGroup
 
 abstract class AbstractPercentNumber(): AbstractNumber() {
 
-    fun getValue(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
+    private fun getValue(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
         var value = 0.0
         val percent = valueMap[DigitalParser.Type.PERCENT]
         if (percent != null) {

@@ -35,7 +35,7 @@ abstract class AbstractNumber: IAttributeGroup.Number {
     override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
     }
 
-    fun getValue(valueMap: Map<DigitalParser.Type, DoubleArray>): Pair<Double, Double> {
+    private fun getValue(valueMap: Map<DigitalParser.Type, DoubleArray>): Pair<Double, Double> {
         var value: Pair<Double, Double> = 0.0 to 0.0
         val count = valueMap[COUNT]
         if (count != null) {
