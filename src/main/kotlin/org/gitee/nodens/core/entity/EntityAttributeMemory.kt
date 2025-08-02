@@ -254,7 +254,6 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         val mutableMap = map.toMutableMap()
         map.forEach { (key, value) ->
             if (key is Mapping.MappingAttribute) {
-                mutableMap.remove(key)
                 key.getAttributes(entity, value).forEach {
                     mutableMap[it.key] = mergeValues(
                         *it.value.map { entry -> DigitalParser.Value(entry.key, entry.value) }.toTypedArray(),
