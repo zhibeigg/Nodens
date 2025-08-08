@@ -1,6 +1,8 @@
 package org.gitee.nodens.common
 
 import com.eatthepath.uuid.FastUUID
+import eos.moe.armourers.ev
+import org.bukkit.Bukkit
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
@@ -95,9 +97,14 @@ object Handle {
         return event
     }
 
-    fun doHeal(passive: LivingEntity, regain: Double): EntityRegainHealthEvent? {
-        val event = EntityRegainHealthEvent(passive, regain, EntityRegainHealthEvent.RegainReason.CUSTOM)
-        passive.health = (passive.health + regain).coerceIn(0.0, passive.maxHealth())
+    fun doHeal(passive: LivingEntity, regain: Double): EntityRegainHealthEvent {
+        val health = (passive.health + regain).coerceIn(0.0, passive.maxHealth())
+        val amount = health - passive.health
+        val event = EntityRegainHealthEvent(passive, amount, EntityRegainHealthEvent.RegainReason.CUSTOM)
+        Bukkit.getPluginManager().callEvent(event)
+        if (!event.isCancelled && amount > 0) {
+            passive.health = health
+        }
         return event
     }
 

@@ -1,5 +1,6 @@
 package org.gitee.nodens.core.attribute
 
+import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.DigitalParser.Type.COUNT
@@ -59,7 +60,7 @@ abstract class AbstractNumber: IAttributeGroup.Number {
         }
     }
 
-    override fun getFinalValue(valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
+    override fun getFinalValue(entity: LivingEntity, valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
 
         return object : IAttributeGroup.Number.FinalValue {
 

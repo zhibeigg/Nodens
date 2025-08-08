@@ -1,5 +1,6 @@
 package org.gitee.nodens.core.attribute
 
+import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.IAttributeGroup
 
@@ -22,7 +23,7 @@ abstract class AbstractPercentNumber(): AbstractNumber() {
         return getValue(valueMap) * config.combatPower
     }
 
-    override fun getFinalValue(valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
+    override fun getFinalValue(entity: LivingEntity, valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
 
         return object : IAttributeGroup.Number.FinalValue {
 

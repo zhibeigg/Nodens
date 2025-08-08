@@ -1,5 +1,6 @@
 package org.gitee.nodens.core.attribute
 
+import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
@@ -66,7 +67,7 @@ object JavaScript: IAttributeGroup {
             return (compile.engine as Invocable).invokeFunction("combatPower", valueMap).cdouble
         }
 
-        override fun getFinalValue(valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
+        override fun getFinalValue(entity: LivingEntity, valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
             TODO()
         }
 

@@ -13,6 +13,18 @@ Regain:
   period: 20
   keys:
     - 生命恢复
+RegainAddon:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 1
+  keys:
+    - 百分比生命恢复
+Heal:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 1
+  keys:
+    - 治疗力
 GrievousWounds:
   combatPower: 1.0
   valueType: SINGLE

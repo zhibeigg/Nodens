@@ -24,7 +24,7 @@ class AttributeInfoUI {
                     comparePriority(o1.config.handlePriority, o2.config.handlePriority)
                 }
                 val map = source?.map {
-                    it.key to it.key.getFinalValue(it.value)
+                    it.key to it.key.getFinalValue(player, it.value)
                 }?.associate {
                     when(it.first.config.valueType) {
                         IAttributeGroup.Number.ValueType.SINGLE -> "${it.first.group.name}:${it.first.name}" to it.second.value!!.toString()

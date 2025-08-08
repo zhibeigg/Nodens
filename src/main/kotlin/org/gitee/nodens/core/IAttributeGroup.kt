@@ -1,5 +1,6 @@
 package org.gitee.nodens.core
 
+import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
@@ -35,7 +36,7 @@ interface IAttributeGroup {
 
         fun combatPower(valueMap: Map<DigitalParser.Type, DoubleArray>): Double
 
-        fun getFinalValue(valueMap: Map<DigitalParser.Type, DoubleArray>): FinalValue
+        fun getFinalValue(entity: LivingEntity, valueMap: Map<DigitalParser.Type, DoubleArray>): FinalValue
 
         interface FinalValue {
 

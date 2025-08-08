@@ -17,12 +17,14 @@ import org.gitee.nodens.util.ReloadableLazy
 import org.gitee.nodens.util.addBukkitAttribute
 import org.gitee.nodens.util.maxHealth
 import taboolib.common.util.random
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 object Health: IAttributeGroup {
 
     override val name: String = "Health"
 
-    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Max, Regain, GrievousWounds, Healer).associateBy { it.name }
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Max, Regain, RegainAddon, Heal, GrievousWounds, Healer).associateBy { it.name }
 
     object Max: AbstractNumber() {
 
@@ -41,32 +43,97 @@ object Health: IAttributeGroup {
 
         val period by ReloadableLazy({ config }) { config.getLong("period", 20) }
 
-        fun getRegain(entity: LivingEntity, map: Map<DigitalParser.Type, DoubleArray>): Double {
-            var regain = 0.0
-            map.forEach { (key, value) ->
-                regain += when(config.valueType) {
-                    RANGE -> {
-                        when (key) {
-                            PERCENT -> entity.maxHealth() * random(value[0], value[1])
-                            COUNT -> random(value[0], value[1])
+        override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            if (regainProcessor.reason == NATURAL_REASON) {
+                regainProcessor.addRegainSource("$NODENS_NAMESPACE${Health.name}$name", this, getRegain(valueMap))
+            }
+        }
+    }
+
+    private fun IAttributeGroup.Number.getRegain(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
+        var regain = 0.0
+        when(config.valueType) {
+            SINGLE -> {
+                valueMap.forEach { (type, double) ->
+                    regain += when(type) {
+                        PERCENT -> (valueMap[COUNT]?.get(0) ?: 0.0) * double[0]
+                        COUNT -> double[0]
+                    }
+                }
+            }
+            RANGE -> {
+                valueMap.forEach { (type, double) ->
+                    regain += when(type) {
+                        PERCENT -> (valueMap[COUNT]?.get(0) ?: 0.0) * random(double[0], double[1])
+                        COUNT -> random(double[0], double[1])
+                    }
+                }
+            }
+        }
+        return regain
+    }
+
+    object RegainAddon: AbstractPercentNumber() {
+
+        override val group: IAttributeGroup
+            get() = Health
+
+        override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            if (regainProcessor.reason == NATURAL_REASON) {
+                regainProcessor.addRegainSource("$NODENS_NAMESPACE${Health.name}$name", this, getPercentRegain(regainProcessor.passive, valueMap))
+            }
+        }
+    }
+
+    private fun IAttributeGroup.Number.getPercentRegain(entity: LivingEntity, valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
+        var regain = 0.0
+        when(config.valueType) {
+            SINGLE -> {
+                valueMap.forEach { (type, double) ->
+                    regain += when(type) {
+                        PERCENT -> entity.maxHealth() * double[0]
+                        COUNT -> 0.0
+                    }
+                }
+            }
+            RANGE -> {
+                valueMap.forEach { (type, double) ->
+                    regain += when(type) {
+                        PERCENT -> entity.maxHealth() * random(double[0], double[1])
+                        COUNT -> 0.0
+                    }
+                }
+            }
+        }
+        return regain
+    }
+
+    object Heal: AbstractNumber() {
+
+        override val group: IAttributeGroup
+            get() = Health
+
+        override fun handleHealer(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            var heal = 0.0
+            when(config.valueType) {
+                SINGLE -> {
+                    valueMap.forEach { (type, double) ->
+                        heal += when(type) {
+                            PERCENT -> (valueMap[COUNT]?.get(0) ?: 0.0) * double[0]
+                            COUNT -> double[0]
                         }
                     }
-
-                    SINGLE -> {
-                        when (key) {
-                            PERCENT -> entity.maxHealth() * value[0]
-                            COUNT -> value[0]
+                }
+                RANGE -> {
+                    valueMap.forEach { (type, double) ->
+                        heal += when(type) {
+                            PERCENT -> (valueMap[COUNT]?.get(0) ?: 0.0) * random(double[0], double[1])
+                            COUNT -> random(double[0], double[1])
                         }
                     }
                 }
             }
-            return regain
-        }
-
-        override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            if (regainProcessor.reason == NATURAL_REASON) {
-                regainProcessor.addRegainSource("$NODENS_NAMESPACE${Health.name}$name", this, getRegain(regainProcessor.passive, valueMap))
-            }
+            regainProcessor.addRegainSource("$NODENS_NAMESPACE${Health.name}$name", this, heal)
         }
     }
 
@@ -90,7 +157,7 @@ object Health: IAttributeGroup {
         override val group: IAttributeGroup
             get() = Health
 
-        override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+        override fun handleHealer(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             val percent = when (MagicChance.config.valueType) {
                 SINGLE -> valueMap[PERCENT]!![0]
                 RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])

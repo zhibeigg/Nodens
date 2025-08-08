@@ -8,11 +8,10 @@ import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.*
 import taboolib.common.OpenResult
-import taboolib.common.platform.function.info
 import taboolib.common5.cdouble
 import taboolib.library.kether.QuestReader
 import taboolib.module.kether.*
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.CompletableFuture
 
 object AttributeActions {
@@ -88,7 +87,7 @@ object AttributeActions {
                 actionNow {
                     val attribute = livingEntity().attributeMemory() ?: return@actionNow null
                     val number = AttributeManager.getNumber(group, number) ?: return@actionNow null
-                    number.getFinalValue(attribute.mergedAttribute(number))
+                    number.getFinalValue(attribute.entity, attribute.mergedAttribute(number))
                 }
             }
         }
