@@ -97,15 +97,19 @@ object Handle {
         return event
     }
 
-    fun doHeal(passive: LivingEntity, regain: Double): EntityRegainHealthEvent {
+    fun doHeal(passive: LivingEntity, regain: Double): EntityRegainHealthEvent? {
         val health = (passive.health + regain).coerceIn(0.0, passive.maxHealth())
         val amount = health - passive.health
-        val event = EntityRegainHealthEvent(passive, amount, EntityRegainHealthEvent.RegainReason.CUSTOM)
-        Bukkit.getPluginManager().callEvent(event)
-        if (!event.isCancelled && amount > 0) {
-            passive.health = health
+        return if (amount > 0) {
+            val event = EntityRegainHealthEvent(passive, amount, EntityRegainHealthEvent.RegainReason.CUSTOM)
+            Bukkit.getPluginManager().callEvent(event)
+            if (!event.isCancelled) {
+                passive.health = health
+            }
+            event
+        } else {
+            null
         }
-        return event
     }
 
     private fun LivingEntity.setKiller(killer: LivingEntity) {

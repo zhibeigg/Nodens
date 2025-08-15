@@ -80,6 +80,7 @@ class NodensAPI: INodensAPI {
     }
 
     companion object {
+
         internal val pluginScope = CoroutineScope(AsyncDispatcher + SupervisorJob())
 
         @Awake(LifeCycle.DISABLE)

@@ -3,8 +3,10 @@ package org.gitee.nodens.core.kether
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.ItemConfig
 import org.gitee.nodens.module.item.NormalContext
+import org.gitee.nodens.module.item.group.GroupManager
 import org.gitee.nodens.module.random.RandomManager
 import org.gitee.nodens.util.NODENS_NAMESPACE
+import org.gitee.nodens.util.bukkitPlayer
 import org.gitee.nodens.util.context
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
 import org.gitee.nodens.util.toVariable
@@ -90,6 +92,28 @@ object ItemActions {
             }
         }
     }
+
+    @KetherParser(["itemGroup"], shared = true)
+    private fun itemGroup() = scriptParser {
+        val group = it.nextToken()
+        it.switch {
+            case("variable") {
+                val key = it.nextToken()
+                val value = it.nextParsedAction()
+                val any = it.nextParsedAction()
+                actionFuture { future ->
+                    run(value).str { value ->
+                        run(any).bool { any ->
+                            GroupManager.itemGroups.get(group)!!.check(script().bukkitPlayer(), any) {
+                                context()?.variable[key]?.value == value
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     fun randomsEval(sender: ProxyCommandSender?, randoms: String, context: NormalContext): CompletableFuture<Any?> {
         val randoms = RandomManager.randomsMap[randoms] ?: return CompletableFuture.completedFuture(null)
