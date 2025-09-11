@@ -104,9 +104,11 @@ object ItemActions {
                 actionFuture { future ->
                     run(value).str { value ->
                         run(any).bool { any ->
-                            GroupManager.itemGroups.get(group)!!.check(script().bukkitPlayer(), any) {
-                                context()?.variable[key]?.value == value
-                            }
+                            future.complete(
+                                GroupManager.itemGroups.get(group)!!.check(script().bukkitPlayer(), any) {
+                                    context()?.variable[key]?.value == value
+                                }
+                            )
                         }
                     }
                 }

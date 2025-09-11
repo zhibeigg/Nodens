@@ -14,6 +14,7 @@ import taboolib.platform.util.isNotAir
 
 const val CONTEXT_TAG = "NODENS_CONTEXT"
 const val SELL_TAG = "NODENS@SELL"
+const val DURABILITY_TAG = "NODENS@DURABILITY"
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T: IItemContext> ItemStack.context(): T? {

@@ -60,6 +60,12 @@ class CloneItemConfig(override val key: String, val copy: ItemConfig, configurat
         copy.itemFlags
     }
 
+    override val durability = if (configurationSection.contains("durability")) {
+        configurationSection.getString("durability")
+    } else {
+        copy.durability
+    }
+
     override val isUnBreakable = if (configurationSection.contains("unbreakable")) {
         configurationSection.getBoolean("unbreakable")
     } else {

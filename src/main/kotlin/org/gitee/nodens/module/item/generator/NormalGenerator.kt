@@ -9,6 +9,7 @@ import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.getItemAttribute
 import org.gitee.nodens.module.item.*
 import org.gitee.nodens.util.*
+import org.gitee.orryx.utils.flag
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
@@ -27,12 +28,16 @@ object NormalGenerator: IItemGenerator {
         val sender = player?.let { adaptPlayer(it) } ?: console()
         val context = NormalContext(itemConfig.key, hashMapOf(), itemConfig.hashCode)
 
+        // 生成出售价格
+        context.variable[SELL_TAG] = (itemConfig.sell?.let { eval(sender, itemConfig, context, it).cdouble } ?: 0.0).toVariable()
+        // 生成最大耐久值
+        context.variable[DURABILITY_TAG] = (itemConfig.durability?.let { eval(sender, itemConfig, context, it).cint } ?: 0.0).toVariable()
+        // 覆盖自定义数值
         context.variable.putAll(map.mapValues { it.value.toVariable() })
         itemConfig.variables.forEach {
             if (map.containsKey(it.key)) return@forEach
             context.variable[it.key] = it.getVariable(sender, itemConfig, context)
         }
-        context.variable[SELL_TAG] = (itemConfig.sell?.let { eval(sender, itemConfig, context, it).cdouble } ?: 0.0).toVariable()
         val parser = parse(sender, itemConfig, context, itemConfig.lore + itemConfig.name)
 
         val builder = ItemBuilder(itemConfig.material)
@@ -51,9 +56,17 @@ object NormalGenerator: IItemGenerator {
         }
         builder.isUnbreakable = itemConfig.isUnBreakable
         builder.colored()
+        val durability = context.variable["durability"]?.value
+        if (durability == null) {
+            context.variable["durability"] = context.variable[DURABILITY_TAG]!!
+        }
+        if (!itemConfig.isUnBreakable) {
+            builder.damage = builder.material.maxDurability * (context.variable["durability"]!!.value.cint / context.variable[DURABILITY_TAG]!!.value.cint)
+        }
         builder.finishing = {
             val tag = it.getItemTag()
             tag[CONTEXT_TAG] = Json.encodeToString(context)
+            tag["durability"] = context.variable["durability"]!!.value.cint
             tag.saveTo(it)
             it.replaceLore(
                 mapOf(
@@ -61,7 +74,9 @@ object NormalGenerator: IItemGenerator {
                         AttributeManager.getCombatPower(
                             *it.getItemAttribute().toTypedArray()
                         )
-                    ).toString()
+                    ).toString(),
+                    "{MaxDurability}" to context.variable[DURABILITY_TAG]!!.value.cint.toString(),
+                    "{Sell}" to ceil(context.variable[SELL_TAG]!!.value.cdouble).toString(),
                 )
             )
         }

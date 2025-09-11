@@ -34,6 +34,7 @@ open class ItemConfig(open val key: String, configurationSection: ConfigurationS
     }
     open val itemFlags = configurationSection.getStringList("itemFlags").map { XItemFlag.of(it).get() }
 
+    open val durability = configurationSection.getString("durability")
     open val isUnBreakable = configurationSection.getBoolean("unbreakable")
 
     open val sell = configurationSection.getString("sell")
