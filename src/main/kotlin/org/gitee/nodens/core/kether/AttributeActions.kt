@@ -38,7 +38,7 @@ object AttributeActions {
         }
     }
 
-    @KetherParser(["nodens"], namespace = NODENS_NAMESPACE, shared = true)
+    @KetherParser(["nodens", "no"], namespace = NODENS_NAMESPACE, shared = true)
     private fun attribute() = scriptParser {
         it.switch {
             case("add") {
@@ -88,6 +88,34 @@ object AttributeActions {
                     val attribute = livingEntity().attributeMemory() ?: return@actionNow null
                     val number = AttributeManager.getNumber(group, number) ?: return@actionNow null
                     number.getFinalValue(attribute.entity, attribute.mergedAttribute(number))
+                }
+            }
+            case("give") {
+                val item = it.nextParsedAction()
+                val amount = it.nextParsedAction()
+                it.mark()
+                val vars = try {
+                    it.expect("vars")
+                    it.nextParsedAction()
+                } catch (_: Exception) {
+                    it.reset()
+                    null
+                }
+                actionNow {
+                    run(item).str { item ->
+                        run(amount).int { amount ->
+                            if (vars != null) {
+                                run(vars).str { vars ->
+                                    val map = vars.split(",").associate { v -> v.split("=")[0] to v.split("=")[1] }
+                                    val player = bukkitPlayer()
+                                    player.giveItems(item, amount, map)
+                                }
+                            } else {
+                                val player = bukkitPlayer()
+                                player.giveItems(item, amount)
+                            }
+                        }
+                    }
                 }
             }
         }

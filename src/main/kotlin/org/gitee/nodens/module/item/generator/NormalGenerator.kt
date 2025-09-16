@@ -9,13 +9,11 @@ import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.getItemAttribute
 import org.gitee.nodens.module.item.*
 import org.gitee.nodens.util.*
-import org.gitee.orryx.utils.flag
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
 import taboolib.common5.cdouble
 import taboolib.common5.cint
-import taboolib.module.chat.colored
 import taboolib.module.kether.*
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.ItemBuilder
@@ -28,16 +26,17 @@ object NormalGenerator: IItemGenerator {
         val sender = player?.let { adaptPlayer(it) } ?: console()
         val context = NormalContext(itemConfig.key, hashMapOf(), itemConfig.hashCode)
 
+        // 预置参数
+        itemConfig.variables.forEach {
+            if (map.containsKey(it.key)) return@forEach
+            context.variable[it.key] = it.getVariable(sender, itemConfig, context)
+        }
         // 生成出售价格
         context.variable[SELL_TAG] = (itemConfig.sell?.let { eval(sender, itemConfig, context, it).cdouble } ?: 0.0).toVariable()
         // 生成最大耐久值
         context.variable[DURABILITY_TAG] = (itemConfig.durability?.let { eval(sender, itemConfig, context, it).cint } ?: 0.0).toVariable()
         // 覆盖自定义数值
         context.variable.putAll(map.mapValues { it.value.toVariable() })
-        itemConfig.variables.forEach {
-            if (map.containsKey(it.key)) return@forEach
-            context.variable[it.key] = it.getVariable(sender, itemConfig, context)
-        }
         val parser = parse(sender, itemConfig, context, itemConfig.lore + itemConfig.name)
 
         val builder = ItemBuilder(itemConfig.material)
@@ -61,7 +60,10 @@ object NormalGenerator: IItemGenerator {
             context.variable["durability"] = context.variable[DURABILITY_TAG]!!
         }
         if (!itemConfig.isUnBreakable) {
-            builder.damage = builder.material.maxDurability * (context.variable["durability"]!!.value.cint / context.variable[DURABILITY_TAG]!!.value.cint)
+            val max = context.variable[DURABILITY_TAG]!!.value.cint
+            if (max != 0) {
+                builder.damage = (builder.material.maxDurability.cdouble * (1 - context.variable["durability"]!!.value.cdouble / max.cdouble)).cint
+            }
         }
         builder.finishing = {
             val tag = it.getItemTag()

@@ -119,6 +119,26 @@ class ItemConfigManagerUI(val viewer: Player) {
                         }.build()
                     }
                 }
+                set(46, ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
+                    name = "返回"
+                }.build()) {
+                    fun find(parentNode: ParentNode): ParentNode? {
+                        for (i in parentNode.subNode) {
+                            when(i) {
+                                is ParentNode -> {
+                                    return find(i)
+                                }
+                                is SubNode -> {
+                                    if (i == node) {
+                                        return parentNode
+                                    }
+                                }
+                            }
+                        }
+                        return null
+                    }
+                    open(find(Companion.node) ?: Companion.node)
+                }
                 setNextPage(53) { page, hasNextPage ->
                     if (hasNextPage) {
                         ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
