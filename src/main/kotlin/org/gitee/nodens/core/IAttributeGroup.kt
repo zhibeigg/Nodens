@@ -1,13 +1,11 @@
 package org.gitee.nodens.core
 
+import org.apache.commons.lang3.tuple.Pair
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.common.RegainProcessor
-import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.*
-import org.gitee.nodens.core.attribute.AbstractNumber
-import java.math.BigDecimal
 
 interface IAttributeGroup {
 

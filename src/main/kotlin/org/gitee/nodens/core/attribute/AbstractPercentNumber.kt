@@ -1,5 +1,6 @@
 package org.gitee.nodens.core.attribute
 
+import org.apache.commons.lang3.tuple.Pair
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.IAttributeGroup

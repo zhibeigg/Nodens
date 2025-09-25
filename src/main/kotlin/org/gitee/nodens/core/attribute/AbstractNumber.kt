@@ -1,5 +1,6 @@
 package org.gitee.nodens.core.attribute
 
+import org.apache.commons.lang3.tuple.Pair
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
@@ -37,26 +38,26 @@ abstract class AbstractNumber: IAttributeGroup.Number {
     }
 
     private fun getValue(valueMap: Map<DigitalParser.Type, DoubleArray>): Pair<Double, Double> {
-        var value: Pair<Double, Double> = 0.0 to 0.0
+        var value: Pair<Double, Double> = Pair.of(0.0, 0.0)
         val count = valueMap[COUNT]
         if (count != null) {
             value = if (count.size == 2) {
-                count[0] to count[1]
+                Pair.of(count[0], count[1])
             } else {
-                count[0] to count[0]
+                Pair.of(count[0], count[0])
             }
         }
         val percent = valueMap[PERCENT]
         if (percent != null) {
-            value = value.first * (1 + percent[0]) to value.second * (1 + percent[0])
+            value = Pair.of(value.left * (1 + percent[0]), value.right * (1 + percent[0]))
         }
         return value
     }
 
     override fun combatPower(valueMap: Map<DigitalParser.Type, DoubleArray>): Double {
         return when(this@AbstractNumber.config.valueType) {
-            RANGE -> (getValue(valueMap).first + getValue(valueMap).second)/2 * config.combatPower
-            SINGLE -> getValue(valueMap).first * config.combatPower
+            RANGE -> (getValue(valueMap).left + getValue(valueMap).right)/2 * config.combatPower
+            SINGLE -> getValue(valueMap).left * config.combatPower
         }
     }
 
@@ -69,7 +70,7 @@ abstract class AbstractNumber: IAttributeGroup.Number {
 
             override val value: Double? =  when(this@AbstractNumber.config.valueType) {
                 RANGE -> null
-                SINGLE -> getValue(valueMap).first
+                SINGLE -> getValue(valueMap).left
             }
 
             override val rangeValue: Pair<Double, Double>? =  when(this@AbstractNumber.config.valueType) {

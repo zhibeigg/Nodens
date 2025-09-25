@@ -28,7 +28,7 @@ class AttributeInfoUI {
                 }?.associate {
                     when(it.first.config.valueType) {
                         IAttributeGroup.Number.ValueType.SINGLE -> "${it.first.group.name}:${it.first.name}" to it.second.value!!.toString()
-                        IAttributeGroup.Number.ValueType.RANGE -> "${it.first.group.name}:${it.first.name}" to "${it.second.rangeValue!!.first} - ${it.second.rangeValue!!.second}"
+                        IAttributeGroup.Number.ValueType.RANGE -> "${it.first.group.name}:${it.first.name}" to "${it.second.rangeValue!!.left} - ${it.second.rangeValue!!.right}"
                     }
                 } ?: return
                 val explicitMap = source.map { (key, value) ->
