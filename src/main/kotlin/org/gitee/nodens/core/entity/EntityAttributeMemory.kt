@@ -270,4 +270,24 @@ class EntityAttributeMemory(val entity: LivingEntity) {
             it.key to it.key.combatPower(it.value)
         }.toMap()
     }
+
+    fun mergedAllAttribute(data: List<IAttributeData>, isTransferMap: Boolean = true): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
+        val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
+        data.groupBy { it.attributeNumber }.forEach { (number, list) ->
+            mergeData[number] = mergeValues(*list.map { tempAttributeData ->
+                tempAttributeData.value
+            }.toTypedArray())
+        }
+        return if (isTransferMap) {
+            transferMap(mergeData)
+        } else {
+            mergeData
+        }
+    }
+
+    fun getCombatPower(data: List<IAttributeData>): Map<IAttributeGroup.Number, Double> {
+        return mergedAllAttribute(data, true).map {
+            it.key to it.key.combatPower(it.value)
+        }.toMap()
+    }
 }
