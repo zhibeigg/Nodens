@@ -29,7 +29,7 @@ object NodensItemCommand {
     val give = subCommand {
         player {
             dynamic("item") {
-                suggest { ItemManager.itemConfigs.map { it.key } }
+                suggest { ItemManager.itemConfigs.filter { !it.value.ignoreGenerate }.map { it.key } }
                 int("amount") {
                     exec<ProxyCommandSender> {
                         val player = Bukkit.getPlayerExact(ctx["player"]) ?: return@exec

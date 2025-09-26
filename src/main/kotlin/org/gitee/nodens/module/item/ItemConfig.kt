@@ -13,6 +13,8 @@ open class ItemConfig(open val key: String, configurationSection: ConfigurationS
 
     // 是否开启动态更新
     open val isUpdate = configurationSection.getBoolean("update", false)
+    // 是否不生成
+    val ignoreGenerate = configurationSection.getBoolean("ignoreGenerate", false)
 
     open val material: XMaterial = XMaterial.matchXMaterial(configurationSection.getString("material", "stone")!!).getOrElse { XMaterial.STONE }
     open val name = configurationSection.getString("name", "none")!!

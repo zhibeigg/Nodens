@@ -79,6 +79,25 @@ class ItemConfigManagerUI(val viewer: Player) {
                         }.build()
                     }
                 }
+                if (node != Companion.node) {
+                    set(46, ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
+                        name = "返回"
+                    }.build()) {
+                        fun find(parentNode: ParentNode): ParentNode? {
+                            for (i in parentNode.subNode) {
+                                if (i == node) {
+                                    return parentNode
+                                } else {
+                                    if (i is ParentNode) {
+                                        return find(i) ?: continue
+                                    }
+                                }
+                            }
+                            return null
+                        }
+                        open(find(Companion.node) ?: Companion.node)
+                    }
+                }
                 onGenerate(false) { player, element, index, slot ->
                     return@onGenerate when (element) {
                         is ParentNode -> {
@@ -107,7 +126,7 @@ class ItemConfigManagerUI(val viewer: Player) {
                 handLocked(false)
                 rows(6)
                 slots((0..44).toList())
-                elements { node.configs }
+                elements { node.configs.filter { !it.ignoreGenerate } }
                 setPreviousPage(45) { page, hasPreviousPage ->
                     if (hasPreviousPage) {
                         ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
@@ -124,14 +143,11 @@ class ItemConfigManagerUI(val viewer: Player) {
                 }.build()) {
                     fun find(parentNode: ParentNode): ParentNode? {
                         for (i in parentNode.subNode) {
-                            when(i) {
-                                is ParentNode -> {
-                                    return find(i)
-                                }
-                                is SubNode -> {
-                                    if (i == node) {
-                                        return parentNode
-                                    }
+                            if (i == node) {
+                                return parentNode
+                            } else {
+                                if (i is ParentNode) {
+                                    return find(i) ?: continue
                                 }
                             }
                         }
