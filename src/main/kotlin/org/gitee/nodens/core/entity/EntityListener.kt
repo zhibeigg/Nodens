@@ -17,6 +17,7 @@ import org.gitee.nodens.core.attribute.Exp
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.event.SubscribeEvent
+import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common5.cdouble
 import taboolib.common5.cint
@@ -69,9 +70,16 @@ object EntityListener {
     /**
      * 攻击检测
      * */
-    @SubscribeEvent
+    @SubscribeEvent(EventPriority.HIGHEST)
     private fun attack(e: EntityDamageByEntityEvent) {
         if (e.isCancelled) return
+        if (e.isApplicable(EntityDamageEvent.DamageModifier.ARMOR)) {
+            e.setDamage(EntityDamageEvent.DamageModifier.ARMOR, 0.0)
+        }
+        if (e.isApplicable(EntityDamageEvent.DamageModifier.MAGIC)) {
+            e.setDamage(EntityDamageEvent.DamageModifier.MAGIC, 0.0)
+        }
+
         val processor: DamageProcessor = when (e.cause) {
             ENTITY_ATTACK, ENTITY_SWEEP_ATTACK  -> {
                 DamageProcessor(Damage.Physics.name, e.attacker ?: return, e.entity as? LivingEntity ?: return)
@@ -82,10 +90,6 @@ object EntityListener {
             else -> return
         }
         processor.handle()
-        e.setDamage(EntityDamageEvent.DamageModifier.ABSORPTION, 0.0)
-        e.setDamage(EntityDamageEvent.DamageModifier.ARMOR, 0.0)
-        e.setDamage(EntityDamageEvent.DamageModifier.MAGIC, 0.0)
-        e.setDamage(EntityDamageEvent.DamageModifier.RESISTANCE, 0.0)
         if (e.entity is Player) {
             e.setDamage(EntityDamageEvent.DamageModifier.BLOCKING, 0.0)
             runCatching { e.setDamage(EntityDamageEvent.DamageModifier.HARD_HAT, 0.0) }

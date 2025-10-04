@@ -1,5 +1,6 @@
 package org.gitee.nodens.api
 
+import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.gitee.nodens.api.interfaces.INodensAPI
 import org.gitee.nodens.common.Handle.handle
 import org.gitee.nodens.core.reload.Reload
@@ -7,6 +8,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.env.RuntimeDependencies
 import taboolib.common.env.RuntimeDependency
 import taboolib.common.platform.Awake
+import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.platform.function.info
 import taboolib.module.chat.colored
 import taboolib.module.configuration.Config

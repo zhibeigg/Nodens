@@ -1,5 +1,6 @@
 package org.gitee.nodens.common
 
+import org.bukkit.Bukkit
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent

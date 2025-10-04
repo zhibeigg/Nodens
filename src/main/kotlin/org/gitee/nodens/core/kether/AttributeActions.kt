@@ -233,10 +233,14 @@ object AttributeActions {
             damageProcessors()
         ).apply(it) { processors ->
             future {
-                processors.forEach { processor ->
-                    processor.callDamage()
+                val future = CompletableFuture<List<DamageProcessor>>()
+                ensureSync {
+                    processors.forEach { processor ->
+                        processor.callDamage()
+                    }
+                    future.complete(processors)
                 }
-                CompletableFuture.completedFuture(processors)
+                future
             }
         }
     }
@@ -247,10 +251,14 @@ object AttributeActions {
             regainProcessors()
         ).apply(it) { processors ->
             future {
-                processors.forEach { processor ->
-                    processor.callRegain()
+                val future = CompletableFuture<List<RegainProcessor>>()
+                ensureSync {
+                    processors.forEach { processor ->
+                        processor.callRegain()
+                    }
+                    future.complete(processors)
                 }
-                CompletableFuture.completedFuture(processors)
+                future
             }
         }
     }

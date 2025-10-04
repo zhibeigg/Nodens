@@ -31,12 +31,12 @@ object NormalGenerator: IItemGenerator {
             if (map.containsKey(it.key)) return@forEach
             context.variable[it.key] = it.getVariable(sender, itemConfig, context)
         }
+        // 覆盖自定义数值
+        context.variable.putAll(map.mapValues { it.value.toVariable() })
         // 生成出售价格
         context.variable[SELL_TAG] = (itemConfig.sell?.let { eval(sender, itemConfig, context, it).cdouble } ?: 0.0).toVariable()
         // 生成最大耐久值
         context.variable[DURABILITY_TAG] = (itemConfig.durability?.let { eval(sender, itemConfig, context, it).cint } ?: 0.0).toVariable()
-        // 覆盖自定义数值
-        context.variable.putAll(map.mapValues { it.value.toVariable() })
         val parser = parse(sender, itemConfig, context, itemConfig.lore + itemConfig.name)
 
         val builder = ItemBuilder(itemConfig.material)
