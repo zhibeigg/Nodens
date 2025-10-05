@@ -99,7 +99,7 @@ object Handle {
             }
         } else null
         if (event == null || !event.isCancelled) {
-            defender.damage(damage)
+            defender.damage(damage, attacker)
         }
         return event
     }

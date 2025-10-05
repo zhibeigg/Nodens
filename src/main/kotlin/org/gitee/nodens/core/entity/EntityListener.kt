@@ -62,7 +62,7 @@ object EntityListener {
 
     @SubscribeEvent
     private fun regain(e: EntityRegainHealthEvent) {
-        if (e.regainReason == EntityRegainHealthEvent.RegainReason.EATING) {
+        if (e.regainReason != EntityRegainHealthEvent.RegainReason.CUSTOM) {
             e.isCancelled = true
         }
     }
