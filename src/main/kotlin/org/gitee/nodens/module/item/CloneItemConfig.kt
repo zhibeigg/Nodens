@@ -6,7 +6,7 @@ import taboolib.library.xseries.XItemFlag
 import taboolib.library.xseries.XMaterial
 import kotlin.jvm.optionals.getOrElse
 
-class CloneItemConfig(override val key: String, val copy: ItemConfig, configurationSection: ConfigurationSection): ItemConfig(key, configurationSection) {
+class CloneItemConfig(override val key: String, val copy: ItemConfig, private val configurationSection: ConfigurationSection): ItemConfig(key, configurationSection) {
 
     override val isUpdate: Boolean = if (configurationSection.contains("update")) {
         configurationSection.getBoolean("update", false)
@@ -82,6 +82,22 @@ class CloneItemConfig(override val key: String, val copy: ItemConfig, configurat
         configurationSection.getStringList("armourers")
     } else {
         copy.armourers
+    }
+
+    override fun get(path: String): Any? {
+        return if (configurationSection.contains(path)) {
+            configurationSection[path]
+        } else {
+            copy[path]
+        }
+    }
+
+    override fun get(path: String, def: Any?): Any? {
+        return if (configurationSection.contains(path)) {
+            configurationSection[path, def]
+        } else {
+            copy[path, def]
+        }
     }
 
     override val hashCode = copy.hashCode + configurationSection.toString().hashCode()

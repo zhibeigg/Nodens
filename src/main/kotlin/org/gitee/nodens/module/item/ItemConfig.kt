@@ -9,7 +9,7 @@ import taboolib.library.xseries.XItemFlag
 import taboolib.library.xseries.XMaterial
 import kotlin.jvm.optionals.getOrElse
 
-open class ItemConfig(open val key: String, configurationSection: ConfigurationSection) {
+open class ItemConfig(open val key: String, private val configurationSection: ConfigurationSection) {
 
     // 是否开启动态更新
     open val isUpdate = configurationSection.getBoolean("update", false)
@@ -47,6 +47,14 @@ open class ItemConfig(open val key: String, configurationSection: ConfigurationS
     open val hashCode = configurationSection.toString().hashCode()
 
     class Variable(val key: String, val action: String)
+
+    open operator fun get(path: String): Any? {
+        return configurationSection[path]
+    }
+
+    open operator fun get(path: String, def: Any?): Any? {
+        return configurationSection[path, def]
+    }
 
     fun generate(amount: Int, player: Player? = null, map: Map<String, Any> = emptyMap()): ItemStack {
         return NormalGenerator.generate(this, amount, player, map)
