@@ -11,6 +11,8 @@ import taboolib.module.nms.ItemTagData
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.isAir
 import taboolib.platform.util.isNotAir
+import java.util.function.Consumer
+import java.util.function.Function
 
 const val CONTEXT_TAG = "NODENS_CONTEXT"
 const val SELL_TAG = "NODENS@SELL"
@@ -26,6 +28,13 @@ inline fun <reified T: IItemContext> ItemStack.context(): T? {
 fun ItemStack.context(): NormalContext? {
     if (isAir()) return null
     return Json.decodeFromString<NormalContext>(getItemTag()[CONTEXT_TAG]?.asString() ?: return null)
+}
+
+fun ItemStack.modifyContext(consumer: Consumer<NormalContext>) {
+    val context = context()?.also { consumer.accept(it) } ?: return
+    val tag = getItemTag()
+    tag[CONTEXT_TAG] = Json.encodeToString(context)
+    tag.saveTo(this)
 }
 
 fun Any.toVariable(): Variable<*> {
