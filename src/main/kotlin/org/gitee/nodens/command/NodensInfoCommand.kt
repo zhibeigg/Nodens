@@ -10,6 +10,7 @@ import taboolib.common.platform.command.bool
 import taboolib.common.platform.command.player
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.info
+import taboolib.common5.cbool
 import taboolib.common5.format
 import taboolib.module.lang.sendLang
 
@@ -22,7 +23,7 @@ object NodensInfoCommand {
                 exec<ProxyCommandSender> {
                     val player = Bukkit.getPlayer(ctx["player"]) ?: return@exec
                     sender.sendLang("info-attribute")
-                    player.attributeMemory()?.mergedAllAttribute(true)?.toSortedMap { o1, o2 ->
+                    player.attributeMemory()?.mergedAllAttribute(ctx["transferMap"].cbool)?.toSortedMap { o1, o2 ->
                         comparePriority(o1.config.handlePriority, o2.config.handlePriority)
                     }?.forEach { (key, value) ->
                         val value = "${value[DigitalParser.Type.COUNT]?.joinToString("-") ?: 0} + ${value[DigitalParser.Type.PERCENT]?.joinToString("-") { (it * 100).format(1).toString() } ?: 0}%"

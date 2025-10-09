@@ -5,7 +5,12 @@ import taboolib.common5.cdouble
 
 class DigitalParser(private val value: String, private val number: IAttributeGroup.Number) {
 
-    class Value(val type: Type, val doubleArray: DoubleArray)
+    class Value(val type: Type, val doubleArray: DoubleArray) {
+
+        fun isEmpty(): Boolean {
+            return doubleArray.all { it == 0.0 }
+        }
+    }
 
     private lateinit var type: Type
 

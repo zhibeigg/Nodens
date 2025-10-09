@@ -115,6 +115,7 @@ class FastMatchingMap<T>(
             if (start == -1) return null
         }
 
+        // 当前指针
         var current = root
         for (i in start until line.length) {
             val node = current.children[line[i].code] ?: return null
