@@ -1,6 +1,8 @@
 package org.gitee.nodens.command
 
 import org.bukkit.Bukkit
+import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.comparePriority
@@ -13,6 +15,7 @@ import taboolib.common.platform.function.info
 import taboolib.common5.cbool
 import taboolib.common5.format
 import taboolib.module.lang.sendLang
+import taboolib.platform.util.sendLang
 
 object NodensInfoCommand {
 
@@ -29,6 +32,22 @@ object NodensInfoCommand {
                         val value = "${value[DigitalParser.Type.COUNT]?.joinToString("-") ?: 0} + ${value[DigitalParser.Type.PERCENT]?.joinToString("-") { (it * 100).format(1).toString() } ?: 0}%"
                         sender.sendLang("info-attribute-argument", "${key.group.name}:${key.name}", value, key.config.keys.joinToString(", "))
                     }
+                }
+            }
+        }
+    }
+
+    @CommandBody
+    val entity = subCommand {
+        bool("transferMap") {
+            exec<Player> {
+                val entity = sender.getNearbyEntities(1.0, 1.0, 1.0).first() as LivingEntity
+                sender.sendLang("info-attribute")
+                entity.attributeMemory()?.mergedAllAttribute(ctx["transferMap"].cbool)?.toSortedMap { o1, o2 ->
+                    comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+                }?.forEach { (key, value) ->
+                    val value = "${value[DigitalParser.Type.COUNT]?.joinToString("-") ?: 0} + ${value[DigitalParser.Type.PERCENT]?.joinToString("-") { (it * 100).format(1).toString() } ?: 0}%"
+                    sender.sendLang("info-attribute-argument", "${key.group.name}:${key.name}", value, key.config.keys.joinToString(", "))
                 }
             }
         }

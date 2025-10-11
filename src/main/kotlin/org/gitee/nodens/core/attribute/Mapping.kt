@@ -38,7 +38,7 @@ object Mapping: IAttributeGroup {
             val list = runKether {
                 KetherFunction.parse(
                     attributes,
-                    ScriptOptions.builder().sender(adaptPlayer(entity)).set("value", value).namespace(nodensEnvironmentNamespaces).build()
+                    ScriptOptions.builder().sender(entity).set("value", value).namespace(nodensEnvironmentNamespaces).build()
                 )
             }?.mapNotNull {
                 AttributeManager.ATTRIBUTE_MATCHING_MAP.getMatchResult(it)
