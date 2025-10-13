@@ -91,7 +91,9 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
     fun callDamage(): EntityDamageByEntityEvent? {
         val event = NodensEntityDamageEvents.Pre(this)
         return if (event.call()) {
-            doDamage(attacker, defender, EntityDamageEvent.DamageCause.CUSTOM, getFinalDamage())?.apply {
+            val value = getFinalDamage()
+            if (value == 0.0) return null
+            doDamage(attacker, defender, EntityDamageEvent.DamageCause.CUSTOM, value)?.apply {
                 if (!isCancelled) {
                     callback(finalDamage)
                     NodensEntityDamageEvents.Post(finalDamage, this@DamageProcessor).call()

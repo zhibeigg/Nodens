@@ -68,7 +68,9 @@ class RegainProcessor(reason: String, val healer: LivingEntity, val passive: Liv
     fun callRegain(): EntityRegainHealthEvent? {
         val event = NodensEntityRegainEvents.Pre(this)
         return if (event.call()) {
-            Handle.doHeal(passive, getFinalRegain())?.apply {
+            val value = getFinalRegain()
+            if (value == 0.0) return null
+            Handle.doHeal(passive, value)?.apply {
                 if (!isCancelled) {
                     callback(amount)
                     NodensEntityRegainEvents.Post(amount, this@RegainProcessor).call()
