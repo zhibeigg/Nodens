@@ -1,6 +1,7 @@
 package org.gitee.nodens.module.ui
 
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.ClickType.*
 import org.gitee.nodens.module.item.ItemConfig
 import org.gitee.nodens.module.item.ItemManager
 import taboolib.common.platform.function.getDataFolder
@@ -57,7 +58,7 @@ class ItemConfigManagerUI(val viewer: Player) {
                 rows(6)
                 slots((0..44).toList())
                 elements { node.subNode }
-                setPreviousPage(45) { page, hasPreviousPage ->
+                setPreviousPage(45) { _, hasPreviousPage ->
                     if (hasPreviousPage) {
                         ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
                             name = "上一页"
@@ -68,7 +69,7 @@ class ItemConfigManagerUI(val viewer: Player) {
                         }.build()
                     }
                 }
-                setNextPage(53) { page, hasNextPage ->
+                setNextPage(53) { _, hasNextPage ->
                     if (hasNextPage) {
                         ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
                             name = "下一页"
@@ -98,7 +99,7 @@ class ItemConfigManagerUI(val viewer: Player) {
                         open(find(Companion.node) ?: Companion.node)
                     }
                 }
-                onGenerate(false) { player, element, index, slot ->
+                onGenerate(false) { _, element, _, _ ->
                     return@onGenerate when (element) {
                         is ParentNode -> {
                             ItemBuilder(XMaterial.CHEST).apply {
@@ -127,7 +128,7 @@ class ItemConfigManagerUI(val viewer: Player) {
                 rows(6)
                 slots((0..44).toList())
                 elements { node.configs.filter { !it.ignoreGenerate } }
-                setPreviousPage(45) { page, hasPreviousPage ->
+                setPreviousPage(45) { _, hasPreviousPage ->
                     if (hasPreviousPage) {
                         ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
                             name = "上一页"
@@ -155,7 +156,7 @@ class ItemConfigManagerUI(val viewer: Player) {
                     }
                     open(find(Companion.node) ?: Companion.node)
                 }
-                setNextPage(53) { page, hasNextPage ->
+                setNextPage(53) { _, hasNextPage ->
                     if (hasNextPage) {
                         ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
                             name = "下一页"
@@ -166,11 +167,18 @@ class ItemConfigManagerUI(val viewer: Player) {
                         }.build()
                     }
                 }
-                onGenerate(false) { player, element, index, slot ->
+                onGenerate(false) { player, element, _, _ ->
                     element.generate(1, player)
                 }
                 onClick { event, element ->
-                    viewer.giveItem(element.generate(1, viewer))
+                    val clickEvent = event.clickEventOrNull()
+                    if (clickEvent != null) {
+                        when (clickEvent.click) {
+                            LEFT -> viewer.giveItem(element.generate(1, viewer))
+                            RIGHT -> viewer.giveItem(element.generate(64, viewer))
+                            else -> {}
+                        }
+                    }
                 }
             }
         }
