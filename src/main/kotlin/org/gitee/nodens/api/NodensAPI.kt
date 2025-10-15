@@ -47,8 +47,7 @@ import taboolib.expansion.AsyncDispatcher
     ),
     RuntimeDependency(
         "!org.xerial.snappy:snappy-java:1.1.10.7",
-        test = "!org.gitee.nodens.xerial.snappy.Snappy",
-        relocate = ["!org.xerial.snappy", "!org.gitee.nodens.xerial.snappy"],
+        test = "!org.xerial.snappy.Snappy",
         transitive = false
     )
 )
