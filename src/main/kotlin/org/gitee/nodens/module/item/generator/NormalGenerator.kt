@@ -29,14 +29,14 @@ object NormalGenerator: IItemGenerator {
         // 预置参数
         itemConfig.variables.forEach {
             if (map.containsKey(it.key)) return@forEach
-            context.variable[it.key] = it.getVariable(sender, itemConfig, context)
+            context[it.key] = it.getVariable(sender, itemConfig, context)
         }
         // 覆盖自定义数值
-        context.variable.putAll(map.mapValues { it.value.toVariable() })
+        context.putAll(map)
         // 生成出售价格
-        context.variable[SELL_TAG] = (itemConfig.sell?.let { eval(sender, itemConfig, context, it).cdouble } ?: 0.0).toVariable()
+        context[SELL_TAG] = (itemConfig.sell?.let { eval(sender, itemConfig, context, it).cdouble } ?: 0.0).toVariable()
         // 生成最大耐久值
-        context.variable[DURABILITY_TAG] = (itemConfig.durability?.let { eval(sender, itemConfig, context, it).cint } ?: 0.0).toVariable()
+        context[DURABILITY_TAG] = (itemConfig.durability?.let { eval(sender, itemConfig, context, it).cint } ?: 0.0).toVariable()
         val parser = parse(sender, itemConfig, context, itemConfig.lore + itemConfig.name)
 
         val builder = ItemBuilder(itemConfig.material)
@@ -55,20 +55,20 @@ object NormalGenerator: IItemGenerator {
         }
         builder.isUnbreakable = itemConfig.isUnBreakable
         builder.colored()
-        val durability = context.variable["durability"]?.value
+        val durability = context["durability"]
         if (durability == null) {
-            context.variable["durability"] = context.variable[DURABILITY_TAG]!!
+            context["durability"] = context[DURABILITY_TAG]!!
         }
         if (!itemConfig.isUnBreakable) {
-            val max = context.variable[DURABILITY_TAG]!!.value.cint
+            val max = context[DURABILITY_TAG]!!.cint
             if (max != 0) {
-                builder.damage = (builder.material.maxDurability.cdouble * (1 - context.variable["durability"]!!.value.cdouble / max.cdouble)).cint
+                builder.damage = (builder.material.maxDurability.cdouble * (1 - context["durability"]!!.cdouble / max.cdouble)).cint
             }
         }
         builder.finishing = {
             val tag = it.getItemTag()
-            tag[CONTEXT_TAG] = Json.encodeToString(context)
-            tag["durability"] = context.variable["durability"]!!.value.cint
+            tag[CONTEXT_TAG] = compress(Json.encodeToString(context))
+            tag["durability"] = context["durability"]!!.cint
             tag.saveTo(it)
             it.replaceLore(
                 mapOf(
@@ -77,8 +77,8 @@ object NormalGenerator: IItemGenerator {
                             *it.getItemAttribute().toTypedArray()
                         )
                     ).toString(),
-                    "{MaxDurability}" to context.variable[DURABILITY_TAG]!!.value.cint.toString(),
-                    "{Sell}" to ceil(context.variable[SELL_TAG]!!.value.cdouble).toString(),
+                    "{MaxDurability}" to context[DURABILITY_TAG]!!.cint.toString(),
+                    "{Sell}" to ceil(context[SELL_TAG]!!.cdouble).toString(),
                 )
             )
         }
@@ -131,7 +131,7 @@ object NormalGenerator: IItemGenerator {
      * @param sender 执行者
      * @param itemConfig 物品配置
      * */
-    private fun ItemConfig.Variable.getVariable(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext): Variable<*> {
+    private fun ItemConfig.Variable.getVariable(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext): Any {
         val any = try {
             KetherShell.eval(
                 action,
@@ -147,13 +147,14 @@ object NormalGenerator: IItemGenerator {
             e.printKetherErrorMessage()
             "none-error"
         }
-        return any.toVariable()
+        return any
     }
 
     override fun update(player: Player?, itemStack: ItemStack): ItemStack? {
         val context = itemStack.context<NormalContext>() ?: return null
         val config = ItemManager.getItemConfig(context.key) ?: return null
-        val new = generate(config, itemStack.amount, player, context.variable)
+        val new = generate(config, itemStack.amount, player, context.map())
+        itemStack.getItemTag().saveTo(new)
         val event = NodensItemUpdateEvents.Pre(itemStack, new)
         return if (event.call()) {
             event.new

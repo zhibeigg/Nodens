@@ -44,6 +44,12 @@ import taboolib.expansion.AsyncDispatcher
         test = "!org.gitee.nodens.eatthepath.uuid.FastUUID",
         relocate = ["!com.eatthepath.uuid", "!org.gitee.nodens.eatthepath.uuid"],
         transitive = false
+    ),
+    RuntimeDependency(
+        "!org.xerial.snappy:snappy-java:1.1.10.7",
+        test = "!org.gitee.nodens.xerial.snappy.Snappy",
+        relocate = ["!org.xerial.snappy", "!org.gitee.nodens.xerial.snappy"],
+        transitive = false
     )
 )
 class NodensAPI: INodensAPI {

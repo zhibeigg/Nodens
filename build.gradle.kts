@@ -51,6 +51,7 @@ taboolib {
     relocate("com.github.benmanes.caffeine", "org.gitee.nodens.caffeine")
     relocate("com.eatthepath.uuid", "org.gitee.nodens.eatthepath.uuid")
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
+    relocate("org.xerial.snappy", "org.gitee.nodens.xerial.snappy")
     version { taboolib = "6.2.3-b217935" }
 }
 
@@ -66,16 +67,17 @@ dependencies {
     compileOnly("ink.ptms.core:v11200:11200")
     compileOnly("ink.ptms:nms-all:1.0.0")
 
-    compileOnly("com.gitee.redischannel:RedisChannel:1.10.6:api")
+    compileOnly("com.gitee.redischannel:RedisChannel:latest.release:api")
     compileOnly("org.eldergod.ext:DragonCore:2.6.2.9")
     compileOnly("org.eldergod.ext:DragonArmourers:6.72")
     compileOnly("org.eldergod.ext:MythicMobs:4.11.0")
     compileOnly("org.eldergod.ext:GlowAPI:1.4.6")
+    compileOnly("org.gitee.orryx:Orryx:latest.release:api")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     compileOnly("com.eatthepath:fast-uuid:0.2.0")
     compileOnly("com.github.ben-manes.caffeine:caffeine:2.9.3")
-    compileOnly("org.gitee.orryx:Orryx:1.22.54:api")
+    compileOnly("org.xerial.snappy:snappy-java:1.1.10.7")
 
     compileOnly(kotlin("stdlib"))
     compileOnly(kotlin("reflect"))

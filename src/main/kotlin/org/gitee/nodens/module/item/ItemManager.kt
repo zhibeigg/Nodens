@@ -163,6 +163,7 @@ object ItemManager {
                 NodensItemUpdateEvents.Post(item, new).call()
             }
         }
+        player.updateInventory()
     }
 
     private fun updateItem(player: Player?, old: ItemStack): ItemStack? {

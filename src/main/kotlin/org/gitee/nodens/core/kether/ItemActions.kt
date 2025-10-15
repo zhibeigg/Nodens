@@ -42,15 +42,15 @@ object ItemActions {
 
         override fun read(instance: NormalContext, key: String): OpenResult {
             return when {
-                key.startsWith("@") -> OpenResult.successful(instance.variable[key.substring(1)]?.value)
+                key.startsWith("@") -> OpenResult.successful(instance[key.substring(1)])
                 key == "key" -> OpenResult.successful(instance.key)
-                else -> OpenResult.successful(instance.variable[key])
+                else -> OpenResult.successful(instance[key])
             }
         }
 
         override fun write(instance: NormalContext, key: String, value: Any?): OpenResult {
             return try {
-                instance.variable[key] = value?.toVariable()!!
+                instance[key] = value
                 OpenResult.successful()
             } catch (_: Throwable) {
                 OpenResult.failed()
@@ -76,7 +76,7 @@ object ItemActions {
         actionFuture { future ->
             run(itemStack).thenApply { itemStack ->
                 val itemStack = itemStack as ItemStack?
-                future.complete(itemStack?.context()?.variable[key]?.value)
+                future.complete(itemStack?.context()?.get(key))
             }
         }
     }
@@ -106,7 +106,7 @@ object ItemActions {
                         run(any).bool { any ->
                             future.complete(
                                 GroupManager.itemGroups.get(group)!!.check(script().bukkitPlayer(), any) {
-                                    context()?.variable[key]?.value == value
+                                    context()?.get(key) == value
                                 }
                             )
                         }
@@ -121,7 +121,7 @@ object ItemActions {
         val randoms = RandomManager.randomsMap[randoms] ?: return CompletableFuture.completedFuture(null)
         return KetherShell.eval(
             randoms.action,
-            ScriptOptions.builder().vars(context.variable.mapValues { it.value.value }).sender(sender ?: console()).namespace(nodensEnvironmentNamespaces).build()
+            ScriptOptions.builder().vars(context.map()).sender(sender ?: console()).namespace(nodensEnvironmentNamespaces).build()
         )
     }
 }

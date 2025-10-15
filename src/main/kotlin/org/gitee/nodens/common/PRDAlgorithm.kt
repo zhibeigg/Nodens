@@ -30,10 +30,10 @@ object PRDAlgorithm {
                 cacheMap[percent] = c
                 info("&e┣&7计算成功 Percent: $percent c=${c} &a√".colored())
             }
-            file.writeText(Json.Default.encodeToString(cacheMap))
+            file.writeText(Json.encodeToString(cacheMap))
             info("&e┣&7写入C值缓存文件成功 &a√".colored())
         } else {
-            cacheMap = Json.Default.decodeFromString(file.readText())
+            cacheMap = Json.decodeFromString(file.readText())
             info("&e┣&7检测到PRD算法C值缓存 加载成功 &a√".colored())
         }
     }

@@ -24,7 +24,7 @@ class NodensItemAPI: IItemAPI {
     }
 
     override fun addDurability(itemStack: ItemStack, durability: Int): Int {
-        val max = itemStack.context()?.variable[DURABILITY_TAG]?.value as? Int ?: 0
+        val max = itemStack.context()?.get(DURABILITY_TAG) as? Int ?: 0
         val tag = itemStack.getItemTag()
         tag["durability"] = ((tag["durability"]?.asInt() ?: return 0) + durability).coerceAtMost(max)
         tag.saveTo(itemStack)
@@ -39,7 +39,7 @@ class NodensItemAPI: IItemAPI {
     }
 
     override fun setDurability(itemStack: ItemStack, durability: Int): Int {
-        val max = itemStack.context()?.variable[DURABILITY_TAG]?.value as? Int ?: 0
+        val max = itemStack.context()?.get(DURABILITY_TAG) as? Int ?: 0
         val tag = itemStack.getItemTag()
         tag["durability"] = durability.coerceAtMost(max)
         tag.saveTo(itemStack)
@@ -51,7 +51,7 @@ class NodensItemAPI: IItemAPI {
     }
 
     override fun getMaxDurability(itemStack: ItemStack): Int {
-        return itemStack.context()?.variable[DURABILITY_TAG]?.value as? Int ?: 0
+        return itemStack.context()?.get(DURABILITY_TAG) as? Int ?: 0
     }
 
     companion object {

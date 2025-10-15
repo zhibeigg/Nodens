@@ -6,13 +6,10 @@ import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.*
 import org.gitee.nodens.module.item.drop.DropManager
 import org.gitee.nodens.module.item.generator.NormalGenerator.generate
-import taboolib.common.platform.function.info
-import taboolib.module.nms.ItemTagData
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.isAir
 import taboolib.platform.util.isNotAir
 import java.util.function.Consumer
-import java.util.function.Function
 
 const val CONTEXT_TAG = "NODENS_CONTEXT"
 const val SELL_TAG = "NODENS@SELL"
@@ -21,25 +18,31 @@ const val DURABILITY_TAG = "NODENS@DURABILITY"
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T: IItemContext> ItemStack.context(): T? {
     if (isAir()) return null
-    return Json.decodeFromString<T>(getItemTag()[CONTEXT_TAG]?.asString() ?: return null)
+    val byteArray = getItemTag()[CONTEXT_TAG]?.asByteArray() ?: return null
+    return Json.decodeFromString<T>(decompress(byteArray))
 }
 
 @Suppress("UNCHECKED_CAST")
 fun ItemStack.context(): NormalContext? {
     if (isAir()) return null
-    return Json.decodeFromString<NormalContext>(getItemTag()[CONTEXT_TAG]?.asString() ?: return null)
+    val byteArray = getItemTag()[CONTEXT_TAG]?.asByteArray() ?: return null
+    return Json.decodeFromString<NormalContext>(decompress(byteArray))
 }
 
 fun ItemStack.modifyContext(consumer: Consumer<NormalContext>) {
     val context = context()?.also { consumer.accept(it) } ?: return
     val tag = getItemTag()
-    tag[CONTEXT_TAG] = Json.encodeToString(context)
+    tag[CONTEXT_TAG] = compress(Json.encodeToString(context))
     tag.saveTo(this)
 }
 
-fun Any.toVariable(): Variable<*> {
+@Suppress("UNCHECKED_CAST")
+fun Any?.toVariable(): Variable<*> {
     return when (this) {
+        null -> NullVariable(null)
         is Variable<*> -> this
+        is List<*> -> ArrayVariable(this.map { it.toVariable() })
+        is Map<*, *> -> MapVariable(this.mapValues { it.value.toVariable() } as Map<String, Variable<*>>)
         is Byte -> ByteVariable(this)
         is Short -> ShortVariable(this)
         is Int -> IntVariable(this)

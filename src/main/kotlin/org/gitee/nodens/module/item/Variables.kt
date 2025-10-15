@@ -3,6 +3,9 @@ package org.gitee.nodens.module.item
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class NullVariable(override val value: Nothing?): Variable<Nothing?>
+
+@Serializable
 data class ByteVariable(override val value: Byte): Variable<Byte>
 
 @Serializable
@@ -28,3 +31,9 @@ data class StringVariable(override val value: String): Variable<String>
 
 @Serializable
 data class BooleanVariable(override val value: Boolean): Variable<Boolean>
+
+@Serializable
+data class ArrayVariable(override val value: List<@Serializable Variable<*>>): Variable<List<Variable<*>>>
+
+@Serializable
+data class MapVariable(override val value: Map<String, @Serializable Variable<*>>): Variable<Map<String, Variable<*>>>
