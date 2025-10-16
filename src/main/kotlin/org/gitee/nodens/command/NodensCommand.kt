@@ -1,12 +1,9 @@
 package org.gitee.nodens.command
 
 import org.bukkit.entity.Player
-import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.core.reload.ReloadAPI
-import org.gitee.nodens.module.item.generator.NbtParser
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.*
-import taboolib.common.platform.function.info
 import taboolib.expansion.createHelper
 
 @CommandHeader("Nodens", ["no"], "Nodens属性插件主指令")
@@ -35,7 +32,7 @@ object NodensCommand {
     @CommandBody
     val test = subCommand {
         exec<Player> {
-            info(NbtParser.parse(Nodens.config.getConfigurationSection("test")!!))
+
         }
     }
 }
