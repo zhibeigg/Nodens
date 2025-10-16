@@ -1,5 +1,6 @@
 package org.gitee.nodens.module.item.generator
 
+import eos.moe.armourers.ne
 import kotlinx.serialization.json.Json
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -154,10 +155,12 @@ object NormalGenerator: IItemGenerator {
     }
 
     override fun update(player: Player?, itemStack: ItemStack): ItemStack? {
-        val context = itemStack.context<NormalContext>() ?: return null
+        val context = itemStack.context() ?: return null
         val config = ItemManager.getItemConfig(context.key) ?: return null
         val new = generate(config, itemStack.amount, player, context.map())
-        itemStack.getItemTag().saveTo(new)
+        val tag = new.getItemTag()
+        tag["durability"] = context["durability"]!!.cint
+        tag.saveTo(new)
         val event = NodensItemUpdateEvents.Pre(itemStack, new)
         return if (event.call()) {
             event.new

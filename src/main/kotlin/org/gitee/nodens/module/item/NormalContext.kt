@@ -15,10 +15,18 @@ data class NormalContext(override val key: String, private val variable: HashMap
     }
 
     operator fun get(key: String): Any? {
-        return variable[key]?.value
+        return restore(variable[key]?.value)
+    }
+
+    private fun restore(value: Any?): Any? {
+        return when (value) {
+            is List<*> -> value.map { restore((it as Variable<*>).value) }
+            is Map<*, *> -> value.mapValues { restore((it.value as Variable<*>).value) }
+            else -> value
+        }
     }
 
     fun map(): Map<String, Any> {
-        return variable.toMap().filter { it.value.value != null }.mapValues { it.value.value!! }
+        return variable.toMap().mapValues { restore(it.value.value)!! }
     }
 }

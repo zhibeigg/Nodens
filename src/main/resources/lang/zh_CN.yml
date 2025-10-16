@@ -1,2 +1,5 @@
 info-attribute: "&a| &c&lNodens &e属性面板"
 info-attribute-argument: "&a| &f{0} &e{1} &fkey: &b{2}"
+
+info-item: "&a| &c&lNodens &e物品&7: &f{0} &7hashcode: {1}"
+info-item-argument: "&a| &f{0}&7: &e{1} &7({2}&7)"
