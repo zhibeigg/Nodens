@@ -1,5 +1,6 @@
 package org.gitee.nodens.module.item
 
+import org.gitee.nodens.module.item.generator.NbtParser
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.xseries.XEnchantment
 import taboolib.library.xseries.XItemFlag
@@ -82,6 +83,12 @@ class CloneItemConfig(override val key: String, val copy: ItemConfig, private va
         configurationSection.getStringList("armourers")
     } else {
         copy.armourers
+    }
+
+    override val nbt = if (configurationSection.contains("nbt")) {
+        configurationSection.getConfigurationSection("nbt")?.let { NbtParser.parse(it) }
+    } else {
+        copy.nbt
     }
 
     override fun get(path: String): Any? {

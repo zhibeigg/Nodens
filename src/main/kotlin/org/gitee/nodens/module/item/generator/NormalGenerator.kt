@@ -69,6 +69,9 @@ object NormalGenerator: IItemGenerator {
             val tag = it.getItemTag()
             tag[CONTEXT_TAG] = compress(Json.encodeToString(context))
             tag["durability"] = context["durability"]!!.cint
+            itemConfig.nbt?.forEach { (key, value) ->
+                tag[key] = value
+            }
             tag.saveTo(it)
             it.replaceLore(
                 mapOf(

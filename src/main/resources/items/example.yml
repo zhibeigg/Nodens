@@ -20,3 +20,21 @@
   unbreakable: true
   sell: |-
     randoms 武器价值
+  nbt:
+    test:
+      value: '测试'
+      nt: string
+    type:
+      value: 1
+      nt: int
+    武器:
+      nt: compound
+      笔修:
+        value:
+          - '1'
+          - '2'
+          - '3'
+        nt: int_array
+      剑修:
+        value: 1
+        nt: int
