@@ -29,7 +29,12 @@ class MythicMobsDamageMechanic(line: String, mlc: MythicLineConfig) : SkillMecha
             }
         }
         processor.handleDefender()
-        processor.callDamage()
+        data.caster.isUsingDamageSkill = true
+        try {
+            processor.callDamage()
+        } finally {
+            data.caster.isUsingDamageSkill = false
+        }
         return true
     }
 }
