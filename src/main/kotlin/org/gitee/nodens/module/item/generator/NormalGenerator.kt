@@ -86,9 +86,14 @@ object NormalGenerator: IItemGenerator {
                 )
             )
         }
-        val event = NodensItemGenerateEvent(player, itemConfig, context, builder.build())
-        event.call()
-        return event.item
+
+        return if (callEvent) {
+            val event = NodensItemGenerateEvent(player, itemConfig, context, builder.build())
+            event.call()
+            event.item
+        } else {
+            builder.build()
+        }
     }
 
     private fun parse(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, list: List<String>): List<String> {
