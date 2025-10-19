@@ -32,7 +32,7 @@ class AttributeInfoUI {
                     }
                 } ?: return
                 val explicitMap = source.map { (key, value) ->
-                    "${key.group.name}:${key.name}:explicit" to "${value[DigitalParser.Type.COUNT]?.joinToString("-") ?: 0} + ${value[DigitalParser.Type.PERCENT]?.joinToString("-") { (it * 100).format(1).toString() } ?: 0}%"
+                    "${key.group.name}:${key.name}:explicit" to "${value[DigitalParser.Type.COUNT]?.joinToString("-") { it.format(1).toString() } ?: 0} + ${value[DigitalParser.Type.PERCENT]?.joinToString("-") { (it * 100).format(1).toString() } ?: 0}%"
                 }
                 PacketSender.sendSyncPlaceholder(e.player, map + explicitMap)
             }

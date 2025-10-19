@@ -23,6 +23,8 @@ import kotlin.math.ceil
 
 object NormalGenerator: IItemGenerator {
 
+    private val REMOVE_REGEX = Regex("\\*[0-9.]+\\*")
+
     override fun generate(itemConfig: ItemConfig, amount: Int, player: Player?, map: Map<String, Any>, callEvent: Boolean): ItemStack {
         val sender = player?.let { adaptPlayer(it) } ?: console()
         val context = NormalContext(itemConfig.key, hashMapOf(), itemConfig.hashCode)
@@ -43,8 +45,22 @@ object NormalGenerator: IItemGenerator {
         val builder = ItemBuilder(itemConfig.material)
         builder.name = parser.last()
         builder.amount = amount
-        parser.dropLast(1).forEach {
-            builder.lore += it
+        // 生成 lore
+        parser.dropLast(1).forEach { line ->
+            // 将含有 *0* 的行删除
+            // 为了删除算法生成为 0 的属性
+            var newLine: String? = line
+            REMOVE_REGEX.find(line)?.let { matchResult ->
+                val number = matchResult.value.let { value -> value.substring(1, value.length - 2) }.cdouble
+                newLine = if (number == 0.0) {
+                    null
+                } else {
+                    line.replace(matchResult.value, number.toString())
+                }
+            }
+            if (newLine != null) {
+                builder.lore += newLine
+            }
         }
         itemConfig.itemFlags.forEach {
             builder.flags += it.get() ?: return@forEach
