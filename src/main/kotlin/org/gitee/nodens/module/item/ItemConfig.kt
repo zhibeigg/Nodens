@@ -59,7 +59,7 @@ open class ItemConfig(open val key: String, private val configurationSection: Co
         return configurationSection[path, def]
     }
 
-    fun generate(amount: Int, player: Player? = null, map: Map<String, Any> = emptyMap()): ItemStack {
-        return NormalGenerator.generate(this, amount, player, map)
+    fun generate(amount: Int, player: Player? = null, map: Map<String, Any> = emptyMap(), callEvent: Boolean = true): ItemStack {
+        return NormalGenerator.generate(this, amount, player, map, callEvent)
     }
 }
