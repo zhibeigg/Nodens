@@ -6,6 +6,7 @@ import org.gitee.nodens.common.FastMatchingMap
 import org.gitee.nodens.core.attribute.JavaScript
 import org.gitee.nodens.core.attribute.Mapping
 import org.gitee.nodens.core.reload.Reload
+import org.gitee.nodens.module.item.condition.ICondition
 import org.gitee.nodens.util.ConfigLazy
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files

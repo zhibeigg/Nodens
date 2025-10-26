@@ -1,0 +1,53 @@
+package org.gitee.nodens.module.item.condition
+
+import org.bukkit.entity.LivingEntity
+import org.bukkit.inventory.ItemStack
+import org.gitee.nodens.common.FastMatchingMap
+import org.gitee.nodens.core.reload.Reload
+import taboolib.common.LifeCycle
+import taboolib.common.io.runningClassesWithoutLibrary
+import taboolib.common.platform.Awake
+import taboolib.common.platform.function.info
+import taboolib.module.chat.colored
+
+object ConditionManager {
+
+    internal val CONDITION_MATCHING_MAP = FastMatchingMap<ICondition>()
+
+    const val SLOT_DATA_KEY = "slot"
+    const val SLOT_IDENTIFY_KEY = "identify"
+
+    @Reload(0)
+    @Awake(LifeCycle.ENABLE)
+    private fun load() {
+        CONDITION_MATCHING_MAP.clear()
+        runningClassesWithoutLibrary.forEach {
+            if (it.hasInterface(ICondition::class.java)) {
+                val instance = it.getInstance() as ICondition
+                instance.keywords.forEach { key ->
+                    CONDITION_MATCHING_MAP.put(key, instance)
+                }
+            }
+        }
+        info("&e┣&7ConditionMatchingMap loaded &a√".colored())
+    }
+
+    /**
+     * 匹配条件是否通过
+     *
+     * @param livingEntity 被检测的实体
+     * @param itemStack 被检测的物品
+     * @param ignoreCondition 忽略的条件
+     * @param map 额外检测参数
+     * */
+    fun matchConditions(livingEntity: LivingEntity, itemStack: ItemStack, ignoreCondition: Array<ICondition>, map: Map<String, String>): Boolean {
+        return itemStack.itemMeta?.lore?.all { line ->
+            CONDITION_MATCHING_MAP.getMatchResult(line)?.let { matchResult ->
+                if (matchResult.value in ignoreCondition) return true
+                matchResult.value.check(livingEntity, itemStack, matchResult.remain ?: return true, map)
+                // 如果没匹配到内容 通过
+            } ?: true
+            // 如果没 lore 通过
+        } ?: true
+    }
+}

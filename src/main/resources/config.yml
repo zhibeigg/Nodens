@@ -3,6 +3,49 @@ healthScaled: true
 drop:
   cancel: false
   survival: PT3M
+condition:
+# 绑定于: zhibei
+  bind:
+    keywords:
+      - '绑定于'
+# 等级限制: 20
+  level:
+    keywords:
+      - '等级限制'
+# 使用期限: 2009-06-15
+  time:
+    keywords:
+      - '使用期限'
+    pattern: '-'
+# 职业限制: 战士
+  job:
+    keywords:
+      - '职业限制'
+    pattern:
+      - 战士: 'orryx 战士'
+        肉盾: 'orryx 肉盾'
+        职业: 'orryx 职业'
+  slot:
+    keywords:
+      - '物品类型'
+    pattern:
+      main-hand:
+        - '主手'
+      off-hand:
+        - '副手'
+      helmet:
+        - '头盔'
+      chestplate:
+        - '胸甲'
+      leggings:
+        - '护腿'
+      boots:
+        - '鞋子'
+      dragoncore-slots:
+        example-项链:
+          - '项链'
+        example-戒指:
+          - '戒指'
 update-dragoncore-slots:
   - "example-1"
 attribute-dragoncore-slots:

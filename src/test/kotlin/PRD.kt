@@ -8,7 +8,7 @@ object PRD {
     @JvmStatic
     fun main(args: Array<String>) {
         println("输入一个概率")
-        val chance = readLine()!!.toDouble()
+        val chance = readln().toDouble()
 
         require(chance in 0.0..0.5) { "PRD算法仅在0-0.5之间具备准确性" }
 

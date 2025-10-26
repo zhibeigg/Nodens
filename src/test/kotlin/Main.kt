@@ -10,6 +10,7 @@ object Main {
         map.put("移动速度", Speed)
         map.put("攻击速度", AttackSpeed)
         map.put("物理防御", Defence)
+        map.put("特殊限制", Damage)
 
         val fastMap = FastMatchingMap<Attribute>(ignoreSpace = true, ignoreColor = true, ignoreColon = true, ignorePrefix = true)
         fastMap.put("物理伤害", Damage)
@@ -17,6 +18,7 @@ object Main {
         fastMap.put("移动速度", Speed)
         fastMap.put("攻击速度", AttackSpeed)
         fastMap.put("物理防御", Defence)
+        fastMap.put("特殊限制", Damage)
 
         val lore = listOf(
             "&a测试&e物理伤害：+99",
@@ -26,7 +28,9 @@ object Main {
             "&a测试&e物理伤害：+99",
             "&a测试&e攻击速度：+99%",
             "&a测试&e物理防御：+29",
-            "&a测试&e物理伤害：+39"
+            "&a测试&e物理伤害：+39",
+            "&a测试&e特殊限制：2025/03/09",
+            "&a测试&e特殊限制：左手"
         )
 
         val timeAvg0 = measureNanoTime {
@@ -36,7 +40,7 @@ object Main {
                 }
             }
         }
-        println(timeAvg0/100_0000)
+        println("${timeAvg0/100_0000} ns")
 
         val timeAvg1 = measureNanoTime {
             for (i in 1..100_0000) {
@@ -45,7 +49,10 @@ object Main {
                 }
             }
         }
-        println(timeAvg1/100_0000)
+        println("${timeAvg1/100_0000} ns")
+        lore.forEach {
+            println("MatchResult: ${fastMap.getMatchResult(it)?.remain}")
+        }
     }
 
     interface Attribute

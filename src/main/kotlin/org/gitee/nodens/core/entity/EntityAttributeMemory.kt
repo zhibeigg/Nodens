@@ -22,6 +22,7 @@ import org.gitee.nodens.core.attribute.JavaScript
 import org.gitee.nodens.core.attribute.Mapping
 import org.gitee.nodens.core.attribute.Speed
 import org.gitee.nodens.core.reload.Reload
+import org.gitee.nodens.module.item.condition.ConditionManager
 import org.gitee.nodens.util.ConfigLazy
 import org.gitee.nodens.util.ensureSync
 import org.gitee.nodens.util.mergeValues
@@ -149,16 +150,23 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
     fun getItemsAttribute(): List<IAttributeData> {
         val list = mutableListOf<IAttributeData>()
-        entity.equipment?.helmet?.getItemAttribute()?.also { list.addAll(it) }
-        entity.equipment?.chestplate?.getItemAttribute()?.also { list.addAll(it) }
-        entity.equipment?.leggings?.getItemAttribute()?.also { list.addAll(it) }
-        entity.equipment?.boots?.getItemAttribute()?.also { list.addAll(it) }
-        entity.equipment?.itemInMainHand?.getItemAttribute()?.also { list.addAll(it) }
-        entity.equipment?.itemInOffHand?.getItemAttribute()?.also { list.addAll(it) }
+
+        fun add(itemStack: ItemStack?, map: Map<String, String>) {
+            itemStack ?: return
+            if (ConditionManager.matchConditions(entity, itemStack, emptyArray(), map)) {
+                list.addAll(itemStack.getItemAttribute())
+            }
+        }
+        add(entity.equipment?.helmet, mapOf(ConditionManager.SLOT_DATA_KEY to "helmet"))
+        add(entity.equipment?.chestplate, mapOf(ConditionManager.SLOT_DATA_KEY to "chestplate"))
+        add(entity.equipment?.leggings, mapOf(ConditionManager.SLOT_DATA_KEY to "leggings"))
+        add(entity.equipment?.boots, mapOf(ConditionManager.SLOT_DATA_KEY to "boots"))
+        add(entity.equipment?.itemInMainHand, mapOf(ConditionManager.SLOT_DATA_KEY to "main-hand"))
+        add(entity.equipment?.itemInOffHand, mapOf(ConditionManager.SLOT_DATA_KEY to "off-hand"))
         if (entity is Player) {
             attributeDragoncoreSlots.forEach { id ->
                 val item = SlotAPI.getCacheSlotItem(entity, id) ?: return@forEach
-                list.addAll(item.getItemAttribute())
+                add(item, mapOf(ConditionManager.SLOT_DATA_KEY to "dragoncore", ConditionManager.SLOT_IDENTIFY_KEY to id))
             }
         }
         return list
