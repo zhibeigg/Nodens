@@ -7,5 +7,5 @@ interface ICondition {
 
     val keywords: List<String>
 
-    fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String, map: Map<String, String> = emptyMap()): Boolean
+    fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String?, map: Map<String, String> = emptyMap()): Boolean
 }

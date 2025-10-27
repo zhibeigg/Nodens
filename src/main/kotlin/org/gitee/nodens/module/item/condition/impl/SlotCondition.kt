@@ -10,7 +10,7 @@ import org.gitee.nodens.util.ConfigLazy
 
 object SlotCondition: ICondition {
 
-    override val keywords by ConfigLazy(Nodens.config) { getStringList("condition.slot.slot") }
+    override val keywords by ConfigLazy(Nodens.config) { getStringList("condition.slot.keywords") }
 
     val mainHand by ConfigLazy(Nodens.config) { getStringList("condition.slot.pattern.main-hand") }
     val offHand by ConfigLazy(Nodens.config) { getStringList("condition.slot.pattern.off-hand") }
@@ -24,7 +24,8 @@ object SlotCondition: ICondition {
         }
     }
 
-    override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String, map: Map<String, String>): Boolean {
+    override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String?, map: Map<String, String>): Boolean {
+        remain ?: return false
         return when(map[SLOT_DATA_KEY]) {
             "main-hand" -> remain in mainHand
             "off-hand" -> remain in offHand
@@ -38,7 +39,7 @@ object SlotCondition: ICondition {
                 remain in keys
             }
 
-            else -> true
+            else -> false
         }
     }
 }

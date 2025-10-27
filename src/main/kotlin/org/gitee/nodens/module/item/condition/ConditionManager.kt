@@ -13,6 +13,7 @@ import taboolib.module.chat.colored
 object ConditionManager {
 
     internal val CONDITION_MATCHING_MAP = FastMatchingMap<ICondition>()
+    internal val conditionMap = mutableMapOf<String, ICondition>()
 
     const val SLOT_DATA_KEY = "slot"
     const val SLOT_IDENTIFY_KEY = "identify"
@@ -21,15 +22,18 @@ object ConditionManager {
     @Awake(LifeCycle.ENABLE)
     private fun load() {
         CONDITION_MATCHING_MAP.clear()
+        conditionMap.clear()
         runningClassesWithoutLibrary.forEach {
             if (it.hasInterface(ICondition::class.java)) {
                 val instance = it.getInstance() as ICondition
+                conditionMap[instance::class.java.simpleName] = instance
                 instance.keywords.forEach { key ->
                     CONDITION_MATCHING_MAP.put(key, instance)
                 }
             }
         }
         info("&e┣&7ConditionMatchingMap loaded &a√".colored())
+        info("&e┣&7Condition loaded &e${conditionMap.size} &a√".colored())
     }
 
     /**
@@ -41,13 +45,16 @@ object ConditionManager {
      * @param map 额外检测参数
      * */
     fun matchConditions(livingEntity: LivingEntity, itemStack: ItemStack, ignoreCondition: Array<ICondition>, map: Map<String, String>): Boolean {
-        return itemStack.itemMeta?.lore?.all { line ->
+        val matchResults = mutableMapOf<String, String?>()
+        itemStack.itemMeta?.lore?.forEach { line ->
             CONDITION_MATCHING_MAP.getMatchResult(line)?.let { matchResult ->
-                if (matchResult.value in ignoreCondition) return true
-                matchResult.value.check(livingEntity, itemStack, matchResult.remain ?: return true, map)
-                // 如果没匹配到内容 通过
-            } ?: true
-            // 如果没 lore 通过
-        } ?: true
+                matchResults[matchResult.value::class.java.simpleName] = matchResult.remain
+            }
+            // 如果没 lore 跳过
+        } ?: return false
+        return conditionMap.values.all { condition ->
+            if (condition in ignoreCondition) return@all true
+            condition.check(livingEntity, itemStack, matchResults[condition::class.java.simpleName], map)
+        }
     }
 }

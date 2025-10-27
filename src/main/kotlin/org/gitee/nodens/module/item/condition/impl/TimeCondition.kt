@@ -15,7 +15,8 @@ object TimeCondition: ICondition {
 
     val pattern by ConfigLazy(Nodens.config) { getString("condition.time.pattern", "-")!! }
 
-    override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String, map: Map<String, String>): Boolean {
+    override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String?, map: Map<String, String>): Boolean {
+        remain ?: return true
         val time = remain.split(pattern).map { it.cint }
         val localTime = LocalDateTime.of(time[0], time[1], time[2], 0, 0)
         return localTime.isAfter(LocalDateTime.now())

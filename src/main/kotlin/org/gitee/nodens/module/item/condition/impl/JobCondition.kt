@@ -17,7 +17,8 @@ object JobCondition: ICondition {
 
     val pattern by ConfigLazy(Nodens.config) { getMap("condition.job.pattern") }
 
-    override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String, map: Map<String, String>): Boolean {
+    override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String?, map: Map<String, String>): Boolean {
+        remain ?: return true
         val job = pattern[remain] ?: return true
         return if (livingEntity is Player) {
             when {
