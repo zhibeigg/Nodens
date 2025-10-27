@@ -1,5 +1,6 @@
 package org.gitee.nodens.core.entity
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import eos.moe.dragoncore.api.SlotAPI
 import kotlinx.coroutines.launch
 import org.bukkit.entity.LivingEntity
@@ -38,6 +39,7 @@ import taboolib.module.chat.colored
 import taboolib.platform.util.onlinePlayers
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 class EntityAttributeMemory(val entity: LivingEntity) {
 
@@ -47,8 +49,13 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         private var regainTask: PlatformExecutor.PlatformTask? = null
 
         private val attributeDragoncoreSlots by ConfigLazy(Nodens.config) { getStringList("attribute-dragoncore-slots") }
+        private val attributeCatch = Caffeine.newBuilder()
+            .initialCapacity(50)
+            .maximumSize(100)
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .build<UUID, List<IAttributeData>>()
 
-        @Schedule(async = false, period = 1)
+        @Schedule(async = false, period = 20)
         private fun schedule() {
             val iterator = entityAttributeMemoriesMap.iterator()
             while (iterator.hasNext()) {
@@ -128,6 +135,10 @@ class EntityAttributeMemory(val entity: LivingEntity) {
                 AttributeData(match.attributeNumber, match.value)
             } ?: emptyList()
         }
+
+        fun removeCatch(entity: UUID) {
+            attributeCatch.invalidate(entity)
+        }
     }
 
     init {
@@ -148,7 +159,8 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         return remove
     }
 
-    fun getItemsAttribute(): List<IAttributeData> {
+    fun getItemsAttribute(ignoreCache: Boolean = false): List<IAttributeData> {
+        if (!ignoreCache) return attributeCatch.get(entity.uniqueId) { _ -> getItemsAttribute(true) }!!
         val list = mutableListOf<IAttributeData>()
 
         fun add(itemStack: ItemStack?, map: Map<String, String>) {
@@ -176,6 +188,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         if (entity.isDead) return
         val event = NodensPlayerAttributeUpdateEvents.Pre(this)
         if (event.call()) {
+            removeCatch(entity.uniqueId)
             pluginScope.launch {
                 val iterator = extendMemory.iterator()
                 while (iterator.hasNext()) {

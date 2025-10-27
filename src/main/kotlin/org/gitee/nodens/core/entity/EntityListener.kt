@@ -2,6 +2,8 @@ package org.gitee.nodens.core.entity
 
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
+import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause.*
@@ -25,38 +27,44 @@ import taboolib.platform.util.attacker
 
 object EntityListener {
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onSwapHandItems(e: PlayerSwapHandItemsEvent) {
+        if (e.isCancelled) return
         e.player.attributeMemory()?.updateAttributeAsync()
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onInventoryClick(e: InventoryClickEvent) {
+        if (e.isCancelled) return
         e.whoClicked.attributeMemory()?.updateAttributeAsync()
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onInventoryDrag(e: InventoryDragEvent) {
+        if (e.isCancelled) return
         e.whoClicked.attributeMemory()?.updateAttributeAsync()
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onItemHeld(e: PlayerItemHeldEvent) {
+        if (e.isCancelled) return
         e.player.attributeMemory()?.updateAttributeAsync()
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onDropItem(e: PlayerDropItemEvent) {
+        if (e.isCancelled) return
         e.player.attributeMemory()?.updateAttributeAsync()
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onItemBreak(e: PlayerItemBreakEvent) {
         e.player.attributeMemory()?.updateAttributeAsync()
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onInteract(e: PlayerInteractEvent) {
+        if (e.useItemInHand() == Event.Result.DENY) return
         e.player.attributeMemory()?.updateAttributeAsync()
     }
 
