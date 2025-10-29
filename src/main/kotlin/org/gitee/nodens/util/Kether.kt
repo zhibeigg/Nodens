@@ -88,7 +88,7 @@ internal fun regainProcessors(): Parser<List<RegainProcessor>> {
 /**
  * 确保[func]在主线程运行
  * */
-fun <T> ensureWaitSync(func: () -> T): CompletableFuture<T> {
+inline fun <T> ensureWaitSync(crossinline func: () -> T): CompletableFuture<T> {
     if (isPrimaryThread) {
         return CompletableFuture.completedFuture(func())
     } else {
@@ -98,7 +98,7 @@ fun <T> ensureWaitSync(func: () -> T): CompletableFuture<T> {
     }
 }
 
-fun <T> ensureSync(func: () -> T) {
+inline fun <T> ensureSync(crossinline func: () -> T) {
     if (isPrimaryThread) {
         func()
     } else {

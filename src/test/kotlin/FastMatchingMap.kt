@@ -132,10 +132,10 @@ class FastMatchingMap<T>(
     }
 
     // 内联工具函数
-    private inline fun Char.isWhitespaceFast() = this == ' ' || this == '\t' || this == '\n' || this == '\r'
-    private inline fun isColorCodeStart(c: Char) = c == '&' || c == '§'
-    private inline fun isColorCodeContent(c: Char) = c in '0'..'9' || c in 'a'..'f' || c in 'A'..'F' || c in "k-o" || c in "K-O" || c == 'r' || c == 'R'
-    private inline fun isColon(c: Char) = c == ':' || c == '：'
+    private fun Char.isWhitespaceFast() = this == ' ' || this == '\t' || this == '\n' || this == '\r'
+    private fun isColorCodeStart(c: Char) = c == '&' || c == '§'
+    private fun isColorCodeContent(c: Char) = c in '0'..'9' || c in 'a'..'f' || c in 'A'..'F' || c in "k-o" || c in "K-O" || c == 'r' || c == 'R'
+    private fun isColon(c: Char) = c == ':' || c == '：'
 
     class MatchResult<T>(val remain: String?, val value: T)
 }
