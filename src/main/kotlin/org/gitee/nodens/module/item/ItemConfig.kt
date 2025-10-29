@@ -41,6 +41,7 @@ open class ItemConfig(open val key: String, private val configurationSection: Co
     open val isUnBreakable = configurationSection.getBoolean("unbreakable")
 
     open val sell = configurationSection.getString("sell")
+    open val quality = configurationSection.getString("quality")
 
     open val armourers = configurationSection.getStringList("armourers")
 

@@ -79,6 +79,12 @@ class CloneItemConfig(override val key: String, val copy: ItemConfig, private va
         copy.sell
     }
 
+    override val quality = if (configurationSection.contains("quality")) {
+        configurationSection.getString("quality")
+    } else {
+        copy.quality
+    }
+
     override val armourers = if (configurationSection.contains("armourers")) {
         configurationSection.getStringList("armourers")
     } else {

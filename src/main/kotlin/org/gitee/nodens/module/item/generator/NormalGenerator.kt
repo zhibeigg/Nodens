@@ -28,19 +28,27 @@ object NormalGenerator: IItemGenerator {
     override fun generate(itemConfig: ItemConfig, amount: Int, player: Player?, map: Map<String, Any>, callEvent: Boolean): ItemStack {
         val sender = player?.let { adaptPlayer(it) } ?: console()
         val context = NormalContext(itemConfig.key, hashMapOf(), itemConfig.hashCode)
+        val extendMap = mutableMapOf<String, Any?>()
 
         // 预置参数
         itemConfig.variables.forEach {
             if (map.containsKey(it.key)) return@forEach
-            context[it.key] = it.getVariable(sender, itemConfig, context)
+            context[it.key] = it.getVariable(sender, itemConfig, context, extendMap)
         }
         // 覆盖自定义数值
         context.putAll(map)
+        // 生成品质
+        val quality = itemConfig.quality?.let { eval(sender, itemConfig, context, it, extendMap).cint } ?: 0
+        extendMap[QUALITY] = quality
         // 生成出售价格
-        context[SELL_TAG] = (itemConfig.sell?.let { eval(sender, itemConfig, context, it).cdouble } ?: 0.0).toVariable()
+        val sell = itemConfig.sell?.let { eval(sender, itemConfig, context, it, extendMap).cdouble } ?: 0.0
+        context[SELL_TAG] = sell
+        extendMap[SELL] = quality
         // 生成最大耐久值
-        context[DURABILITY_TAG] = (itemConfig.durability?.let { eval(sender, itemConfig, context, it).cint } ?: 0.0).toVariable()
-        val parser = parse(sender, itemConfig, context, itemConfig.lore + itemConfig.name)
+        val maxDurability = itemConfig.durability?.let { eval(sender, itemConfig, context, it, extendMap).cint } ?: 0.0
+        context[DURABILITY_TAG] = maxDurability
+        extendMap[DURABILITY] = maxDurability
+        val parser = parse(sender, itemConfig, context, itemConfig.lore + itemConfig.name, extendMap)
 
         val builder = ItemBuilder(itemConfig.material)
         builder.name = parser.last()
@@ -67,25 +75,26 @@ object NormalGenerator: IItemGenerator {
         }
         itemConfig.enchantments.forEach {
             builder.enchants[it.key.get() ?: return@forEach] = it.value?.let { level ->
-                parse(sender, itemConfig, context, level).cint
+                parse(sender, itemConfig, context, level, extendMap).cint
             } ?: 1
         }
         builder.isUnbreakable = itemConfig.isUnBreakable
         builder.colored()
-        val durability = context["durability"]
+        val durability = context[DURABILITY]
         if (durability == null) {
-            context["durability"] = context[DURABILITY_TAG]!!
+            context[DURABILITY] = context[DURABILITY_TAG]!!
         }
         if (!itemConfig.isUnBreakable) {
             val max = context[DURABILITY_TAG]!!.cint
             if (max != 0) {
-                builder.damage = (builder.material.maxDurability.cdouble * (1 - context["durability"]!!.cdouble / max.cdouble)).cint
+                builder.damage = (builder.material.maxDurability.cdouble * (1 - context[DURABILITY]!!.cdouble / max.cdouble)).cint
             }
         }
         builder.finishing = {
             val tag = it.getItemTag()
             tag[CONTEXT_TAG] = compress(Json.encodeToString(context))
-            tag["durability"] = context["durability"]!!.cint
+            tag[DURABILITY] = context[DURABILITY]!!.cint
+            tag[QUALITY] = quality
             itemConfig.nbt?.forEach { (key, value) ->
                 tag[key] = value
             }
@@ -112,7 +121,7 @@ object NormalGenerator: IItemGenerator {
         }
     }
 
-    private fun parse(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, list: List<String>): List<String> {
+    private fun parse(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, list: List<String>, map: Map<String, Any?>): List<String> {
         return KetherFunction.parse(
             list,
             ScriptOptions.builder()
@@ -121,11 +130,12 @@ object NormalGenerator: IItemGenerator {
                 .sandbox(false)
                 .set("item", itemConfig)
                 .set("context", context)
+                .vars(map)
                 .build()
         )
     }
 
-    private fun parse(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, string: String): String {
+    private fun parse(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, string: String, map: Map<String, Any?>): String {
         return KetherFunction.parse(
             string,
             ScriptOptions.builder()
@@ -134,11 +144,12 @@ object NormalGenerator: IItemGenerator {
                 .sandbox(false)
                 .set("item", itemConfig)
                 .set("context", context)
+                .vars(map)
                 .build()
         )
     }
 
-    private fun eval(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, string: String): Any? {
+    private fun eval(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, string: String, map: Map<String, Any?>): Any? {
         return KetherShell.eval(
             string,
             ScriptOptions.builder()
@@ -147,6 +158,7 @@ object NormalGenerator: IItemGenerator {
                 .sandbox(false)
                 .set("item", itemConfig)
                 .set("context", context)
+                .vars(map)
                 .build()
         ).orNull()
     }
@@ -156,7 +168,7 @@ object NormalGenerator: IItemGenerator {
      * @param sender 执行者
      * @param itemConfig 物品配置
      * */
-    private fun ItemConfig.Variable.getVariable(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext): Any {
+    private fun ItemConfig.Variable.getVariable(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, map: Map<String, Any?>): Any {
         val any = try {
             KetherShell.eval(
                 action,
@@ -166,6 +178,7 @@ object NormalGenerator: IItemGenerator {
                     .sandbox(false)
                     .set("item", itemConfig)
                     .set("context", context)
+                    .vars(map)
                     .build()
             ).orNull() ?: error("not variable $key")
         } catch (e: Throwable) {

@@ -86,10 +86,7 @@ object ItemActions {
         it.group(
             text()
         ).apply(it) { id ->
-            future {
-                val context = script().get<NormalContext>("context") ?: return@future completedFuture(null)
-                randomsEval(script().sender, id, context)
-            }
+            future { randomsEval(script().sender, id, variables().toMap()) }
         }
     }
 
@@ -117,11 +114,15 @@ object ItemActions {
     }
 
 
-    fun randomsEval(sender: ProxyCommandSender?, randoms: String, context: NormalContext): CompletableFuture<Any?> {
+    fun randomsEval(sender: ProxyCommandSender?, randoms: String, map: Map<String, Any?>): CompletableFuture<Any?> {
         val randoms = RandomManager.randomsMap[randoms] ?: return CompletableFuture.completedFuture(null)
         return KetherShell.eval(
             randoms.action,
-            ScriptOptions.builder().vars(context.map()).sender(sender ?: console()).namespace(nodensEnvironmentNamespaces).build()
+            ScriptOptions.builder()
+                .vars(map)
+                .sender(sender ?: console())
+                .namespace(nodensEnvironmentNamespaces)
+                .build()
         )
     }
 }
