@@ -9,11 +9,11 @@ import taboolib.module.chat.colored
 val debug: Boolean by ConfigLazy(Nodens.config) { getBoolean("debug") }
 
 fun debug(vararg message: Any?) {
-    if (debug) PlatformFactory.getService<PlatformIO>().warning(*message.map { "[debug] $it" }.toTypedArray())
+    if (debug) consoleMessage(*message.map { it.toString() }.toTypedArray())
 }
 
 fun consoleMessage(vararg message: String) {
     message.forEach {
-        console().sendMessage("[Orryx] $it")
+        console().sendMessage("[Nodens] $it".colored())
     }
 }
