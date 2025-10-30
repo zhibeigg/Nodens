@@ -24,3 +24,5 @@ val MythicMobsPlugin = Plugin("MythicMobs")
 val GlowAPIPlugin = Plugin("GlowAPI")
 
 val RedisChannelPlugin = Plugin("RedisChannel")
+
+val DragonCorePlugin = Plugin("DragonCore")

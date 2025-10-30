@@ -8,6 +8,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
 import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.gitee.nodens.core.reload.Reload
+import org.gitee.nodens.util.consoleMessage
 import org.gitee.nodens.util.getBytes
 import org.gitee.nodens.util.maxHealth
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
@@ -58,7 +59,7 @@ object Handle {
         catchMap.clear()
         catchMap[SCRIPT_ON_DAMAGE] = getScript(SCRIPT_ON_DAMAGE, handle.getString("onDamage")!!) ?: error("请补充handle.yml中的onDamage脚本")
         catchMap[SCRIPT_ON_REGAIN] = getScript(SCRIPT_ON_REGAIN, handle.getString("onRegain")!!) ?: error("请补充handle.yml中的onRegain脚本")
-        info("&e┣&7Handle loaded &a√".colored())
+        consoleMessage("&e┣&7Handle loaded &a√")
     }
 
     fun runProcessor(damageProcessor: DamageProcessor): Double {

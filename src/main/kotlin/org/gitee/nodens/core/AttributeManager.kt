@@ -8,6 +8,7 @@ import org.gitee.nodens.core.attribute.Mapping
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.condition.ICondition
 import org.gitee.nodens.util.ConfigLazy
+import org.gitee.nodens.util.consoleMessage
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files
 import org.gitee.nodens.util.mergeValues
@@ -62,14 +63,14 @@ object AttributeManager {
                 instance.numbers.forEach { (_, number) ->
                     number.config.keys.forEach { key ->
                         ATTRIBUTE_MATCHING_MAP.put(key, number)
-                        debug("&e┣&7AttributeKey $key loaded &a√".colored())
+                        debug("&e┣&7AttributeKey $key loaded &a√")
                     }
                 }
             }
         }
         // 加载 Js 属性
         JavaScript.reload()
-        info("&e┣&7AttributeMatchingMap loaded &a√".colored())
+        consoleMessage("&e┣&7AttributeMatchingMap loaded &a√")
     }
 
     fun getConfig(group: String, key: String): AttributeConfig {

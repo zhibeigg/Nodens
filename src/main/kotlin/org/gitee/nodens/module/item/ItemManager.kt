@@ -18,6 +18,7 @@ import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.generator.NormalGenerator
 import org.gitee.nodens.module.ui.ItemConfigManagerUI
 import org.gitee.nodens.util.ConfigLazy
+import org.gitee.nodens.util.DragonCorePlugin
 import org.gitee.nodens.util.context
 import org.gitee.nodens.util.files
 import org.gitee.nodens.util.getConfig
@@ -36,7 +37,9 @@ object ItemManager {
 
     val itemConfigs = mutableMapOf<String, ItemConfig>()
     private val heldItemArmourersMap by unsafeLazy { mutableMapOf<UUID, List<String>?>() }
-    private val enableArmourers by lazy { Bukkit.getPluginManager().isPluginEnabled("DragonArmourers") }
+    private val enableArmourers by unsafeLazy { Bukkit.getPluginManager().isPluginEnabled("DragonArmourers") }
+
+    private val dragonCoreIsEnabled by unsafeLazy { DragonCorePlugin.isEnabled }
 
     val dragoncoreSlots by ConfigLazy(Nodens.config) { getStringList("update-dragoncore-slots") }
 
@@ -138,15 +141,17 @@ object ItemManager {
     }
 
     private fun updateInventory(player: Player) {
-        dragoncoreSlots.forEach {
-            val item = SlotAPI.getCacheSlotItem(player, it)
-            if (item.isAir()) return
-            val context = item.context() ?: return
-            val config = getItemConfig(context.key) ?: return
-            if (config.isUpdate && config.hashCode != context.hashcode) {
-                val new = updateItem(player, item)
-                SlotAPI.setSlotItem(player, it, new, false)
-                NodensItemUpdateEvents.Post(item, new).call()
+        if (dragonCoreIsEnabled) {
+            dragoncoreSlots.forEach {
+                val item = SlotAPI.getCacheSlotItem(player, it)
+                if (item.isAir()) return
+                val context = item.context() ?: return
+                val config = getItemConfig(context.key) ?: return
+                if (config.isUpdate && config.hashCode != context.hashcode) {
+                    val new = updateItem(player, item)
+                    SlotAPI.setSlotItem(player, it, new, false)
+                    NodensItemUpdateEvents.Post(item, new).call()
+                }
             }
         }
         updateBukkitInventory(player)

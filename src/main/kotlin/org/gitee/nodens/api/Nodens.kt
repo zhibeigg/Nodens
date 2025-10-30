@@ -4,6 +4,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.gitee.nodens.api.interfaces.INodensAPI
 import org.gitee.nodens.common.Handle.handle
 import org.gitee.nodens.core.reload.Reload
+import org.gitee.nodens.util.consoleMessage
 import taboolib.common.LifeCycle
 import taboolib.common.env.RuntimeDependencies
 import taboolib.common.env.RuntimeDependency
@@ -25,7 +26,7 @@ object Nodens {
     private fun load() {
         config.reload()
         handle.reload()
-        info("&e┣&7Config loaded &a√".colored())
+        consoleMessage("&e┣&7Config loaded &a√")
     }
 
     private var api: INodensAPI? = null

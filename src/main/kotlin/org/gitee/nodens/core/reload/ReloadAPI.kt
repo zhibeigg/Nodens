@@ -3,6 +3,7 @@ package org.gitee.nodens.core.reload
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.api.events.NodensPluginReloadEvent
 import org.gitee.nodens.api.interfaces.IReloadAPI
+import org.gitee.nodens.util.consoleMessage
 import org.gitee.nodens.util.debug
 import taboolib.common.LifeCycle
 import taboolib.common.inject.ClassVisitor
@@ -32,14 +33,14 @@ object ReloadAPI: IReloadAPI, ClassVisitor(3) {
                 owner.getInstance() ?: return,
                 method.getAnnotation(Reload::class.java).enum("weight")
             )
-            debug("&e┣&7Reload loaded &e${method.owner.name}/${method.name} &a√".colored())
+            debug("&e┣&7Reload loaded &e${method.owner.name}/${method.name} &a√")
         }
     }
 
     override fun reload() {
         val event = NodensPluginReloadEvent()
         if (event.call()) {
-            info("&e┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".colored())
+            consoleMessage("&e┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             Nodens.config.reload()
             val extensions = event.getFunctions()
             val weights = (methodList.map { it.weight } + extensions.map { it.weight }).distinct()
@@ -51,7 +52,7 @@ object ReloadAPI: IReloadAPI, ClassVisitor(3) {
                     it.run()
                 }
             }
-            info("&e┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".colored())
+            consoleMessage("&e┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         }
     }
 

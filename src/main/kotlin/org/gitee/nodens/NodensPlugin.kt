@@ -2,6 +2,7 @@ package org.gitee.nodens
 
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.api.NodensAPI
+import org.gitee.nodens.util.consoleMessage
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Plugin
 import taboolib.common.platform.function.disablePlugin
@@ -23,11 +24,13 @@ object NodensPlugin : Plugin() {
 
     override fun onEnable() {
         println()
-        println("§9    /|    / /")
-        println("§9   //|   / /      ___        ___   /      ___         __        ___")
-        println("§9  // |  / /     //   ) )   //   ) /     //___) )   //   ) )   ((   ) )  §8Nodens §eversion§7: §e$pluginVersion")
-        println("§9 //  | / /     //   / /   //   / /     //         //   / /     \\ \\    §7by. §bzhibei")
-        println("§9//   |/ /     ((___/ /   ((___/ /     ((____     //   / /   //   ) )")
+        consoleMessage(
+            "§9    /|    / /",
+            "§9   //|   / /      ___        ___   /      ___         __        ___",
+            "§9  // |  / /     //   ) )   //   ) /     //___) )   //   ) )   ((   ) )  §8Nodens §eversion§7: §e$pluginVersion",
+            "§9 //  | / /     //   / /   //   / /     //         //   / /     \\ \\    §7by. §bzhibei",
+            "§9//   |/ /     ((___/ /   ((___/ /     ((____     //   / /   //   ) )"
+        )
         println()
     }
 }

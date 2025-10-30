@@ -93,7 +93,7 @@ object JavaScript: IAttributeGroup {
 
                     attribute.config.keys.forEach { key ->
                         ATTRIBUTE_MATCHING_MAP.put(key, attribute)
-                        debug("&e┣&7AttributeKey $key loaded &a√ &7- &cJs".colored())
+                        debug("&e┣&7AttributeKey $key loaded &a√ &7- &cJs")
                     }
                 }
             } catch (e: Exception) {

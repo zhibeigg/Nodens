@@ -4,6 +4,7 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.common.FastMatchingMap
 import org.gitee.nodens.core.reload.Reload
+import org.gitee.nodens.util.consoleMessage
 import taboolib.common.LifeCycle
 import taboolib.common.io.runningClassesWithoutLibrary
 import taboolib.common.platform.Awake
@@ -32,8 +33,10 @@ object ConditionManager {
                 }
             }
         }
-        info("&e┣&7ConditionMatchingMap loaded &a√".colored())
-        info("&e┣&7Condition loaded &e${conditionMap.size} &a√".colored())
+        consoleMessage(
+            "&e┣&7ConditionMatchingMap loaded &a√",
+            "&e┣&7Condition loaded &e${conditionMap.size} &a√"
+        )
     }
 
     /**

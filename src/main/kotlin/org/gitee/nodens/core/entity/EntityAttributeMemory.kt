@@ -25,6 +25,8 @@ import org.gitee.nodens.core.attribute.Speed
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.condition.ConditionManager
 import org.gitee.nodens.util.ConfigLazy
+import org.gitee.nodens.util.DragonCorePlugin
+import org.gitee.nodens.util.consoleMessage
 import org.gitee.nodens.util.ensureSync
 import org.gitee.nodens.util.mergeValues
 import taboolib.common.LifeCycle
@@ -35,6 +37,7 @@ import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import taboolib.common.platform.service.PlatformExecutor
+import taboolib.common.util.unsafeLazy
 import taboolib.module.chat.colored
 import taboolib.platform.util.onlinePlayers
 import java.util.*
@@ -47,6 +50,8 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         internal val entityAttributeMemoriesMap = hashMapOf<UUID, EntityAttributeMemory>()
         private var regainTask: PlatformExecutor.PlatformTask? = null
+
+        private val dragonCoreIsEnabled by unsafeLazy { DragonCorePlugin.isEnabled }
 
         private val attributeDragoncoreSlots by ConfigLazy(Nodens.config) { getStringList("attribute-dragoncore-slots") }
         private val attributeCatch = Caffeine.newBuilder()
@@ -126,7 +131,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
                     submit { processor.callRegain() }
                 }
             }
-            info("&e┣&7RegainTask loaded &a√".colored())
+            consoleMessage("&e┣&7RegainTask loaded &a√")
         }
 
         fun ItemStack.getItemAttribute(): List<IAttributeData> {
@@ -175,7 +180,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         add(entity.equipment?.boots, mapOf(ConditionManager.SLOT_DATA_KEY to "boots"))
         add(entity.equipment?.itemInMainHand, mapOf(ConditionManager.SLOT_DATA_KEY to "main-hand"))
         add(entity.equipment?.itemInOffHand, mapOf(ConditionManager.SLOT_DATA_KEY to "off-hand"))
-        if (entity is Player) {
+        if (entity is Player && dragonCoreIsEnabled) {
             attributeDragoncoreSlots.forEach { id ->
                 val item = SlotAPI.getCacheSlotItem(entity, id) ?: return@forEach
                 add(item, mapOf(ConditionManager.SLOT_DATA_KEY to "dragoncore", ConditionManager.SLOT_IDENTIFY_KEY to id))

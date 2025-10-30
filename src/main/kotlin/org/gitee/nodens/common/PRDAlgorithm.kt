@@ -1,6 +1,7 @@
 package org.gitee.nodens.common
 
 import kotlinx.serialization.json.Json
+import org.gitee.nodens.util.consoleMessage
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getDataFolder
@@ -20,7 +21,7 @@ object PRDAlgorithm {
     fun initCache() {
         val file = File(getDataFolder(), "PRDCache.json")
         if (!file.exists()) {
-            info("&e┣&7检测到PRD算法C值未缓存，开始计算并写入缓存文件......".colored())
+            consoleMessage("&e┣&7检测到PRD算法C值未缓存，开始计算并写入缓存文件......")
             var percent = 0.00
             while (percent < 0.5) {
                 percent = BigDecimal.valueOf(percent + 0.01)
@@ -28,13 +29,13 @@ object PRDAlgorithm {
                     .toDouble()
                 val c = ptoC(percent)
                 cacheMap[percent] = c
-                info("&e┣&7计算成功 Percent: $percent c=${c} &a√".colored())
+                consoleMessage("&e┣&7计算成功 Percent: $percent c=${c} &a√")
             }
             file.writeText(Json.encodeToString(cacheMap))
-            info("&e┣&7写入C值缓存文件成功 &a√".colored())
+            consoleMessage("&e┣&7写入C值缓存文件成功 &a√")
         } else {
             cacheMap = Json.decodeFromString(file.readText())
-            info("&e┣&7检测到PRD算法C值缓存 加载成功 &a√".colored())
+            consoleMessage("&e┣&7检测到PRD算法C值缓存 加载成功 &a√")
         }
     }
 
