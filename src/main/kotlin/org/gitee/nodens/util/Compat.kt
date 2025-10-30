@@ -22,3 +22,5 @@ class Plugin(val name: String, val extensionFunction: () -> Unit = {}) {
 val MythicMobsPlugin = Plugin("MythicMobs")
 
 val GlowAPIPlugin = Plugin("GlowAPI")
+
+val RedisChannelPlugin = Plugin("RedisChannel")

@@ -13,16 +13,19 @@ interface ISyncCache {
 
     companion object {
 
-        internal val exArgs = HSetExArgs().ex(Duration.ofHours(3))
         const val GLOBAL_DROP = "nodens@global@drop"
 
         lateinit var INSTANCE: ISyncCache
 
         @Awake(LifeCycle.ENABLE)
         private fun init() {
-            INSTANCE = when(RedisChannelPlugin.type) {
-                CLUSTER -> RedisClusterManager()
-                SINGLE -> RedisManager()
+            INSTANCE = if (org.gitee.nodens.util.RedisChannelPlugin.isEnabled) {
+                when(RedisChannelPlugin.type) {
+                    CLUSTER -> RedisClusterManager(HSetExArgs().ex(Duration.ofHours(3)))
+                    SINGLE -> RedisManager(HSetExArgs().ex(Duration.ofHours(3)))
+                }
+            } else {
+                JSONManager()
             }
         }
     }
