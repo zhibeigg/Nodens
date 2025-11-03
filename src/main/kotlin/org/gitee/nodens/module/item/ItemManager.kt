@@ -2,6 +2,7 @@ package org.gitee.nodens.module.item
 
 import eos.moe.armourers.api.DragonAPI
 import eos.moe.armourers.api.PlayerSkinUpdateEvent
+import eos.moe.dragoncore.api.FutureSlotAPI
 import eos.moe.dragoncore.api.SlotAPI
 import eos.moe.dragoncore.database.IDataBase
 import org.bukkit.Bukkit
@@ -102,23 +103,19 @@ object ItemManager {
 
     @SubscribeEvent
     private fun join(e: PlayerJoinEvent) {
-        dragoncoreSlots.forEach {
-            SlotAPI.getSlotItem(e.player, it, object : IDataBase.Callback<ItemStack> {
-
-                override fun onResult(item: ItemStack?) {
-                    if (item.isAir()) return
-                    val context = item.context() ?: return
-                    val config = getItemConfig(context.key) ?: return
+        if (dragonCoreIsEnabled) {
+            dragoncoreSlots.forEach {
+                FutureSlotAPI.getSlotItem(e.player, it).thenAccept { item ->
+                    if (item.isAir()) return@thenAccept
+                    val context = item.context() ?: return@thenAccept
+                    val config = getItemConfig(context.key) ?: return@thenAccept
                     if (config.isUpdate && config.hashCode != context.hashcode) {
                         val new = updateItem(e.player, item)
                         SlotAPI.setSlotItem(e.player, it, new, false)
                         NodensItemUpdateEvents.Post(item, new).call()
                     }
                 }
-
-                override fun onFail() {
-                }
-            })
+            }
         }
         updateBukkitInventory(e.player)
         updateSkin(e.player)
