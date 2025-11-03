@@ -8,8 +8,6 @@ import org.gitee.nodens.util.consoleMessage
 import taboolib.common.LifeCycle
 import taboolib.common.io.runningClassesWithoutLibrary
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.info
-import taboolib.module.chat.colored
 
 object ConditionManager {
 
