@@ -142,16 +142,17 @@ object ItemManager {
     }
 
     private fun updateInventory(player: Player) {
-        if (!dragonCoreIsEnabled) return
-        dragoncoreSlots.forEach {
-            val item = SlotAPI.getCacheSlotItem(player, it)
-            if (item.isAir()) return
-            val context = item.context() ?: return
-            val config = getItemConfig(context.key) ?: return
-            if (config.isUpdate && config.hashCode != context.hashcode) {
-                val new = updateItem(player, item)
-                SlotAPI.setSlotItem(player, it, new, false)
-                NodensItemUpdateEvents.Post(item, new).call()
+        if (dragonCoreIsEnabled) {
+            dragoncoreSlots.forEach {
+                val item = SlotAPI.getCacheSlotItem(player, it)
+                if (item.isAir()) return
+                val context = item.context() ?: return
+                val config = getItemConfig(context.key) ?: return
+                if (config.isUpdate && config.hashCode != context.hashcode) {
+                    val new = updateItem(player, item)
+                    SlotAPI.setSlotItem(player, it, new, false)
+                    NodensItemUpdateEvents.Post(item, new).call()
+                }
             }
         }
         updateBukkitInventory(player)
