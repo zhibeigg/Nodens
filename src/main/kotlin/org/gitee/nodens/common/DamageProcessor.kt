@@ -1,6 +1,5 @@
 package org.gitee.nodens.common
 
-import org.bukkit.Bukkit
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
@@ -18,6 +17,8 @@ import org.gitee.nodens.util.comparePriority
  * @param defender 防御者
  * */
 class DamageProcessor(damageType: String, val attacker: LivingEntity, val defender: LivingEntity) {
+
+    private var damageCache: Double? = null
 
     val damageType = damageType.uppercase()
     var scale = 1.0
@@ -37,6 +38,7 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
                 defenceSources.remove("$NODENS_NAMESPACE${Crit.name}${Crit.CritAddonResistance.name}")
                 this.crit = false
             }
+            refresh()
         }
     }
 
@@ -66,6 +68,7 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
 
     fun addDamageSource(key: String, attribute: IAttributeGroup.Number, damage: Double) {
         damageSources[key] = DamageSource(key, attribute, damage)
+        refresh()
     }
 
     fun getDefenceSource(key: String): DefenceSource? {
@@ -74,10 +77,20 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
 
     fun addDefenceSource(key: String, attribute: IAttributeGroup.Number, defence: Double) {
         defenceSources[key] = DefenceSource(key, attribute, defence)
+        refresh()
     }
 
     fun getFinalDamage(): Double {
-        return Handle.runProcessor(this).coerceAtLeast(0.0)
+        if (damageCache == null) {
+            damageCache = Handle.runProcessor(this).coerceAtLeast(0.0)
+        }
+        return damageCache!!
+    }
+
+    fun refresh() {
+        if (damageCache != null) {
+            damageCache = null
+        }
     }
 
     fun onDamage(priority: Int, callback: (damage: Double) -> Unit) {

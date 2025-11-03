@@ -10,6 +10,7 @@ import org.gitee.nodens.util.comparePriority
 // reason NATURAL
 class RegainProcessor(reason: String, val healer: LivingEntity, val passive: LivingEntity) {
 
+    private var regainCache: Double? = null
     val reason = reason.uppercase()
     var scale = 1.0
 
@@ -43,6 +44,7 @@ class RegainProcessor(reason: String, val healer: LivingEntity, val passive: Liv
 
     fun addRegainSource(key: String, attribute: IAttributeGroup.Number, regain: Double) {
         regainSources[key] = RegainSource(key, attribute, regain)
+        refresh()
     }
 
     fun getReduceSource(key: String): ReduceSource? {
@@ -51,10 +53,20 @@ class RegainProcessor(reason: String, val healer: LivingEntity, val passive: Liv
 
     fun addReduceSource(key: String, attribute: IAttributeGroup.Number, reduce: Double) {
         reduceSources[key] = ReduceSource(key, attribute, reduce)
+        refresh()
     }
 
     fun getFinalRegain(): Double {
-        return Handle.runProcessor(this).coerceAtLeast(0.0)
+        if (regainCache == null) {
+            regainCache = Handle.runProcessor(this).coerceAtLeast(0.0)
+        }
+        return regainCache!!
+    }
+
+    fun refresh() {
+        if (regainCache != null) {
+            regainCache = null
+        }
     }
 
     fun onRegain(priority: Int, callback: (damage: Double) -> Unit) {
