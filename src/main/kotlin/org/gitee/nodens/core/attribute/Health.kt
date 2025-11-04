@@ -12,8 +12,8 @@ import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.RANGE
 import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.SINGLE
 import org.gitee.nodens.core.attribute.Crit.MagicChance
+import org.gitee.nodens.util.MonitorLazy
 import org.gitee.nodens.util.NODENS_NAMESPACE
-import org.gitee.nodens.util.ReloadableLazy
 import org.gitee.nodens.util.addBukkitAttribute
 import org.gitee.nodens.util.maxHealth
 import taboolib.common.util.random
@@ -41,7 +41,7 @@ object Health: IAttributeGroup {
         override val group: IAttributeGroup
             get() = Health
 
-        val period by ReloadableLazy({ config }) { config.getLong("period", 20) }
+        val period by MonitorLazy({ config }) { config.getLong("period", 20) }
 
         override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             if (regainProcessor.reason == NATURAL_REASON) {

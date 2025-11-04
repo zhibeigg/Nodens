@@ -3,27 +3,10 @@ package org.gitee.nodens.util
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DigitalParser
+import org.gitee.nodens.core.reload.ReloadAPI
 import taboolib.module.configuration.Configuration
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
-
-class ReloadableLazy<T>(private val check: () -> Any?, private val initializer: () -> T) : ReadOnlyProperty<Any?, T> {
-    private var cached: T? = null
-    private var initialized: Boolean = false
-    private var lastHash: Int? = null
-
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        val current = check()
-        val currentHash = current.hashCode()
-        if (!initialized || lastHash != currentHash) {
-            cached = initializer()
-            initialized = true
-            lastHash = currentHash
-        }
-        @Suppress("UNCHECKED_CAST")
-        return cached as T
-    }
-}
 
 fun mergeValues(vararg values: DigitalParser.Value): Map<DigitalParser.Type, DoubleArray> {
     val group = values.groupBy { it.type }
@@ -42,17 +25,35 @@ fun mergeValues(vararg values: DigitalParser.Value): Map<DigitalParser.Type, Dou
     return map
 }
 
-class ConfigLazy<T>(val config: Configuration, private val initializer: Configuration.() -> T) : ReadOnlyProperty<Any?, T> {
+class MonitorLazy<T>(private val check: () -> Any?, private val initializer: () -> T) : ReadOnlyProperty<Any?, T> {
     private var cached: T? = null
     private var initialized: Boolean = false
     private var lastHash: Int? = null
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        val currentHash = config.toString().hashCode()
+        val current = check()
+        val currentHash = current.hashCode()
         if (!initialized || lastHash != currentHash) {
-            cached = initializer(config)
+            cached = initializer()
             initialized = true
             lastHash = currentHash
+        }
+        @Suppress("UNCHECKED_CAST")
+        return cached as T
+    }
+}
+
+class ConfigLazy<T>(private val initializer: () -> T) : ReadOnlyProperty<Any?, T> {
+    private var cached: T? = null
+    private var initialized: Boolean = false
+    private var lastMark: Short? = null
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        val currentMark = ReloadAPI.reloadMark
+        if (!initialized || lastMark != currentMark) {
+            cached = initializer()
+            initialized = true
+            lastMark = currentMark
         }
         @Suppress("UNCHECKED_CAST")
         return cached as T

@@ -27,7 +27,7 @@ object AttributeManager {
     private val attributeNumberConfigs = hashMapOf<String, HashMap<String, AttributeConfig>>()
     internal val ATTRIBUTE_MATCHING_MAP = FastMatchingMap<IAttributeGroup.Number>()
 
-    val healthScaled by ConfigLazy(Nodens.config) { getBoolean("healthScaled", true) }
+    val healthScaled by ConfigLazy { Nodens.config.getBoolean("healthScaled", true) }
 
     @Reload(0)
     @Awake(LifeCycle.ENABLE)

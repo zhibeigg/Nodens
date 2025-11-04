@@ -10,7 +10,7 @@ import taboolib.common5.cint
 
 object LevelCondition: ICondition {
 
-    override val keywords by ConfigLazy(Nodens.config) { getStringList("condition.level.keywords") }
+    override val keywords by ConfigLazy { Nodens.config.getStringList("condition.level.keywords") }
 
     override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String?, map: Map<String, String>): Boolean {
         remain ?: return true

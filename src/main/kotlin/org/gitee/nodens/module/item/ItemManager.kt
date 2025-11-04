@@ -42,7 +42,7 @@ object ItemManager {
 
     private val dragonCoreIsEnabled by unsafeLazy { DragonCorePlugin.isEnabled }
 
-    val dragoncoreSlots by ConfigLazy(Nodens.config) { getStringList("update-dragoncore-slots") }
+    val dragoncoreSlots by ConfigLazy { Nodens.config.getStringList("update-dragoncore-slots") }
 
     @Reload(0)
     @Awake(LifeCycle.ENABLE)

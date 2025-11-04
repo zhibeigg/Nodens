@@ -10,17 +10,17 @@ import org.gitee.nodens.util.ConfigLazy
 
 object SlotCondition: ICondition {
 
-    override val keywords by ConfigLazy(Nodens.config) { getStringList("condition.slot.keywords") }
+    override val keywords by ConfigLazy { getStringList("condition.slot.keywords") }
 
-    val mainHand by ConfigLazy(Nodens.config) { getStringList("condition.slot.pattern.main-hand") }
-    val offHand by ConfigLazy(Nodens.config) { getStringList("condition.slot.pattern.off-hand") }
-    val helmet by ConfigLazy(Nodens.config) { getStringList("condition.slot.pattern.helmet") }
-    val chestplate by ConfigLazy(Nodens.config) { getStringList("condition.slot.pattern.chestplate") }
-    val leggings by ConfigLazy(Nodens.config) { getStringList("condition.slot.pattern.leggings") }
-    val boots by ConfigLazy(Nodens.config) { getStringList("condition.slot.pattern.boots") }
-    val dragoncoreSlots by ConfigLazy(Nodens.config) {
-        getConfigurationSection("condition.slot.pattern.dragoncore-slot")?.getKeys(false)?.associate { key ->
-            key to getStringList("condition.slot.pattern.dragoncore-slot.$key")
+    val mainHand by ConfigLazy { Nodens.config.getStringList("condition.slot.pattern.main-hand") }
+    val offHand by ConfigLazy { Nodens.config.getStringList("condition.slot.pattern.off-hand") }
+    val helmet by ConfigLazy { Nodens.config.getStringList("condition.slot.pattern.helmet") }
+    val chestplate by ConfigLazy { Nodens.config.getStringList("condition.slot.pattern.chestplate") }
+    val leggings by ConfigLazy { Nodens.config.getStringList("condition.slot.pattern.leggings") }
+    val boots by ConfigLazy { Nodens.config.getStringList("condition.slot.pattern.boots") }
+    val dragoncoreSlots by ConfigLazy {
+        Nodens.config.getConfigurationSection("condition.slot.pattern.dragoncore-slot")?.getKeys(false)?.associate { key ->
+            key to Nodens.config.getStringList("condition.slot.pattern.dragoncore-slot.$key")
         }
     }
 

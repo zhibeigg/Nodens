@@ -53,7 +53,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         private val dragonCoreIsEnabled by unsafeLazy { DragonCorePlugin.isEnabled }
 
-        private val attributeDragoncoreSlots by ConfigLazy(Nodens.config) { getStringList("attribute-dragoncore-slots") }
+        private val attributeDragoncoreSlots by ConfigLazy { Nodens.config.getStringList("attribute-dragoncore-slots") }
         private val attributeCatch = Caffeine.newBuilder()
             .initialCapacity(50)
             .maximumSize(100)

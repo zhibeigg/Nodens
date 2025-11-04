@@ -13,9 +13,9 @@ import taboolib.module.kether.orNull
 
 object JobCondition: ICondition {
 
-    override val keywords by ConfigLazy(Nodens.config) { getStringList("condition.job.keywords") }
+    override val keywords by ConfigLazy { Nodens.config.getStringList("condition.job.keywords") }
 
-    val pattern by ConfigLazy(Nodens.config) { getMap("condition.job.pattern") }
+    val pattern by ConfigLazy { Nodens.config.getMap("condition.job.pattern") }
 
     override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String?, map: Map<String, String>): Boolean {
         remain ?: return true

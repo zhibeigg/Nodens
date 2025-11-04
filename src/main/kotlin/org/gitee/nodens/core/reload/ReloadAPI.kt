@@ -18,6 +18,8 @@ import taboolib.module.chat.colored
 @Awake
 object ReloadAPI: IReloadAPI, ClassVisitor(3) {
 
+    var reloadMark: Short = 0
+
     class ReloadFunction(val method: ClassMethod, val obj: Any, val weight: Int)
 
     override fun getLifeCycle(): LifeCycle {
@@ -52,6 +54,7 @@ object ReloadAPI: IReloadAPI, ClassVisitor(3) {
                     it.run()
                 }
             }
+            reloadMark ++
             consoleMessage("&e┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         }
     }

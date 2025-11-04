@@ -11,9 +11,9 @@ import java.util.Timer
 
 object TimeCondition: ICondition {
 
-    override val keywords by ConfigLazy(Nodens.config) { getStringList("condition.time.keywords") }
+    override val keywords by ConfigLazy { Nodens.config.getStringList("condition.time.keywords") }
 
-    val pattern by ConfigLazy(Nodens.config) { getString("condition.time.pattern", "-")!! }
+    val pattern by ConfigLazy { Nodens.config.getString("condition.time.pattern", "-")!! }
 
     override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String?, map: Map<String, String>): Boolean {
         remain ?: return true
