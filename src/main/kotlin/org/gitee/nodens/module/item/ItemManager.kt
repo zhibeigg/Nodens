@@ -79,6 +79,7 @@ object ItemManager {
         e.player.inventory.armorContents.forEach { item ->
             item?.getConfig()?.armourers?.let { list += it }
         }
+        if (heldItemArmourersMap[e.player.uniqueId] == list) return
         heldItemArmourersMap[e.player.uniqueId] = list
         DragonAPI.updatePlayerSkin(e.player)
     }
@@ -134,6 +135,7 @@ object ItemManager {
         player.inventory.armorContents.forEach { item ->
             item?.getConfig()?.armourers?.let { list += it }
         }
+        if (heldItemArmourersMap[player.uniqueId] == list) return
         heldItemArmourersMap[player.uniqueId] = list
         DragonAPI.updatePlayerSkin(player)
     }
