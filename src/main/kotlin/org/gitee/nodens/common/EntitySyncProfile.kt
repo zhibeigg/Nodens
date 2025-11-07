@@ -20,9 +20,13 @@ class EntitySyncProfile(val entity: LivingEntity) {
                 try {
                     if (attribute == Attribute.GENERIC_MOVEMENT_SPEED) {
                         val player = entity as? Player ?: return
-                        player.walkSpeed = value.toFloat()
+                        if (player.walkSpeed != value.toFloat()) {
+                            player.walkSpeed = value.toFloat()
+                        }
                     } else {
-                        attributeInstant.baseValue = value
+                        if (attributeInstant.baseValue != value) {
+                            attributeInstant.baseValue = value
+                        }
                     }
                 } catch (e: IllegalArgumentException) {
                     warning(e.message)
@@ -40,9 +44,15 @@ class EntitySyncProfile(val entity: LivingEntity) {
         modifierMap.values.sortedBy { it.priority }.forEach {
             it.apply(entity)
         }
-        if (AttributeManager.healthScaled && entity is Player) {
-            entity.isHealthScaled = true
-            entity.healthScale = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.defaultValue / entity.maxHealth()
+        if (entity is Player) {
+            if (AttributeManager.healthScaled && (!entity.isHealthScaled || entity.healthScale != 40.0)) {
+                entity.isHealthScaled = true
+                entity.healthScale = 40.0
+            } else {
+                if (entity.isHealthScaled) {
+                    entity.isHealthScaled = false
+                }
+            }
         }
     }
 
