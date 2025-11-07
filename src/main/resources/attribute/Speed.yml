@@ -3,6 +3,7 @@ Attack:
   valueType: SINGLE
   handlePriority: 1
   syncPriority: 1
+  default: 0.2
   keys:
     - 攻击速度
     - 攻速加成
@@ -11,6 +12,7 @@ Move:
   valueType: SINGLE
   handlePriority: 1
   syncPriority: 1
+  default: 0.2
   keys:
     - 移动速度
     - 移速加成

@@ -3,6 +3,7 @@ Max:
   valueType: SINGLE
   handlePriority: 1
   syncPriority: 1
+  default: 20
   keys:
     - 生命上限
     - 最大生命值

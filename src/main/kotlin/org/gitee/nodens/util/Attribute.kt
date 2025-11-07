@@ -6,13 +6,15 @@ import org.gitee.nodens.common.DigitalParser.Type.COUNT
 import org.gitee.nodens.common.DigitalParser.Type.PERCENT
 import org.gitee.nodens.common.EntitySyncProfile
 import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.attribute.ISyncDefault
 
 fun IAttributeGroup.Number.addBukkitAttribute(attribute: Attribute, entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>) {
     ensureSync {
+        val default = (this as? ISyncDefault)?.default ?: return@ensureSync
         var value = 0.0
         valueMap.forEach { (type, double) ->
-            value += when(type) {
-                PERCENT -> ((valueMap[COUNT]?.get(0) ?: 0.0) + entitySyncProfile.entity.getAttribute(attribute)!!.defaultValue) * double[0]
+            value += when (type) {
+                PERCENT -> ((valueMap[COUNT]?.get(0) ?: 0.0) + default) * double[0]
                 COUNT -> double[0]
             }
         }
@@ -21,7 +23,7 @@ fun IAttributeGroup.Number.addBukkitAttribute(attribute: Attribute, entitySyncPr
             EntitySyncProfile.PriorityModifier(
                 attribute,
                 this,
-                value,
+                value + default,
                 config.syncPriority
             )
         )
