@@ -31,4 +31,10 @@ object Speed: IAttributeGroup {
             addBukkitAttribute(Attribute.GENERIC_MOVEMENT_SPEED, entitySyncProfile, valueMap)
         }
     }
+
+    object Skill: AbstractSyncNumber() {
+
+        override val group: IAttributeGroup
+            get() = Speed
+    }
 }

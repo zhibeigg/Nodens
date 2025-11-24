@@ -5,8 +5,6 @@ import org.gitee.nodens.util.consoleMessage
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
-import taboolib.module.chat.colored
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode

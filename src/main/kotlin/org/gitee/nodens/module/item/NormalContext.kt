@@ -18,6 +18,10 @@ data class NormalContext(override val key: String, private val variable: HashMap
         return restore(variable[key]?.value)
     }
 
+    fun remove(key: String): Any? {
+        return restore(variable.remove(key))
+    }
+
     private fun restore(value: Any?): Any? {
         return when (value) {
             is List<*> -> value.map { restore((it as Variable<*>).value) }

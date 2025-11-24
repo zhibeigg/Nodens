@@ -49,7 +49,7 @@ taboolib {
     relocate("com.github.benmanes.caffeine", "org.gitee.nodens.caffeine")
     relocate("com.eatthepath.uuid", "org.gitee.nodens.eatthepath.uuid")
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
-    version { taboolib = "6.2.3-b217935" }
+    version { taboolib = "6.2.4-3b3cd67" }
 }
 
 repositories {
@@ -69,7 +69,7 @@ dependencies {
     compileOnly("org.eldergod.ext:DragonArmourers:6.72")
     compileOnly("org.eldergod.ext:MythicMobs:4.11.0")
     compileOnly("org.eldergod.ext:GlowAPI:1.4.6")
-    compileOnly("org.gitee.orryx:Orryx:latest.release:api")
+    compileOnly("org.gitee.orryx:orryx:latest.release:api")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     compileOnly("com.eatthepath:fast-uuid:0.2.0")
