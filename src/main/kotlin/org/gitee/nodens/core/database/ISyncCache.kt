@@ -23,6 +23,7 @@ interface ISyncCache {
                 when(RedisChannelPlugin.type) {
                     CLUSTER -> RedisClusterManager(HSetExArgs().ex(Duration.ofHours(3)))
                     SINGLE -> RedisManager(HSetExArgs().ex(Duration.ofHours(3)))
+                    null -> error("Redis 炸了")
                 }
             } else {
                 JSONManager()
