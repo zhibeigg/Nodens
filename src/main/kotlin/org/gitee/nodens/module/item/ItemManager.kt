@@ -4,7 +4,6 @@ import eos.moe.armourers.api.DragonAPI
 import eos.moe.armourers.api.PlayerSkinUpdateEvent
 import eos.moe.dragoncore.api.FutureSlotAPI
 import eos.moe.dragoncore.api.SlotAPI
-import eos.moe.dragoncore.database.IDataBase
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
@@ -18,11 +17,7 @@ import org.gitee.nodens.api.events.item.NodensItemUpdateEvents
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.generator.NormalGenerator
 import org.gitee.nodens.module.ui.ItemConfigManagerUI
-import org.gitee.nodens.util.ConfigLazy
-import org.gitee.nodens.util.DragonCorePlugin
-import org.gitee.nodens.util.context
-import org.gitee.nodens.util.files
-import org.gitee.nodens.util.getConfig
+import org.gitee.nodens.util.*
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.Ghost
@@ -37,7 +32,7 @@ import java.util.*
 object ItemManager {
 
     val itemConfigs = mutableMapOf<String, ItemConfig>()
-    private val heldItemArmourersMap by unsafeLazy { mutableMapOf<UUID, List<String>?>() }
+    private val heldItemArmourersMap by unsafeLazy { mutableMapOf<UUID, Set<String>>() }
     private val enableArmourers by unsafeLazy { Bukkit.getPluginManager().isPluginEnabled("DragonArmourers") }
 
     private val dragonCoreIsEnabled by unsafeLazy { DragonCorePlugin.isEnabled }
@@ -73,7 +68,7 @@ object ItemManager {
     @SubscribeEvent
     private fun held(e: PlayerItemHeldEvent) {
         if (!enableArmourers) return
-        val list = mutableListOf<String>()
+        val list = mutableSetOf<String>()
         e.player.inventory.getItem(e.newSlot)?.getConfig()?.armourers?.let { list += it }
         e.player.inventory.itemInOffHand.getConfig()?.armourers?.let { list += it }
         e.player.inventory.armorContents.forEach { item ->
@@ -129,7 +124,7 @@ object ItemManager {
 
     fun updateSkin(player: Player) {
         if (!enableArmourers) return
-        val list = mutableListOf<String>()
+        val list = mutableSetOf<String>()
         player.inventory.itemInMainHand.getConfig()?.armourers?.let { list += it }
         player.inventory.itemInOffHand.getConfig()?.armourers?.let { list += it }
         player.inventory.armorContents.forEach { item ->
