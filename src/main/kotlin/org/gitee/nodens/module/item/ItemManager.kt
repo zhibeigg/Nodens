@@ -87,7 +87,9 @@ object ItemManager {
     @Ghost
     @SubscribeEvent
     private fun updateArmourers(e: PlayerSkinUpdateEvent) {
-        e.skinList.addAll(heldItemArmourersMap[e.player.uniqueId] ?: return)
+        val set = (e.skinList + (heldItemArmourersMap[e.player.uniqueId] ?: return)).toSet()
+        e.skinList.clear()
+        e.skinList.addAll(set)
     }
 
     @SubscribeEvent
