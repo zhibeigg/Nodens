@@ -2,6 +2,11 @@ package org.gitee.nodens.module.item
 
 import kotlinx.serialization.Serializable
 
+interface Variable<T> {
+
+    val value: T?
+}
+
 @Serializable
 data class NullVariable(override val value: Nothing?): Variable<Nothing?>
 
