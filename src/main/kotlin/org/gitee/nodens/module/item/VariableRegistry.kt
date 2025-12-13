@@ -1,7 +1,12 @@
 package org.gitee.nodens.module.item
 
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -10,21 +15,67 @@ import taboolib.common.platform.Awake
 import kotlin.reflect.KClass
 
 /**
+ * Variable 序列化适配器接口
+ *
+ * 外部插件实现此接口来提供自定义 Variable 的序列化/反序列化逻辑，
+ * 无需依赖 kotlinx.serialization 的类型。
+ *
+ * @param T Variable 子类的类型
+ */
+interface VariableAdapter<T : Variable<*>> {
+
+    /**
+     * 序列化名称，用于 JSON 中的类型标识
+     * 例如: "SpiritItemVariable"
+     */
+    val serialName: String
+
+    /**
+     * Variable 子类的 Class
+     */
+    val variableClass: Class<T>
+
+    /**
+     * 将 Variable 序列化为 JSON 字符串
+     *
+     * @param variable 要序列化的 Variable 实例
+     * @return JSON 字符串表示
+     */
+    fun serialize(variable: T): String
+
+    /**
+     * 从 JSON 字符串反序列化为 Variable
+     *
+     * @param json JSON 字符串
+     * @return 反序列化后的 Variable 实例
+     */
+    fun deserialize(json: String): T
+}
+
+/**
  * Variable 注册中心
  *
- * 用于注册外部模块的 Variable 子类，使其支持 kotlinx.serialization 多态序列化。
+ * 用于注册外部模块的 Variable 子类，使其支持多态序列化。
  *
  * 使用示例：
  * ```kotlin
- * // 1. 定义你的 Variable 子类
- * @Serializable
- * @SerialName("SpiritItemVariable")
- * data class SpiritItemVariable(override val value: SpiritData) : Variable<SpiritData>
+ * // 1. 实现 VariableAdapter
+ * class SpiritItemVariableAdapter : VariableAdapter<SpiritItemVariable> {
+ *     override val serialName = "SpiritItemVariable"
+ *     override val variableClass = SpiritItemVariable::class.java
  *
- * // 2. 在插件加载时注册
- * VariableRegistry.register(SpiritItemVariable::class, SpiritItemVariable.serializer())
+ *     override fun serialize(variable: SpiritItemVariable): String {
+ *         // 使用你自己的 JSON 库序列化
+ *         return yourJson.encodeToString(variable)
+ *     }
  *
- * // 3. 注册完成后调用 rebuild() 重建 Json 实例
+ *     override fun deserialize(json: String): SpiritItemVariable {
+ *         return yourJson.decodeFromString(json)
+ *     }
+ * }
+ *
+ * // 2. 注册
+ * VariableRegistry.register(SpiritItemVariableAdapter())
  * VariableRegistry.rebuild()
  * ```
  *
@@ -41,35 +92,19 @@ object VariableRegistry {
      * 当前配置好的 Json 实例，支持已注册的 Variable 多态序列化
      */
     @Volatile
+    @JvmStatic
     var json: Json = buildJson()
         private set
 
     /**
-     * 注册一个 Variable 子类
+     * 使用 VariableAdapter 注册
      *
-     * @param kClass Variable 子类的 KClass
-     * @param serializer 该子类的序列化器
+     * @param adapter Variable 序列化适配器
      */
-    fun <T : Variable<*>> register(kClass: KClass<T>, serializer: KSerializer<T>) {
-        registeredSubclasses[kClass] = serializer
-    }
-
-    /**
-     * 注册一个 Variable 子类（内联版本）
-     *
-     * @param serializer 该子类的序列化器
-     */
-    inline fun <reified T : Variable<*>> register(serializer: KSerializer<T>) {
-        register(T::class, serializer)
-    }
-
-    /**
-     * 批量注册 Variable 子类
-     *
-     * @param entries 子类和序列化器的映射
-     */
-    fun registerAll(entries: Map<KClass<out Variable<*>>, KSerializer<out Variable<*>>>) {
-        registeredSubclasses.putAll(entries)
+    @JvmStatic
+    fun <T : Variable<*>> register(adapter: VariableAdapter<T>) {
+        val serializer = AdapterSerializer(adapter)
+        registeredSubclasses[adapter.variableClass.kotlin] = serializer
     }
 
     /**
@@ -77,6 +112,7 @@ object VariableRegistry {
      *
      * 在注册完所有 Variable 子类后调用此方法
      */
+    @JvmStatic
     fun rebuild() {
         json = buildJson()
     }
@@ -84,8 +120,9 @@ object VariableRegistry {
     /**
      * 检查是否已注册某个子类
      */
-    fun isRegistered(kClass: KClass<out Variable<*>>): Boolean {
-        return kClass in registeredSubclasses
+    @JvmStatic
+    fun isRegistered(clazz: Class<out Variable<*>>): Boolean {
+        return clazz.kotlin in registeredSubclasses
     }
 
     /**
@@ -93,6 +130,29 @@ object VariableRegistry {
      */
     fun getRegisteredClasses(): Set<KClass<out Variable<*>>> {
         return registeredSubclasses.keys.toSet()
+    }
+
+    /**
+     * 将 VariableAdapter 包装为 KSerializer
+     */
+    private class AdapterSerializer<T : Variable<*>>(
+        private val adapter: VariableAdapter<T>
+    ) : KSerializer<T> {
+
+        override val descriptor: SerialDescriptor =
+            PrimitiveSerialDescriptor(adapter.serialName, PrimitiveKind.STRING)
+
+        override fun serialize(encoder: Encoder, value: T) {
+            val jsonString = adapter.serialize(value)
+            val jsonElement = Json.parseToJsonElement(jsonString)
+            (encoder as JsonEncoder).encodeJsonElement(jsonElement)
+        }
+
+        override fun deserialize(decoder: Decoder): T {
+            val jsonElement = (decoder as JsonDecoder).decodeJsonElement()
+            val jsonString = jsonElement.toString()
+            return adapter.deserialize(jsonString)
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -129,7 +189,6 @@ object VariableRegistry {
 
     @Awake(LifeCycle.LOAD)
     fun init() {
-        // 初始化时构建默认的 Json 实例
         rebuild()
     }
 }
