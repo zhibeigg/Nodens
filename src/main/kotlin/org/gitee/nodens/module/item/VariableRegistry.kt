@@ -1,9 +1,8 @@
 package org.gitee.nodens.module.item
 
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
@@ -86,7 +85,7 @@ interface VariableAdapter<T : Variable<*>> {
  */
 object VariableRegistry {
 
-    private val registeredSubclasses = mutableMapOf<KClass<out Variable<*>>, KSerializer<out Variable<*>>>()
+    private val adapters = mutableMapOf<String, VariableAdapter<*>>()
 
     /**
      * 当前配置好的 Json 实例，支持已注册的 Variable 多态序列化
@@ -103,8 +102,7 @@ object VariableRegistry {
      */
     @JvmStatic
     fun <T : Variable<*>> register(adapter: VariableAdapter<T>) {
-        val serializer = AdapterSerializer(adapter)
-        registeredSubclasses[adapter.variableClass.kotlin] = serializer
+        adapters[adapter.serialName] = adapter
     }
 
     /**
@@ -122,37 +120,14 @@ object VariableRegistry {
      */
     @JvmStatic
     fun isRegistered(clazz: Class<out Variable<*>>): Boolean {
-        return clazz.kotlin in registeredSubclasses
+        return adapters.values.any { it.variableClass == clazz }
     }
 
     /**
-     * 获取所有已注册的子类
+     * 获取所有已注册的序列化名称
      */
-    fun getRegisteredClasses(): Set<KClass<out Variable<*>>> {
-        return registeredSubclasses.keys.toSet()
-    }
-
-    /**
-     * 将 VariableAdapter 包装为 KSerializer
-     */
-    private class AdapterSerializer<T : Variable<*>>(
-        private val adapter: VariableAdapter<T>
-    ) : KSerializer<T> {
-
-        override val descriptor: SerialDescriptor =
-            PrimitiveSerialDescriptor(adapter.serialName, PrimitiveKind.STRING)
-
-        override fun serialize(encoder: Encoder, value: T) {
-            val jsonString = adapter.serialize(value)
-            val jsonElement = Json.parseToJsonElement(jsonString)
-            (encoder as JsonEncoder).encodeJsonElement(jsonElement)
-        }
-
-        override fun deserialize(decoder: Decoder): T {
-            val jsonElement = (decoder as JsonDecoder).decodeJsonElement()
-            val jsonString = jsonElement.toString()
-            return adapter.deserialize(jsonString)
-        }
+    fun getRegisteredNames(): Set<String> {
+        return adapters.keys.toSet()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -174,8 +149,9 @@ object VariableRegistry {
                 subclass(MapVariable::class, MapVariable.serializer())
 
                 // 注册外部模块的 Variable 子类
-                registeredSubclasses.forEach { (kClass, serializer) ->
-                    subclass(kClass as KClass<Variable<*>>, serializer as KSerializer<Variable<*>>)
+                adapters.forEach { (serialName, adapter) ->
+                    val serializer = AdapterSerializer(adapter as VariableAdapter<Variable<*>>)
+                    subclass(adapter.variableClass.kotlin, serializer)
                 }
             }
         }
@@ -184,6 +160,33 @@ object VariableRegistry {
             serializersModule = module
             ignoreUnknownKeys = true
             encodeDefaults = true
+        }
+    }
+
+    /**
+     * 将 VariableAdapter 包装为 KSerializer
+     */
+    private class AdapterSerializer<T : Variable<*>>(
+        private val adapter: VariableAdapter<T>
+    ) : KSerializer<T> {
+
+        override val descriptor: SerialDescriptor = buildClassSerialDescriptor(adapter.serialName)
+
+        override fun serialize(encoder: Encoder, value: T) {
+            val jsonString = adapter.serialize(value)
+            val jsonElement = Json.parseToJsonElement(jsonString)
+            (encoder as JsonEncoder).encodeJsonElement(jsonElement)
+        }
+
+        override fun deserialize(decoder: Decoder): T {
+            val jsonElement = (decoder as JsonDecoder).decodeJsonElement()
+            // 移除多态序列化添加的 type 字段
+            val cleanedElement = if (jsonElement is JsonObject && "type" in jsonElement) {
+                JsonObject(jsonElement.filterKeys { it != "type" })
+            } else {
+                jsonElement
+            }
+            return adapter.deserialize(cleanedElement.toString())
         }
     }
 
