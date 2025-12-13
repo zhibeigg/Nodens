@@ -1,7 +1,5 @@
 package org.gitee.nodens.module.item.generator
 
-import eos.moe.armourers.ne
-import kotlinx.serialization.json.Json
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.events.item.NodensItemGenerateEvent
@@ -92,7 +90,7 @@ object NormalGenerator: IItemGenerator {
         }
         builder.finishing = {
             val tag = it.getItemTag()
-            tag[CONTEXT_TAG] = compress(Json.encodeToString(context))
+            tag[CONTEXT_TAG] = compress(VariableRegistry.json.encodeToString(context))
             tag[DURABILITY] = context[DURABILITY]!!.cint
             tag[QUALITY] = quality
             itemConfig.nbt?.forEach { (key, value) ->

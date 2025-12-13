@@ -8,10 +8,13 @@ import org.gitee.nodens.core.AttributeData
 import org.gitee.nodens.core.IAttributeData
 import org.gitee.nodens.core.TempAttributeData
 import org.gitee.nodens.core.entity.EntityAttributeMemory
+import org.gitee.nodens.module.item.VariableRegistry
 
 interface INodensAPI {
 
     val itemAPI: IItemAPI
+
+    val variableRegistry: VariableRegistry
 
     /**
      * 攻击实体

@@ -13,6 +13,7 @@ import org.gitee.nodens.core.IAttributeData
 import org.gitee.nodens.core.TempAttributeData
 import org.gitee.nodens.core.entity.EntityAttributeMemory
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
+import org.gitee.nodens.module.item.VariableRegistry
 import taboolib.common.LifeCycle
 import taboolib.common.env.RuntimeDependencies
 import taboolib.common.env.RuntimeDependency
@@ -55,6 +56,9 @@ class NodensAPI: INodensAPI {
 
     override val itemAPI: IItemAPI
         get() = PlatformFactory.getAPI<IItemAPI>()
+
+    override val variableRegistry: VariableRegistry
+        get() = VariableRegistry
 
     override fun attackEntity(damageProcessor: DamageProcessor): EntityDamageByEntityEvent? {
         return damageProcessor.callDamage()

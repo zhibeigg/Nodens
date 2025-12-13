@@ -1,6 +1,5 @@
 package org.gitee.nodens.util
 
-import kotlinx.serialization.json.Json
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.*
@@ -22,20 +21,20 @@ const val DURABILITY_TAG = "NODENS@DURABILITY"
 inline fun <reified T: IItemContext> ItemStack.context(): T? {
     if (isAir()) return null
     val byteArray = getItemTag()[CONTEXT_TAG]?.asByteArray() ?: return null
-    return Json.decodeFromString<T>(decompress(byteArray))
+    return VariableRegistry.json.decodeFromString<T>(decompress(byteArray))
 }
 
 @Suppress("UNCHECKED_CAST")
 fun ItemStack.context(): NormalContext? {
     if (isAir()) return null
     val byteArray = getItemTag()[CONTEXT_TAG]?.asByteArray() ?: return null
-    return Json.decodeFromString<NormalContext>(decompress(byteArray))
+    return VariableRegistry.json.decodeFromString<NormalContext>(decompress(byteArray))
 }
 
 fun ItemStack.modifyContext(consumer: Consumer<NormalContext>) {
     val context = context()?.also { consumer.accept(it) } ?: return
     val tag = getItemTag()
-    tag[CONTEXT_TAG] = compress(Json.encodeToString(context))
+    tag[CONTEXT_TAG] = compress(VariableRegistry.json.encodeToString(context))
     tag.saveTo(this)
 }
 
