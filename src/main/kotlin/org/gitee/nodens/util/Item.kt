@@ -13,9 +13,10 @@ import java.util.function.Consumer
 const val CONTEXT_TAG = "NODENS_CONTEXT"
 const val SELL_TAG = "NODENS@SELL"
 const val SELL = "sell"
+const val QUALITY_TAG = "NODENS@QUALITY"
 const val QUALITY = "quality"
-const val DURABILITY = "durability"
 const val DURABILITY_TAG = "NODENS@DURABILITY"
+const val DURABILITY = "durability"
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T: IItemContext> ItemStack.context(): T? {

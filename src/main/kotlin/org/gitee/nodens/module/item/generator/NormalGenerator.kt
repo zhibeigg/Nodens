@@ -23,38 +23,58 @@ object NormalGenerator: IItemGenerator {
 
     private val REMOVE_REGEX = Regex("\\*[0-9.]+\\*")
 
+    /**
+     * 物品生成流程:
+     * 1. 初始化上下文 -> 2. 计算变量 -> 3. 生成属性(品质/售价/耐久)
+     * -> 4. 解析Lore/Name -> 5. 构建物品 -> 6. 保存NBT -> 7. 触发事件
+     */
     override fun generate(itemConfig: ItemConfig, amount: Int, player: Player?, map: Map<String, Any>, callEvent: Boolean): ItemStack {
         val sender = player?.let { adaptPlayer(it) } ?: console()
         val context = NormalContext(itemConfig.key, hashMapOf(), itemConfig.hashCode)
         val extendMap = mutableMapOf<String, Any?>()
 
-        // 预置参数
+        // ========== 阶段1: 变量初始化 ==========
+        // 从配置的 variables 中计算预置参数
         itemConfig.variables.forEach {
             if (map.containsKey(it.key)) return@forEach
-            context[it.key] = it.getVariable(sender, itemConfig, context, extendMap)
+            context[it.key] = it.getVariable(sender, itemConfig, context, emptyMap())
         }
-        // 覆盖自定义数值
+
+        // 用传入的 map 覆盖自定义数值
         context.putAll(map)
-        // 生成品质
-        val quality = itemConfig.quality?.let { eval(sender, itemConfig, context, it, extendMap).cint } ?: 0
-        extendMap[QUALITY] = quality
-        // 生成出售价格
-        val sell = itemConfig.sell?.let { eval(sender, itemConfig, context, it, extendMap).cdouble } ?: 0.0
-        context[SELL_TAG] = sell
-        extendMap[SELL] = quality
-        // 生成最大耐久值
-        val maxDurability = itemConfig.durability?.let { eval(sender, itemConfig, context, it, extendMap).cint } ?: 0.0
-        context[DURABILITY_TAG] = maxDurability
-        extendMap[DURABILITY] = maxDurability
+
+        // ========== 阶段2: 生成核心属性 ==========
+        // 品质
+        if (!map.containsKey(QUALITY_TAG)) {
+            val quality = itemConfig.quality?.let { eval(sender, itemConfig, context, it, extendMap).cint } ?: 0
+            context[QUALITY_TAG] = quality
+        }
+        extendMap[QUALITY] = context[QUALITY_TAG]
+
+        // 出售价格
+        if (!map.containsKey(SELL_TAG)) {
+            val sell = itemConfig.sell?.let { eval(sender, itemConfig, context, it, extendMap).cdouble } ?: 0.0
+            context[SELL_TAG] = sell
+        }
+        extendMap[SELL] = context[SELL_TAG]
+
+        // 最大耐久值
+        if (!map.containsKey(DURABILITY_TAG)) {
+            val maxDurability = itemConfig.durability?.let { eval(sender, itemConfig, context, it, extendMap).cint } ?: 0.0
+            context[DURABILITY_TAG] = maxDurability
+        }
+        extendMap[DURABILITY] = context[DURABILITY_TAG]
+
+        // ========== 阶段3: 解析Lore和Name ==========
         val parser = parse(sender, itemConfig, context, itemConfig.lore + itemConfig.name, extendMap)
 
+        // ========== 阶段4: 构建物品 ==========
         val builder = ItemBuilder(itemConfig.material)
         builder.name = parser.last()
         builder.amount = amount
-        // 生成 lore
+
+        // 处理Lore: 移除 *0* 标记的行(属性值为0的行)
         parser.dropLast(1).forEach { line ->
-            // 将含有 *0* 的行删除
-            // 为了删除算法生成为 0 的属性
             var newLine: String? = line
             REMOVE_REGEX.find(line)?.let { matchResult ->
                 val number = matchResult.value.let { value -> value.substring(1, value.length - 2) }.cdouble
@@ -68,6 +88,8 @@ object NormalGenerator: IItemGenerator {
                 builder.lore += newLine
             }
         }
+
+        // 设置物品标志、附魔、不可破坏
         itemConfig.itemFlags.forEach {
             builder.flags += it.get() ?: return@forEach
         }
@@ -78,25 +100,34 @@ object NormalGenerator: IItemGenerator {
         }
         builder.isUnbreakable = itemConfig.isUnBreakable
         builder.colored()
+
+        // 初始化当前耐久为最大耐久
         val durability = context[DURABILITY]
         if (durability == null) {
             context[DURABILITY] = context[DURABILITY_TAG]!!
         }
+
+        // 根据耐久比例设置物品损坏度显示
         if (!itemConfig.isUnBreakable) {
             val max = context[DURABILITY_TAG]!!.cint
             if (max != 0) {
                 builder.damage = (builder.material.maxDurability.cdouble * (1 - context[DURABILITY]!!.cdouble / max.cdouble)).cint
             }
         }
+
+        // ========== 阶段5: 保存NBT数据 ==========
         builder.finishing = {
             val tag = it.getItemTag()
+            // 保存上下文(序列化压缩)
             tag[CONTEXT_TAG] = compress(VariableRegistry.json.encodeToString(context))
             tag[DURABILITY] = context[DURABILITY]!!.cint
-            tag[QUALITY] = quality
+            tag[QUALITY] = context[QUALITY_TAG]!!.cint
+            // 保存自定义NBT
             itemConfig.nbt?.forEach { (key, value) ->
                 tag[key] = value
             }
             tag.saveTo(it)
+            // 替换Lore中的占位符
             it.replaceLore(
                 mapOf(
                     "{CombatPower}" to ceil(
@@ -105,11 +136,12 @@ object NormalGenerator: IItemGenerator {
                         )
                     ).toString(),
                     "{MaxDurability}" to context[DURABILITY_TAG]!!.cint.toString(),
-                    "{Sell}" to ceil(context[SELL_TAG]!!.cdouble).toString(),
+                    "{Sell}" to ceil(context[SELL_TAG]!!.cdouble).toString()
                 )
             )
         }
 
+        // ========== 阶段6: 触发事件并返回 ==========
         return if (callEvent) {
             val event = NodensItemGenerateEvent(player, itemConfig, context, builder.build())
             event.call()
@@ -119,6 +151,7 @@ object NormalGenerator: IItemGenerator {
         }
     }
 
+    /** 批量解析Kether表达式(用于Lore) */
     private fun parse(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, list: List<String>, map: Map<String, Any?>): List<String> {
         return KetherFunction.parse(
             list,
@@ -133,6 +166,7 @@ object NormalGenerator: IItemGenerator {
         )
     }
 
+    /** 解析单个Kether表达式 */
     private fun parse(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, string: String, map: Map<String, Any?>): String {
         return KetherFunction.parse(
             string,
@@ -147,6 +181,7 @@ object NormalGenerator: IItemGenerator {
         )
     }
 
+    /** 执行Kether脚本并返回结果(用于计算数值) */
     private fun eval(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, string: String, map: Map<String, Any?>): Any? {
         return KetherShell.eval(
             string,
@@ -186,6 +221,10 @@ object NormalGenerator: IItemGenerator {
         return any
     }
 
+    /**
+     * 更新物品: 基于当前context重新生成物品，保留耐久值
+     * 用于配置变更后刷新已有物品
+     */
     override fun update(player: Player?, itemStack: ItemStack): ItemStack? {
         val context = itemStack.context() ?: return null
         val config = ItemManager.getItemConfig(context.key) ?: return null
