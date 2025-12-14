@@ -5,13 +5,14 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
-import kotlin.reflect.KClass
 
 /**
  * Variable 序列化适配器接口
@@ -49,12 +50,30 @@ interface VariableAdapter<T : Variable<*>> {
      * @return 反序列化后的 Variable 实例
      */
     fun deserialize(json: String): T
+
+    /**
+     * 检查一个对象是否可以转换为此 Variable 类型
+     *
+     * @param value 要检查的对象
+     * @return 如果可以转换返回 true
+     */
+    fun canConvert(value: Any): Boolean
+
+    /**
+     * 将对象转换为 Variable
+     *
+     * 注意: 在调用此方法前应先调用 canConvert 检查
+     *
+     * @param value 要转换的对象
+     * @return 转换后的 Variable 实例
+     */
+    fun convert(value: Any): T
 }
 
 /**
  * Variable 注册中心
  *
- * 用于注册外部模块的 Variable 子类，使其支持多态序列化。
+ * 用于注册外部模块的 Variable 子类，使其支持多态序列化和 toVariable 转换。
  *
  * 使用示例：
  * ```kotlin
@@ -70,6 +89,14 @@ interface VariableAdapter<T : Variable<*>> {
  *
  *     override fun deserialize(json: String): SpiritItemVariable {
  *         return yourJson.decodeFromString(json)
+ *     }
+ *
+ *     override fun canConvert(value: Any): Boolean {
+ *         return value is SpiritItem
+ *     }
+ *
+ *     override fun convert(value: Any): SpiritItemVariable {
+ *         return SpiritItemVariable(value as SpiritItem)
  *     }
  * }
  *
@@ -130,6 +157,23 @@ object VariableRegistry {
         return adapters.keys.toSet()
     }
 
+    /**
+     * 尝试使用已注册的适配器将对象转换为 Variable
+     *
+     * @param value 要转换的对象
+     * @return 转换后的 Variable，如果没有匹配的适配器则返回 null
+     */
+    @JvmStatic
+    fun convert(value: Any): Variable<*>? {
+        for (adapter in adapters.values) {
+            if (adapter.canConvert(value)) {
+                @Suppress("UNCHECKED_CAST")
+                return (adapter as VariableAdapter<Variable<*>>).convert(value)
+            }
+        }
+        return null
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun buildJson(): Json {
         val module = SerializersModule {
@@ -149,7 +193,7 @@ object VariableRegistry {
                 subclass(MapVariable::class, MapVariable.serializer())
 
                 // 注册外部模块的 Variable 子类
-                adapters.forEach { (serialName, adapter) ->
+                adapters.forEach { (_, adapter) ->
                     val serializer = AdapterSerializer(adapter as VariableAdapter<Variable<*>>)
                     subclass(adapter.variableClass.kotlin, serializer)
                 }

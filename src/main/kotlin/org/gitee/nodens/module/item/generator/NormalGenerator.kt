@@ -189,7 +189,7 @@ object NormalGenerator: IItemGenerator {
     override fun update(player: Player?, itemStack: ItemStack): ItemStack? {
         val context = itemStack.context() ?: return null
         val config = ItemManager.getItemConfig(context.key) ?: return null
-        val new = generate(config, itemStack.amount, player, context.map(), false)
+        val new = generate(config, itemStack.amount, player, context.sourceMap(), false)
         val tag = new.getItemTag()
         tag["durability"] = context["durability"]!!.cint
         tag.saveTo(new)

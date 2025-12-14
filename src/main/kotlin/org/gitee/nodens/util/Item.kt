@@ -54,7 +54,7 @@ fun Any?.toVariable(): Variable<*> {
         is Char -> CharVariable(this)
         is String -> StringVariable(this)
         is Boolean -> BooleanVariable(this)
-        else -> error("not supported variable type: ${this::class.qualifiedName}")
+        else -> VariableRegistry.convert(this) ?: error("not supported variable type: ${this::class.qualifiedName}")
     }
 }
 

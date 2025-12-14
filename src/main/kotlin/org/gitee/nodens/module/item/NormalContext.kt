@@ -33,4 +33,8 @@ data class NormalContext(override val key: String, private val variable: HashMap
     fun map(): Map<String, Any> {
         return variable.toMap().mapValues { restore(it.value.value)!! }
     }
+
+    fun sourceMap(): Map<String, Variable<*>> {
+        return variable.toMap()
+    }
 }
