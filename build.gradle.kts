@@ -9,7 +9,7 @@ plugins {
     `maven-publish`
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.serialization") version "2.1.20"
-    id("io.izzel.taboolib") version "2.0.23"
+    id("io.izzel.taboolib") version "2.0.27"
 }
 
 taboolib {
