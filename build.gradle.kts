@@ -32,7 +32,7 @@ taboolib {
         install(Kether)
         install(JavaScript)
         install(Jexl)
-        //repoTabooLib = "https://nexus.mcwar.cn/repository/maven-public/"
+        //repoTabooLib = "https://jfrog.mcwar.cn/artifactory/maven-releases"
     }
     description {
         name = "Nodens"
@@ -55,7 +55,7 @@ taboolib {
 repositories {
     mavenCentral()
     maven("https://repo.tabooproject.org/repository/releases")
-    maven("https://nexus.mcwar.cn/repository/maven-public/")
+    maven("https://jfrog.mcwar.cn/artifactory/maven-releases")
 }
 
 dependencies {
@@ -101,7 +101,7 @@ kotlin {
 publishing {
     repositories {
         maven {
-            url = uri("https://nexus.mcwar.cn/repository/maven-releases/")
+            url = uri("https://jfrog.mcwar.cn/artifactory/maven-releases")
             credentials {
                 username = publishUsername
                 password = publishPassword
