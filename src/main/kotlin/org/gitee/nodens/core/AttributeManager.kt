@@ -44,11 +44,15 @@ object AttributeManager {
             }
         }
         // 加载所有属性的配置文件
+        consoleMessage("")
+        consoleMessage("&6╭─────────────────────────────────────────")
+        consoleMessage("&6│ &e⚡ &f属性系统加载中...")
+        consoleMessage("&6├─────────────────────────────────────────")
         files("attribute", *list.toTypedArray()) {
             val map = newAttributeNumberConfigs.getOrPut(it.nameWithoutExtension) { ConcurrentHashMap() }
             val configuration = Configuration.loadFromFile(it)
             val keys = configuration.getKeys(false)
-            consoleMessage("&e┣&7加载属性配置 ${it.name}: $keys")
+            consoleMessage("&6│ &7├ &e${it.name} &8» &7${keys.size}个配置项")
             keys.forEach { key ->
                 val section = configuration.getConfigurationSection(key)
                 if (section != null) {
@@ -69,28 +73,33 @@ object AttributeManager {
         // 创建 MatchMap
         ATTRIBUTE_MATCHING_MAP.clear()
         var totalKeys = 0
+        consoleMessage("&6├─────────────────────────────────────────")
+        consoleMessage("&6│ &e📦 &f属性组注册")
         runningClassesWithoutLibrary.forEach {
             if (it.hasInterface(IAttributeGroup::class.java)) {
                 val instance = it.getInstance() as IAttributeGroup
-                consoleMessage("&e┣&7属性组 ${instance.name} 包含 ${instance.numbers.size} 个属性")
+                consoleMessage("&6│ &7├ &b${instance.name} &8» &7${instance.numbers.size}个属性")
                 instance.numbers.forEach { (name, number) ->
                     try {
                         val keys = number.config.keys
-                        consoleMessage("&e┣&7  - $name: keys=$keys")
+                        consoleMessage("&6│ &7│ &7└ &a$name &8(&7${keys.size} keys&8)")
                         keys.forEach { key ->
                             ATTRIBUTE_MATCHING_MAP.put(key, number)
                             totalKeys++
                         }
                     } catch (e: Exception) {
-                        consoleMessage("&c┣&7属性 ${instance.name}.$name 加载失败: ${e.message}")
+                        consoleMessage("&6│ &7│ &7└ &c✘ $name &8- &c${e.message}")
                     }
                 }
             }
         }
-        consoleMessage("&e┣&7ATTRIBUTE_MATCHING_MAP 共加载 $totalKeys 个key")
+        consoleMessage("&6├─────────────────────────────────────────")
+        consoleMessage("&6│ &7总计: &f$totalKeys &7个属性匹配键")
         // 加载 Js 属性
         JavaScript.reload()
-        consoleMessage("&e┣&7AttributeMatchingMap loaded &a√")
+        consoleMessage("&6╰─────────────────────────────────────────")
+        consoleMessage("&a✔ &f属性系统加载完成!")
+        consoleMessage("")
     }
 
     fun getConfig(group: String, key: String): AttributeConfig {

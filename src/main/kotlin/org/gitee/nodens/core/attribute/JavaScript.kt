@@ -188,7 +188,7 @@ object JavaScript: IAttributeGroup {
 
                     attribute.config.keys.forEach { key ->
                         ATTRIBUTE_MATCHING_MAP.put(key, attribute)
-                        debug("&e┣&7AttributeKey $key loaded &a√ &7- &cJs")
+                        debug("&6│ &7│ &7└ &dJS &8» &a$key &a✔")
                     }
                 }
             } catch (e: Exception) {
