@@ -50,6 +50,16 @@ object Mapping: IAttributeGroup {
             return hashMap
         }
 
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is MappingAttribute) return false
+            return name == other.name
+        }
+
+        override fun hashCode(): Int {
+            return name.hashCode()
+        }
+
         override fun toString(): String {
             return "MappingAttributeNumber{name: ${name}}"
         }

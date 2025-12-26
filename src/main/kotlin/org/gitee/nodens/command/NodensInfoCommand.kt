@@ -12,7 +12,6 @@ import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.bool
 import taboolib.common.platform.command.player
 import taboolib.common.platform.command.subCommand
-import taboolib.common.platform.function.info
 import taboolib.common5.cbool
 import taboolib.common5.format
 import taboolib.module.lang.sendLang
@@ -26,10 +25,14 @@ object NodensInfoCommand {
             bool("transferMap") {
                 exec<ProxyCommandSender> {
                     val player = Bukkit.getPlayer(ctx["player"]) ?: return@exec
+                    val memory = player.attributeMemory() ?: return@exec
+                    val transferMap = ctx["transferMap"].cbool
+
                     sender.sendLang("info-attribute")
-                    player.attributeMemory()?.mergedAllAttribute(ctx["transferMap"].cbool)?.toSortedMap { o1, o2 ->
-                        comparePriority(o1.config.handlePriority, o2.config.handlePriority)
-                    }?.forEach { (key, value) ->
+                    memory.mergedAllAttribute(transferMap).toSortedMap { o1, o2 ->
+                        val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+                        if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
+                    }.forEach { (key, value) ->
                         val value = "${value[DigitalParser.Type.COUNT]?.joinToString("-") ?: 0} + ${value[DigitalParser.Type.PERCENT]?.joinToString("-") { (it * 100).format(1).toString() } ?: 0}%"
                         sender.sendLang("info-attribute-argument", "${key.group.name}:${key.name}", value, key.config.keys.joinToString(", "))
                     }
@@ -45,7 +48,8 @@ object NodensInfoCommand {
                 val entity = sender.getNearbyEntities(1.0, 1.0, 1.0).first() as LivingEntity
                 sender.sendLang("info-attribute")
                 entity.attributeMemory()?.mergedAllAttribute(ctx["transferMap"].cbool)?.toSortedMap { o1, o2 ->
-                    comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+                    val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+                    if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
                 }?.forEach { (key, value) ->
                     val value = "${value[DigitalParser.Type.COUNT]?.joinToString("-") ?: 0} + ${value[DigitalParser.Type.PERCENT]?.joinToString("-") { (it * 100).format(1).toString() } ?: 0}%"
                     sender.sendLang("info-attribute-argument", "${key.group.name}:${key.name}", value, key.config.keys.joinToString(", "))

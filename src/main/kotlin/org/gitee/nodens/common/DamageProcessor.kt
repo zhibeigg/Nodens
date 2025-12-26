@@ -130,7 +130,8 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
 
     fun handleAttacker(vararg skipNumber: IAttributeGroup.Number) {
         attacker.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+            val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+            if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
         }?.forEach {
             if (it.key in skipNumber) return@forEach
             it.key.handleAttacker(this, it.value)
@@ -139,7 +140,8 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
 
     fun handleDefender(vararg skipNumber: IAttributeGroup.Number) {
         defender.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+            val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+            if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
         }?.forEach {
             if (it.key in skipNumber) return@forEach
             it.key.handleDefender(this, it.value)

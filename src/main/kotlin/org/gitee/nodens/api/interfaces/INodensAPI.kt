@@ -2,9 +2,7 @@ package org.gitee.nodens.api.interfaces
 
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.gitee.nodens.api.NodensItemAPI
 import org.gitee.nodens.common.DamageProcessor
-import org.gitee.nodens.core.AttributeData
 import org.gitee.nodens.core.IAttributeData
 import org.gitee.nodens.core.TempAttributeData
 import org.gitee.nodens.core.entity.EntityAttributeMemory
@@ -13,6 +11,8 @@ import org.gitee.nodens.module.item.VariableRegistry
 interface INodensAPI {
 
     val itemAPI: IItemAPI
+
+    val attributeAPI: IAttributeAPI
 
     val variableRegistry: VariableRegistry
 

@@ -1,10 +1,9 @@
 package org.gitee.nodens.api
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.gitee.nodens.api.interfaces.IAttributeAPI
 import org.gitee.nodens.api.interfaces.IItemAPI
 import org.gitee.nodens.api.interfaces.INodensAPI
 import org.gitee.nodens.common.DamageProcessor
@@ -20,6 +19,7 @@ import taboolib.common.env.RuntimeDependency
 import taboolib.common.platform.Awake
 import taboolib.common.platform.PlatformFactory
 import taboolib.expansion.AsyncDispatcher
+import kotlin.time.Duration.Companion.seconds
 
 @RuntimeDependencies(
     RuntimeDependency(
@@ -57,6 +57,9 @@ class NodensAPI: INodensAPI {
     override val itemAPI: IItemAPI
         get() = PlatformFactory.getAPI<IItemAPI>()
 
+    override val attributeAPI: IAttributeAPI
+        get() = PlatformFactory.getAPI<IAttributeAPI>()
+
     override val variableRegistry: VariableRegistry
         get() = VariableRegistry
 
@@ -90,11 +93,35 @@ class NodensAPI: INodensAPI {
 
     companion object {
 
-        internal val pluginScope = CoroutineScope(AsyncDispatcher + SupervisorJob())
+        private val pluginJob = SupervisorJob()
+        internal val pluginScope = CoroutineScope(AsyncDispatcher + pluginJob)
 
         @Awake(LifeCycle.DISABLE)
         private fun release() {
-            pluginScope.cancel("服务器关闭")
+            shutdownScopes(10)
+        }
+
+        /**
+         * 优雅关闭所有协程作用域
+         * @param timeout 等待协程完成的超时时间（秒）
+         */
+        internal fun shutdownScopes(timeout: Long = 5) {
+            runBlocking {
+                // 先取消所有子协程，给它们发送取消信号
+                pluginJob.cancelChildren()
+
+                // 等待子协程完成，带超时保护
+                try {
+                    withTimeout(timeout.seconds) {
+                        pluginJob.children.forEach { it.join() }
+                    }
+                } catch (_: TimeoutCancellationException) {
+                    // 超时后强制取消
+                }
+
+                // 最终取消整个作用域
+                pluginJob.cancel()
+            }
         }
     }
 }

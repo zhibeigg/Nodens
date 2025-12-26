@@ -21,7 +21,9 @@ class AttributeInfoUI {
             if (e.identifier == "NodensAttributeInfo") {
                 val player = Bukkit.getPlayerExact(e.data[0]) ?: return
                 val source = player.attributeMemory()?.mergedAllAttribute(true)?.toSortedMap { o1, o2 ->
-                    comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+                    val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+                    // 当优先级相同时，用名称区分，避免 TreeMap 覆盖
+                    if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
                 }
                 val map = source?.map {
                     it.key to it.key.getFinalValue(player, it.value)

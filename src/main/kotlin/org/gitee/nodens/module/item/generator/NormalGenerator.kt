@@ -74,13 +74,26 @@ object NormalGenerator: IItemGenerator {
         builder.name = parser.last()
         builder.amount = amount
 
-        // 处理Lore: 移除 *0* 标记的行(属性值为0的行)
+        // 处理Lore: 移除 *0* 标记的行(属性值为0的行)，替换其他 *数字* 为数字
         val lore = parser.dropLast(1).mapNotNull { line ->
-            REMOVE_REGEX.find(line)?.let { matchResult ->
-                val numStr = matchResult.value
-                val number = numStr.substring(1, numStr.length - 1).toDoubleOrNull() ?: 0.0
-                if (number == 0.0) null else line.replace(matchResult.value, number.toString())
-            } ?: line
+            // 检查是否包含 *0* 或 *0.0*（整行移除）
+            if (REMOVE_REGEX.containsMatchIn(line)) {
+                val hasZero = REMOVE_REGEX.findAll(line).any { matchResult ->
+                    val numStr = matchResult.value
+                    val number = numStr.substring(1, numStr.length - 1).toDoubleOrNull() ?: 0.0
+                    number == 0.0
+                }
+                if (hasZero) {
+                    null
+                } else {
+                    // 替换所有 *数字* 为数字
+                    REMOVE_REGEX.replace(line) { matchResult ->
+                        matchResult.value.substring(1, matchResult.value.length - 1)
+                    }
+                }
+            } else {
+                line
+            }
         }
         builder.lore.addAll(lore)
 

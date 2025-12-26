@@ -106,7 +106,8 @@ class RegainProcessor(reason: String, val healer: LivingEntity, val passive: Liv
 
     private fun handleHealer(vararg skipNumber: IAttributeGroup.Number) {
         healer.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+            val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+            if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
         }?.forEach {
             if (it.key in skipNumber) return@forEach
             it.key.handleHealer(this, it.value)
@@ -115,7 +116,8 @@ class RegainProcessor(reason: String, val healer: LivingEntity, val passive: Liv
 
     private fun handlePassive(vararg skipNumber: IAttributeGroup.Number) {
         passive.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+            val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+            if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
         }?.forEach {
             if (it.key in skipNumber) return@forEach
             it.key.handlePassive(this, it.value)

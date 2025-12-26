@@ -6,17 +6,10 @@ import org.gitee.nodens.common.FastMatchingMap
 import org.gitee.nodens.core.attribute.JavaScript
 import org.gitee.nodens.core.attribute.Mapping
 import org.gitee.nodens.core.reload.Reload
-import org.gitee.nodens.module.item.condition.ICondition
-import org.gitee.nodens.util.ConfigLazy
-import org.gitee.nodens.util.consoleMessage
-import org.gitee.nodens.util.debug
-import org.gitee.nodens.util.files
-import org.gitee.nodens.util.mergeValues
+import org.gitee.nodens.util.*
 import taboolib.common.LifeCycle
 import taboolib.common.io.runningClassesWithoutLibrary
 import taboolib.common.platform.Awake
-import taboolib.common.platform.function.info
-import taboolib.module.chat.colored
 import taboolib.module.configuration.Configuration
 import java.math.BigDecimal
 import java.util.concurrent.ConcurrentHashMap
@@ -54,7 +47,9 @@ object AttributeManager {
         files("attribute", *list.toTypedArray()) {
             val map = newAttributeNumberConfigs.getOrPut(it.nameWithoutExtension) { ConcurrentHashMap() }
             val configuration = Configuration.loadFromFile(it)
-            configuration.getKeys(false).forEach { key ->
+            val keys = configuration.getKeys(false)
+            consoleMessage("&e┣&7加载属性配置 ${it.name}: $keys")
+            keys.forEach { key ->
                 val section = configuration.getConfigurationSection(key)
                 if (section != null) {
                     map[key] = AttributeConfig(section)
@@ -73,17 +68,26 @@ object AttributeManager {
         }
         // 创建 MatchMap
         ATTRIBUTE_MATCHING_MAP.clear()
+        var totalKeys = 0
         runningClassesWithoutLibrary.forEach {
             if (it.hasInterface(IAttributeGroup::class.java)) {
                 val instance = it.getInstance() as IAttributeGroup
-                instance.numbers.forEach { (_, number) ->
-                    number.config.keys.forEach { key ->
-                        ATTRIBUTE_MATCHING_MAP.put(key, number)
-                        debug("&e┣&7AttributeKey $key loaded &a√")
+                consoleMessage("&e┣&7属性组 ${instance.name} 包含 ${instance.numbers.size} 个属性")
+                instance.numbers.forEach { (name, number) ->
+                    try {
+                        val keys = number.config.keys
+                        consoleMessage("&e┣&7  - $name: keys=$keys")
+                        keys.forEach { key ->
+                            ATTRIBUTE_MATCHING_MAP.put(key, number)
+                            totalKeys++
+                        }
+                    } catch (e: Exception) {
+                        consoleMessage("&c┣&7属性 ${instance.name}.$name 加载失败: ${e.message}")
                     }
                 }
             }
         }
+        consoleMessage("&e┣&7ATTRIBUTE_MATCHING_MAP 共加载 $totalKeys 个key")
         // 加载 Js 属性
         JavaScript.reload()
         consoleMessage("&e┣&7AttributeMatchingMap loaded &a√")

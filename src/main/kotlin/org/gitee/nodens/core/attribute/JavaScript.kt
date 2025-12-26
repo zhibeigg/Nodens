@@ -1,5 +1,7 @@
 package org.gitee.nodens.core.attribute
 
+import jdk.nashorn.api.scripting.ClassFilter
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DamageProcessor
 import org.gitee.nodens.common.DigitalParser
@@ -9,26 +11,17 @@ import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.AttributeManager.ATTRIBUTE_MATCHING_MAP
 import org.gitee.nodens.core.IAttributeGroup
-import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.RANGE
-import org.gitee.nodens.core.IAttributeGroup.Number.ValueType.SINGLE
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files
 import taboolib.common.platform.function.warning
 import taboolib.common5.cdouble
 import taboolib.common5.scriptEngine
-import taboolib.module.chat.colored
 import java.io.FileReader
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import javax.script.Compilable
-import javax.script.CompiledScript
-import javax.script.Invocable
-import javax.script.ScriptEngine
-import javax.script.SimpleBindings
-import jdk.nashorn.api.scripting.ClassFilter
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory
+import javax.script.*
 
 object JavaScript: IAttributeGroup {
 
@@ -38,9 +31,8 @@ object JavaScript: IAttributeGroup {
     /** 用于执行脚本的线程池 */
     private val scriptExecutor = Executors.newCachedThreadPool()
 
-    /** 安全的脚本引擎，带有类过滤器 */
-    private val safeScriptEngine: ScriptEngine by lazy {
-        try {
+    private fun createSafeEngine(): ScriptEngine {
+        return try {
             val factory = NashornScriptEngineFactory()
             factory.getScriptEngine(SafeClassFilter())
         } catch (e: Exception) {
@@ -126,7 +118,7 @@ object JavaScript: IAttributeGroup {
         "priority" to config.syncPriority
     ))
 
-    class JsAttribute(override val name: String, val compile: CompiledScript): IAttributeGroup.Number {
+    class JsAttribute(override val name: String, val compile: CompiledScript, val engine: ScriptEngine): IAttributeGroup.Number {
 
         override val group: IAttributeGroup
             get() = JavaScript
@@ -135,7 +127,7 @@ object JavaScript: IAttributeGroup {
             get() = AttributeManager.getConfig(JavaScript.name, name)
 
         private val invocable: Invocable
-            get() = compile.engine as Invocable
+            get() = engine as Invocable
 
         override fun sync(entitySyncProfile: EntitySyncProfile, valueMap: Map<DigitalParser.Type, DoubleArray>) {
             invokeWithTimeout<Unit>(invocable, "sync", entitySyncProfile, valueMap)
@@ -175,16 +167,24 @@ object JavaScript: IAttributeGroup {
         files("js", "Fire.js") { file ->
             try {
                 FileReader(file).use { reader ->
-                    val engine = safeScriptEngine
+                    // 为每个脚本创建独立的引擎
+                    val engine = createSafeEngine()
                     val compile = (engine as? Compilable)?.compile(reader) ?: run {
                         warning("无法编译脚本: ${file.name} - 引擎不支持编译")
                         return@files
                     }
 
                     val attributeName = file.nameWithoutExtension
-                    val attribute = JsAttribute(attributeName, compile)
+                    val attribute = JsAttribute(attributeName, compile, engine)
                     numbers[attribute.name] = attribute
-                    compile.eval(createBindings(attribute.config))
+
+                    // 先将变量绑定到引擎全局作用域
+                    val bindings = createBindings(attribute.config)
+                    bindings.forEach { (key, value) ->
+                        engine.put(key, value)
+                    }
+                    // 然后执行脚本，使函数定义在全局作用域中
+                    compile.eval()
 
                     attribute.config.keys.forEach { key ->
                         ATTRIBUTE_MATCHING_MAP.put(key, attribute)

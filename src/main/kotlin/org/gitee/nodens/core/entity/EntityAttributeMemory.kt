@@ -24,21 +24,15 @@ import org.gitee.nodens.core.attribute.Mapping
 import org.gitee.nodens.core.attribute.Speed
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.condition.ConditionManager
-import org.gitee.nodens.util.ConfigLazy
-import org.gitee.nodens.util.DragonCorePlugin
-import org.gitee.nodens.util.consoleMessage
-import org.gitee.nodens.util.ensureSync
-import org.gitee.nodens.util.mergeValues
+import org.gitee.nodens.util.*
 import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.Schedule
 import taboolib.common.platform.event.SubscribeEvent
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.common.util.unsafeLazy
-import taboolib.module.chat.colored
 import taboolib.platform.util.onlinePlayers
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -63,7 +57,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         @Schedule(async = false, period = 20)
         private fun schedule() {
-            val iterator = entityAttributeMemoriesMap.entries.iterator()
+            val iterator = entityAttributeMemoriesMap.iterator()
             while (iterator.hasNext()) {
                 val entry = iterator.next()
                 if (entry.value.entity is Player) continue
@@ -136,10 +130,17 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         }
 
         fun ItemStack.getItemAttribute(): List<IAttributeData> {
-            return itemMeta?.lore?.mapNotNull {
-                val match = AttributeManager.matchAttribute(it) ?: return@mapNotNull null
-                AttributeData(match.attributeNumber, match.value)
-            } ?: emptyList()
+            val lore = itemMeta?.lore ?: return emptyList()
+            return lore.mapNotNull { line ->
+                val match = AttributeManager.matchAttribute(line)
+                if (match == null) {
+                    debug("&c未匹配属性: $line")
+                    null
+                } else {
+                    debug("&a匹配属性: $line -> ${match.attributeNumber}")
+                    AttributeData(match.attributeNumber, match.value)
+                }
+            }
         }
 
         fun removeCatch(entity: UUID) {
@@ -163,6 +164,22 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         val remove = extendMemory.remove(name)
         updateAttributeAsync()
         return remove
+    }
+
+    /**
+     * 获取当前生效的临时属性数据列表
+     * @return 未过期的临时属性数据
+     */
+    fun getExtendData(): List<IAttributeData> {
+        return extendMemory.values.flatMap { if (!it.closed) it.attributeData else emptyList() }
+    }
+
+    /**
+     * 获取所有临时属性的键名集合
+     * @return 临时属性键名集合
+     */
+    fun getExtendMemoryKeys(): Set<String> {
+        return extendMemory.keys.toSet()
     }
 
     /** 计算物品属性的实际实现 */
@@ -192,7 +209,9 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
     fun getItemsAttribute(ignoreCache: Boolean = false): List<IAttributeData> {
         return if (ignoreCache) {
-            computeItemsAttribute()
+            val result = computeItemsAttribute()
+            attributeCatch.put(entity.uniqueId, result)
+            result
         } else {
             attributeCatch.get(entity.uniqueId) { computeItemsAttribute() }!!
         }

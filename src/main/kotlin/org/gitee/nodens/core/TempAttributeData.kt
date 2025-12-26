@@ -17,5 +17,5 @@ class TempAttributeData(val duration: Long, val attributeData: List<IAttributeDa
         get() = (timeStampClose - System.currentTimeMillis()).coerceAtLeast(0L)
 
     val closed: Boolean
-        get() = if (duration == -1L) false else timeStampOver < duration
+        get() = if (duration == -1L) false else timeStampOver >= duration
 }
