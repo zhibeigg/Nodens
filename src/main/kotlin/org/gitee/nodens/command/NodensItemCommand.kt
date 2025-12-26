@@ -39,10 +39,14 @@ object NodensItemCommand {
                             val player = Bukkit.getPlayerExact(ctx["player"]) ?: return@exec
                             val item = ItemManager.getItemConfig(ctx["item"]) ?: return@exec
                             val amount = ctx["amount"].cint
-                            val variable = ctx["variable"].split(",").associate {
-                                val split = it.split("=")
-                                split[0] to split[1]
-                            }
+                            val variable = ctx["variable"].split(",").mapNotNull {
+                                val split = it.split("=", limit = 2)
+                                if (split.size == 2 && split[0].isNotBlank()) {
+                                    split[0].trim() to split[1].trim()
+                                } else {
+                                    null
+                                }
+                            }.toMap()
                             player.giveItem(NormalGenerator.generate(item, amount, player, variable))
                         }
                     }

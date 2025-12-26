@@ -1,5 +1,6 @@
 package org.gitee.nodens.util
 
+import taboolib.common.platform.function.warning
 import taboolib.common5.cbyte
 import taboolib.common5.cfloat
 import taboolib.common5.cshort
@@ -47,7 +48,20 @@ fun nbtParse(config: ConfigurationSection, prefix: String = ""): Map<String, Ite
         if (key == "nt") return@forEach
         val configSection = config.getConfigurationSection(key) ?: return@forEach
 
-        when (val type = ItemTagType.parse(configSection.getString("nt")!!.uppercase())) {
+        val typeStr = configSection.getString("nt")
+        if (typeStr.isNullOrBlank()) {
+            warning("NBT 配置 '$prefix$key' 缺少 'nt' 类型字段")
+            return@forEach
+        }
+
+        val type = try {
+            ItemTagType.parse(typeStr.uppercase())
+        } catch (_: Exception) {
+            warning("NBT 配置 '$prefix$key' 类型无效: $typeStr")
+            return@forEach
+        }
+
+        when (type) {
             COMPOUND -> map += nbtParse(configSection, "$prefix$key.")
             BYTE -> map += "$prefix$key" to ItemTagData(configSection["value"].cbyte)
             SHORT -> map += "$prefix$key" to ItemTagData(configSection["value"].cshort)
@@ -55,11 +69,18 @@ fun nbtParse(config: ConfigurationSection, prefix: String = ""): Map<String, Ite
             LONG -> map += "$prefix$key" to ItemTagData(configSection.getLong("value"))
             FLOAT -> map += "$prefix$key" to ItemTagData(configSection["value"].cfloat)
             DOUBLE -> map += "$prefix$key" to ItemTagData(configSection.getDouble("value"))
-            STRING -> map += "$prefix$key" to ItemTagData(configSection.getString("value")!!)
+            STRING -> {
+                val strValue = configSection.getString("value")
+                if (strValue == null) {
+                    warning("NBT 配置 '$prefix$key' 缺少 'value' 字段")
+                    return@forEach
+                }
+                map += "$prefix$key" to ItemTagData(strValue)
+            }
             BYTE_ARRAY -> map += "$prefix$key" to ItemTagData(configSection.getByteList("value").toByteArray())
             INT_ARRAY -> map += "$prefix$key" to ItemTagData(configSection.getIntegerList("value").toIntArray())
             LONG_ARRAY -> map += "$prefix$key" to ItemTagData(configSection.getLongList("value").toLongArray())
-            else -> error("Unsupported nbt type: $type")
+            else -> warning("不支持的 NBT 类型: $type (配置: $prefix$key)")
         }
     }
 

@@ -4,7 +4,6 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.reload.ReloadAPI
-import taboolib.module.configuration.Configuration
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -65,7 +64,9 @@ fun LivingEntity.maxHealth(): Double {
 }
 
 fun comparePriority(o1: Int, o2: Int): Int {
-    if (o1 == o2) return 1
-    if (o1 > o2) return 1
-    return o1 - o2
+    return when {
+        o1 > o2 -> 1
+        o1 < o2 -> -1
+        else -> 0
+    }
 }

@@ -48,7 +48,8 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
     companion object {
 
-        internal val entityAttributeMemoriesMap = hashMapOf<UUID, EntityAttributeMemory>()
+        /** 使用 ConcurrentHashMap 保证线程安全 */
+        internal val entityAttributeMemoriesMap = ConcurrentHashMap<UUID, EntityAttributeMemory>()
         private var regainTask: PlatformExecutor.PlatformTask? = null
 
         private val dragonCoreIsEnabled by unsafeLazy { DragonCorePlugin.isEnabled }
@@ -62,11 +63,11 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         @Schedule(async = false, period = 20)
         private fun schedule() {
-            val iterator = entityAttributeMemoriesMap.iterator()
+            val iterator = entityAttributeMemoriesMap.entries.iterator()
             while (iterator.hasNext()) {
-                val entityAttributeMemory = iterator.next()
-                if (entityAttributeMemory.value.entity is Player) continue
-                if (!entityAttributeMemory.value.entity.isValid) {
+                val entry = iterator.next()
+                if (entry.value.entity is Player) continue
+                if (!entry.value.entity.isValid) {
                     iterator.remove()
                 }
             }
@@ -164,8 +165,8 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         return remove
     }
 
-    fun getItemsAttribute(ignoreCache: Boolean = false): List<IAttributeData> {
-        if (!ignoreCache) return attributeCatch.get(entity.uniqueId) { _ -> getItemsAttribute(true) }!!
+    /** 计算物品属性的实际实现 */
+    private fun computeItemsAttribute(): List<IAttributeData> {
         val list = mutableListOf<IAttributeData>()
 
         fun add(itemStack: ItemStack?, map: Map<String, String>) {
@@ -187,6 +188,14 @@ class EntityAttributeMemory(val entity: LivingEntity) {
             }
         }
         return list
+    }
+
+    fun getItemsAttribute(ignoreCache: Boolean = false): List<IAttributeData> {
+        return if (ignoreCache) {
+            computeItemsAttribute()
+        } else {
+            attributeCatch.get(entity.uniqueId) { computeItemsAttribute() }!!
+        }
     }
 
     fun updateAttributeAsync() {

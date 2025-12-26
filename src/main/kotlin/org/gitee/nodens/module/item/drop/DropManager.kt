@@ -24,6 +24,7 @@ import taboolib.common.util.random
 import taboolib.module.nms.getName
 import taboolib.platform.util.hasName
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 
@@ -54,7 +55,8 @@ object DropManager {
         }
     }
 
-    val dropMap = mutableMapOf<UUID, DropUser>()
+    /** 使用 ConcurrentHashMap 保证线程安全 */
+    val dropMap = ConcurrentHashMap<UUID, DropUser>()
 
     fun drop(player: Player, location: Location, itemStack: ItemStack, dropSurvival: Long = DropManager.dropSurvival) {
         val item = location.world!!.dropItem(location, itemStack)

@@ -11,6 +11,7 @@ import org.gitee.nodens.util.*
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.adaptPlayer
 import taboolib.common.platform.function.console
+import taboolib.common.platform.function.warning
 import taboolib.common5.cdouble
 import taboolib.common5.cint
 import taboolib.module.kether.*
@@ -74,20 +75,14 @@ object NormalGenerator: IItemGenerator {
         builder.amount = amount
 
         // 处理Lore: 移除 *0* 标记的行(属性值为0的行)
-        parser.dropLast(1).forEach { line ->
-            var newLine: String? = line
+        val lore = parser.dropLast(1).mapNotNull { line ->
             REMOVE_REGEX.find(line)?.let { matchResult ->
-                val number = matchResult.value.let { value -> value.substring(1, value.length - 2) }.cdouble
-                newLine = if (number == 0.0) {
-                    null
-                } else {
-                    line.replace(matchResult.value, number.toString())
-                }
-            }
-            if (newLine != null) {
-                builder.lore += newLine
-            }
+                val numStr = matchResult.value
+                val number = numStr.substring(1, numStr.length - 1).toDoubleOrNull() ?: 0.0
+                if (number == 0.0) null else line.replace(matchResult.value, number.toString())
+            } ?: line
         }
+        builder.lore.addAll(lore)
 
         // 设置物品标志、附魔、不可破坏
         itemConfig.itemFlags.forEach {
@@ -158,7 +153,7 @@ object NormalGenerator: IItemGenerator {
             ScriptOptions.builder()
                 .namespace(namespace = nodensEnvironmentNamespaces)
                 .sender(sender)
-                .sandbox(false)
+                .sandbox(true)
                 .set("item", itemConfig)
                 .set("context", context)
                 .vars(map)
@@ -173,7 +168,7 @@ object NormalGenerator: IItemGenerator {
             ScriptOptions.builder()
                 .namespace(namespace = nodensEnvironmentNamespaces)
                 .sender(sender)
-                .sandbox(false)
+                .sandbox(true)
                 .set("item", itemConfig)
                 .set("context", context)
                 .vars(map)
@@ -188,7 +183,7 @@ object NormalGenerator: IItemGenerator {
             ScriptOptions.builder()
                 .namespace(namespace = nodensEnvironmentNamespaces)
                 .sender(sender)
-                .sandbox(false)
+                .sandbox(true)
                 .set("item", itemConfig)
                 .set("context", context)
                 .vars(map)
@@ -202,23 +197,26 @@ object NormalGenerator: IItemGenerator {
      * @param itemConfig 物品配置
      * */
     private fun ItemConfig.Variable.getVariable(sender: ProxyCommandSender, itemConfig: ItemConfig, context: NormalContext, map: Map<String, Any?>): Any {
-        val any = try {
+        return try {
             KetherShell.eval(
                 action,
                 ScriptOptions.builder()
                     .namespace(namespace = nodensEnvironmentNamespaces)
                     .sender(sender)
-                    .sandbox(false)
+                    .sandbox(true)
                     .set("item", itemConfig)
                     .set("context", context)
                     .vars(map)
                     .build()
-            ).orNull() ?: error("not variable $key")
+            ).orNull() ?: run {
+                warning("物品 ${itemConfig.key} 变量 $key 计算结果为空")
+                0
+            }
         } catch (e: Throwable) {
             e.printKetherErrorMessage()
-            "none-error"
+            warning("物品 ${itemConfig.key} 变量 $key 计算出错: ${e.message}")
+            0
         }
-        return any
     }
 
     /**

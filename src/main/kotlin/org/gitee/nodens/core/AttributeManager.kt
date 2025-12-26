@@ -19,12 +19,18 @@ import taboolib.common.platform.function.info
 import taboolib.module.chat.colored
 import taboolib.module.configuration.Configuration
 import java.math.BigDecimal
+import java.util.concurrent.ConcurrentHashMap
 
 object AttributeManager {
 
-    internal val groupMap = hashMapOf<String, IAttributeGroup>()
+    /** 使用 ConcurrentHashMap 保证线程安全 */
+    @Volatile
+    internal var groupMap = ConcurrentHashMap<String, IAttributeGroup>()
+        private set
 
-    private val attributeNumberConfigs = hashMapOf<String, HashMap<String, AttributeConfig>>()
+    @Volatile
+    private var attributeNumberConfigs = ConcurrentHashMap<String, ConcurrentHashMap<String, AttributeConfig>>()
+
     internal val ATTRIBUTE_MATCHING_MAP = FastMatchingMap<IAttributeGroup.Number>()
 
     val healthScaled by ConfigLazy { Nodens.config.getBoolean("healthScaled", true) }
@@ -32,24 +38,34 @@ object AttributeManager {
     @Reload(0)
     @Awake(LifeCycle.ENABLE)
     private fun load() {
-        groupMap.clear()
-        attributeNumberConfigs.clear()
+        // 使用新的 Map 进行原子替换，避免读取时数据不一致
+        val newGroupMap = ConcurrentHashMap<String, IAttributeGroup>()
+        val newAttributeNumberConfigs = ConcurrentHashMap<String, ConcurrentHashMap<String, AttributeConfig>>()
         val list = mutableListOf<String>()
+
         runningClassesWithoutLibrary.forEach {
             if (it.hasInterface(IAttributeGroup::class.java)) {
                 val group = (it.getInstance() as IAttributeGroup)
-                groupMap[group.name] = group
+                newGroupMap[group.name] = group
                 list += group.name + ".yml"
             }
         }
         // 加载所有属性的配置文件
         files("attribute", *list.toTypedArray()) {
-            val map = attributeNumberConfigs.getOrPut(it.nameWithoutExtension) { hashMapOf() }
+            val map = newAttributeNumberConfigs.getOrPut(it.nameWithoutExtension) { ConcurrentHashMap() }
             val configuration = Configuration.loadFromFile(it)
             configuration.getKeys(false).forEach { key ->
-                map[key] = AttributeConfig(configuration.getConfigurationSection(key)!!)
+                val section = configuration.getConfigurationSection(key)
+                if (section != null) {
+                    map[key] = AttributeConfig(section)
+                }
             }
         }
+
+        // 原子替换
+        groupMap = newGroupMap
+        attributeNumberConfigs = newAttributeNumberConfigs
+
         // 加载 Mapping 属性
         Mapping.numbers.clear()
         attributeNumberConfigs[Mapping.name]?.forEach {

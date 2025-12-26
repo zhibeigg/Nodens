@@ -8,12 +8,15 @@ import taboolib.common5.cint
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 
 class JSONManager: ISyncCache {
 
-    private var cache: Configuration? = null
+    /** 使用 ConcurrentHashMap 分别缓存每个玩家和全局的配置 */
+    private val cacheMap = ConcurrentHashMap<String, Configuration>()
 
     companion object {
+        private const val GLOBAL_CACHE_KEY = "__global__"
 
         @Reload(1)
         private fun reload() {
@@ -35,18 +38,17 @@ class JSONManager: ISyncCache {
     }
 
     fun loadFile(player: Player, global: Boolean): Configuration {
-        return cache ?: run {
+        val cacheKey = if (global) GLOBAL_CACHE_KEY else player.uniqueId.toString()
+        return cacheMap.computeIfAbsent(cacheKey) {
             if (global) {
                 Configuration.loadFromFile(newFile(getDataFolder(), "/data/global.json"), Type.JSON, true)
             } else {
                 Configuration.loadFromFile(newFile(getDataFolder(), "/data/${player.uniqueId}.json"), Type.JSON, true)
-            }.apply {
-                cache = this
             }
         }
     }
 
     fun reload() {
-        cache = null
+        cacheMap.clear()
     }
 }
