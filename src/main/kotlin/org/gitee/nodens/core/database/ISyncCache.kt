@@ -1,11 +1,12 @@
 package org.gitee.nodens.core.database
 
 import com.gitee.redischannel.RedisChannelPlugin
-import com.gitee.redischannel.RedisChannelPlugin.Type.*
+import com.gitee.redischannel.RedisChannelPlugin.Type.CLUSTER
+import com.gitee.redischannel.RedisChannelPlugin.Type.SINGLE
 import io.lettuce.core.HSetExArgs
 import org.bukkit.entity.Player
 import taboolib.common.LifeCycle
-import taboolib.common.platform.Awake
+import taboolib.platform.bukkit.Parallel
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 
@@ -17,7 +18,7 @@ interface ISyncCache {
 
         lateinit var INSTANCE: ISyncCache
 
-        @Awake(LifeCycle.ENABLE)
+        @Parallel(dependOn = ["redis_channel"], runOn = LifeCycle.ENABLE)
         private fun init() {
             INSTANCE = if (org.gitee.nodens.util.RedisChannelPlugin.isEnabled) {
                 when(RedisChannelPlugin.type) {
