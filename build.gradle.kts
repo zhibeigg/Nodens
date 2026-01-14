@@ -49,7 +49,7 @@ taboolib {
     relocate("com.github.benmanes.caffeine", "org.gitee.nodens.caffeine")
     relocate("com.eatthepath.uuid", "org.gitee.nodens.eatthepath.uuid")
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
-    version { taboolib = "6.2.4-3b3cd67" }
+    version { taboolib = "6.2.4-5902762" }
 }
 
 repositories {
