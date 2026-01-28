@@ -9,15 +9,41 @@
 # scale 缩放系数
 # 此处可写更高级算式
 # 最后返回值为 finalDamage
+
+# 基础伤害(物/法) + 增伤(小怪/boss)
 onDamage: |-
-  set a to 0
+  set damage to 0
+  set real to 0
+  set addon to 0
+  set enhancement to 0
   for i in &damageSources then {
-    set a to math add [ &a &i[value] ]
+    case &i[attribute] [
+      when "Physics" -> set damage to math add [ &damage &i[value] ]
+      when "Magic" -> set damage to math add [ &damage &i[value] ]
+      when "Real" -> set real to math add [ &real &i[value] ]
+      when "Monster" -> set addon to math add [ &addon &i[value] ]
+      when "Boss" -> set addon to math add [ &addon &i[value] ]
+      when "Enhancement" -> set enhancement to math add [ &addon &i[value] ]
+      when "Addon" -> set enhancement to math add [ &enhancement &i[value] ]
+    ]
   }
+  set defence to 0
   for i in &defenceSources then {
-    set a to math sub [ &a &i[value] ]
+    case &i[attribute] [
+      when "Physics" -> set defence to math add [ &defence &i[value] ]
+      when "Magic" -> set defence to math add [ &defence &i[value] ]
+    ]
   }
-  math mul [ &scale &a ]
+  set damage to scaled &damage
+  set real to scaled &real
+  set addon to scaled &addon
+  set enhancement to scaled &enhancement
+  set defence to scaled &defence
+  if check &damageType == "REAL" then {
+    calc "(real+enhancement)*scale"
+  } else {
+    calc "(((damage+addon)*(1-defence/(1000+defence))*1)+enhancement)*scale"
+  }
 # reason 治疗原因
 # regainSources 治疗源列表
 # reduceSources 减疗源列表
