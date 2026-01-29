@@ -12,7 +12,7 @@ object Defence: IAttributeGroup {
 
     override val name: String = "Defence"
 
-    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Physics, Magic, Fire, Reduction).associateBy { it.name }
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Physics, Magic, Fire, Reduction, MonsterDefence).associateBy { it.name }
 
     object Physics: AbstractNumber() {
 
@@ -45,6 +45,16 @@ object Defence: IAttributeGroup {
     }
 
     object Reduction: AbstractNumber() {
+
+        override val group: IAttributeGroup
+            get() = Defence
+
+        override fun handleDefender(damageProcessor: DamageProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
+            damageProcessor.addDefenceSource("$NODENS_NAMESPACE${Defence.name}$name", this, getDefence(valueMap))
+        }
+    }
+
+    object MonsterDefence: AbstractNumber() {
 
         override val group: IAttributeGroup
             get() = Defence

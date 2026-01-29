@@ -44,3 +44,9 @@ Enhancement:
   handlePriority: 3
   keys:
     - 伤害提升
+MonsterAttack:
+  combatPower: 1.0
+  valueType: RANGE
+  handlePriority: 1
+  keys:
+    - 怪物伤害

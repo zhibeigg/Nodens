@@ -26,3 +26,9 @@ Reduction:
   handlePriority: 2
   keys:
     - 伤害减免
+MonsterDefence:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 1
+  keys:
+    - 怪物防御

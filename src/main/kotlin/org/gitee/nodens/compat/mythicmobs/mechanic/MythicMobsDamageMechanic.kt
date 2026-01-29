@@ -22,6 +22,7 @@ class MythicMobsDamageMechanic(line: String, mlc: MythicLineConfig) : SkillMecha
         processor.handleAttacker()
         processor.damageSources.forEach {
             when(it.key) {
+                "$NODENS_NAMESPACE${Damage.name}${Damage.MonsterAttack.name}" -> it.value.damage *= nPower
                 "$NODENS_NAMESPACE${Damage.name}${Damage.Physics.name}" -> it.value.damage *= nPower
                 "$NODENS_NAMESPACE${Damage.name}${Damage.Magic.name}" -> it.value.damage *= nPower
                 "$NODENS_NAMESPACE${Damage.name}${Damage.Real.name}" -> it.value.damage *= nPower

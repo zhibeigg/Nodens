@@ -16,6 +16,7 @@ onDamage: |-
   set real to 0
   set addon to 0
   set enhancement to 0
+  set monsterDamage to 0
   for i in &damageSources then {
     case &i[attribute] [
       when "Physics" -> set damage to math add [ &damage &i[value] ]
@@ -25,13 +26,24 @@ onDamage: |-
       when "Boss" -> set addon to math add [ &addon &i[value] ]
       when "Enhancement" -> set enhancement to math add [ &addon &i[value] ]
       when "Addon" -> set enhancement to math add [ &enhancement &i[value] ]
+      when "MonsterAttack" -> set monsterDamage to math add [ &monsterDamage &i[value] ]
     ]
   }
   set defence to 0
+  set monsterDefence to 0
   for i in &defenceSources then {
     case &i[attribute] [
-      when "Physics" -> set defence to math add [ &defence &i[value] ]
-      when "Magic" -> set defence to math add [ &defence &i[value] ]
+      when "Physics" -> {
+        if &damageType == "PHYSICS" then {
+          set defence to math add [ &defence &i[value] ]
+        }
+      }
+      when "Magic" -> {
+        if &damageType == "MAGIC" then {
+          set defence to math add [ &defence &i[value] ]
+        }
+      }
+      when "MonsterDefence" -> set monsterDefence to math add [ &monsterDefence &i[value] ]
     ]
   }
   set damage to scaled &damage
@@ -39,8 +51,12 @@ onDamage: |-
   set addon to scaled &addon
   set enhancement to scaled &enhancement
   set defence to scaled &defence
+  set monsterDamage to scaled &monsterDamage
+  set monsterDefence to scaled &monsterDefence
   if check &damageType == "REAL" then {
     calc "(real+enhancement)*scale"
+  } else if check &damageType == "MONSTER" then {
+    calc "(((monsterDamage+addon)*(1-monsterDefence/(1000+monsterDefence))*1)+enhancement)*scale"
   } else {
     calc "(((damage+addon)*(1-defence/(1000+defence))*1)+enhancement)*scale"
   }
