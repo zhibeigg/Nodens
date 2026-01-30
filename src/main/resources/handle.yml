@@ -34,12 +34,12 @@ onDamage: |-
   for i in &defenceSources then {
     case &i[attribute] [
       when "Physics" -> {
-        if &damageType == "PHYSICS" then {
+        if check &damageType == "PHYSICS" then {
           set defence to math add [ &defence &i[value] ]
         }
       }
       when "Magic" -> {
-        if &damageType == "MAGIC" then {
+        if check &damageType == "MAGIC" then {
           set defence to math add [ &defence &i[value] ]
         }
       }
@@ -53,13 +53,11 @@ onDamage: |-
   set defence to scaled &defence
   set monsterDamage to scaled &monsterDamage
   set monsterDefence to scaled &monsterDefence
-  if check &damageType == "REAL" then {
-    calc "(real+enhancement)*scale"
-  } else if check &damageType == "MONSTER" then {
-    calc "(((monsterDamage+addon)*(1-monsterDefence/(1000+monsterDefence))*1)+enhancement)*scale"
-  } else {
-    calc "(((damage+addon)*(1-defence/(1000+defence))*1)+enhancement)*scale"
-  }
+  case &damageType [
+    when "REAL" -> calc "(real+enhancement)*scale"
+    when "MONSTER" -> calc "(((monsterDamage+addon)*(1-monsterDefence/(1000+monsterDefence))*1)+enhancement)*scale"
+    else calc "(((damage+addon)*(1-defence/(1000+defence))*1)+enhancement)*scale"
+  ]
 # reason 治疗原因
 # regainSources 治疗源列表
 # reduceSources 减疗源列表
