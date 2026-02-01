@@ -1,13 +1,14 @@
 package org.gitee.nodens.core.attribute
 
 import org.bukkit.entity.LivingEntity
+import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
-import org.gitee.nodens.util.MonitorLazy
 import org.gitee.nodens.util.mergeValues
 import org.gitee.nodens.util.nodensEnvironmentNamespaces
+import taboolib.module.configuration.util.ReloadAwareLazy
 import taboolib.module.kether.KetherFunction
 import taboolib.module.kether.ScriptOptions
 import taboolib.module.kether.runKether
@@ -26,7 +27,7 @@ object Mapping: IAttributeGroup {
         override val group: IAttributeGroup
             get() = Mapping
 
-        private val attributes by MonitorLazy({ config }) { config.getStringList("attributes") }
+        private val attributes by ReloadAwareLazy(Nodens.config) { config.getStringList("attributes") }
 
         fun getAttributes(entity: LivingEntity, map: Map<DigitalParser.Type, DoubleArray>): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
             val count = map[DigitalParser.Type.COUNT]?.get(0) ?: 0.0

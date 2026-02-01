@@ -4,59 +4,47 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.reload.ReloadAPI
+import java.util.EnumMap
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+/**
+ * 合并多个 [DigitalParser.Value] 值，按类型分组并累加对应位置的数值。
+ *
+ * 采用单次遍历 + EnumMap 的高性能算法：
+ * - 时间复杂度：O(n * m)，其中 n 为 values 数量，m 为平均数组长度
+ * - 空间复杂度：O(k * m)，其中 k 为类型数量（最多2个）
+ * - 避免创建中间分组对象，减少 GC 压力
+ *
+ * @param values 要合并的值数组
+ * @return 按类型分组的合并结果，每个类型对应一个累加后的 DoubleArray
+ */
 fun mergeValues(vararg values: DigitalParser.Value): Map<DigitalParser.Type, DoubleArray> {
-    val group = values.groupBy { it.type }
-    val map = hashMapOf<DigitalParser.Type, DoubleArray>()
-    DigitalParser.Type.entries.forEach { type ->
-        val list = group[type] ?: return@forEach
-        val maxSize = list.maxOfOrNull { it.doubleArray.size } ?: 0
-        val result = DoubleArray(maxSize)
-        for (value in list) {
-            for (i in value.doubleArray.indices) {
-                result[i] += value.doubleArray[i]
+    if (values.isEmpty()) return emptyMap()
+
+    val result = EnumMap<DigitalParser.Type, DoubleArray>(DigitalParser.Type::class.java)
+
+    for (value in values) {
+        val type = value.type
+        val arr = value.doubleArray
+        val existing = result[type]
+
+        if (existing == null) {
+            result[type] = arr.copyOf()
+        } else if (arr.size <= existing.size) {
+            for (i in arr.indices) {
+                existing[i] += arr[i]
             }
+        } else {
+            val newArr = arr.copyOf()
+            for (i in existing.indices) {
+                newArr[i] += existing[i]
+            }
+            result[type] = newArr
         }
-        map[type] = result
     }
-    return map
-}
 
-class MonitorLazy<T>(private val check: () -> Any?, private val initializer: () -> T) : ReadOnlyProperty<Any?, T> {
-    private var cached: T? = null
-    private var initialized: Boolean = false
-    private var lastHash: Int? = null
-
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        val current = check()
-        val currentHash = current.hashCode()
-        if (!initialized || lastHash != currentHash) {
-            cached = initializer()
-            initialized = true
-            lastHash = currentHash
-        }
-        @Suppress("UNCHECKED_CAST")
-        return cached as T
-    }
-}
-
-class ConfigLazy<T>(private val initializer: () -> T) : ReadOnlyProperty<Any?, T> {
-    private var cached: T? = null
-    private var initialized: Boolean = false
-    private var lastMark: Short? = null
-
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        val currentMark = ReloadAPI.reloadMark
-        if (!initialized || lastMark != currentMark) {
-            cached = initializer()
-            initialized = true
-            lastMark = currentMark
-        }
-        @Suppress("UNCHECKED_CAST")
-        return cached as T
-    }
+    return result
 }
 
 fun LivingEntity.maxHealth(): Double {

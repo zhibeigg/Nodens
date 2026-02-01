@@ -33,6 +33,7 @@ import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.submitAsync
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.common.util.unsafeLazy
+import taboolib.module.configuration.util.ReloadAwareLazy
 import taboolib.platform.util.onlinePlayers
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -48,7 +49,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         private val dragonCoreIsEnabled by unsafeLazy { DragonCorePlugin.isEnabled }
 
-        private val attributeDragoncoreSlots by ConfigLazy { Nodens.config.getStringList("attribute-dragoncore-slots") }
+        private val attributeDragoncoreSlots by ReloadAwareLazy(Nodens.config) { Nodens.config.getStringList("attribute-dragoncore-slots") }
         private val attributeCatch = Caffeine.newBuilder()
             .initialCapacity(50)
             .maximumSize(100)

@@ -11,6 +11,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.io.runningClassesWithoutLibrary
 import taboolib.common.platform.Awake
 import taboolib.module.configuration.Configuration
+import taboolib.module.configuration.util.ReloadAwareLazy
 import java.math.BigDecimal
 import java.util.concurrent.ConcurrentHashMap
 
@@ -26,7 +27,7 @@ object AttributeManager {
 
     internal val ATTRIBUTE_MATCHING_MAP = FastMatchingMap<IAttributeGroup.Number>()
 
-    val healthScaled by ConfigLazy { Nodens.config.getBoolean("healthScaled", true) }
+    val healthScaled by ReloadAwareLazy(Nodens.config) { Nodens.config.getBoolean("healthScaled", true) }
 
     @Reload(0)
     @Awake(LifeCycle.ENABLE)

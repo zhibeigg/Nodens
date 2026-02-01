@@ -14,13 +14,13 @@ import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.module.item.ItemManager
 import org.gitee.nodens.module.item.generator.NormalGenerator
-import org.gitee.nodens.util.ConfigLazy
 import org.gitee.nodens.util.GlowAPIPlugin
 import org.inventivetalent.glow.GlowAPI
 import taboolib.common.platform.Ghost
 import taboolib.common.platform.Schedule
 import taboolib.common.platform.event.SubscribeEvent
 import taboolib.common.util.random
+import taboolib.module.configuration.util.ReloadAwareLazy
 import taboolib.module.nms.getName
 import taboolib.platform.util.hasName
 import java.util.*
@@ -30,8 +30,8 @@ import kotlin.time.Duration
 
 object DropManager {
 
-    val dropCancel by ConfigLazy { Nodens.config.getBoolean("drop.cancel", false) }
-    val dropSurvival by ConfigLazy { Duration.parse(Nodens.config.getString("drop.survival", "P5M")!!).inWholeMilliseconds }
+    val dropCancel by ReloadAwareLazy(Nodens.config) { Nodens.config.getBoolean("drop.cancel", false) }
+    val dropSurvival by ReloadAwareLazy(Nodens.config) { Duration.parse(Nodens.config.getString("drop.survival", "P5M")!!).inWholeMilliseconds }
 
     val chanceMap: Cache<String, DropChance> = Caffeine.newBuilder()
         .initialCapacity(30)

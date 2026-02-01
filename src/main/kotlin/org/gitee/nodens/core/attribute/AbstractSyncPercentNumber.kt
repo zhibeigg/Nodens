@@ -1,8 +1,9 @@
 package org.gitee.nodens.core.attribute
 
-import org.gitee.nodens.util.MonitorLazy
+import org.gitee.nodens.api.Nodens
+import taboolib.module.configuration.util.ReloadAwareLazy
 
 abstract class AbstractSyncPercentNumber: AbstractPercentNumber(), ISyncDefault {
 
-    override val default by MonitorLazy({ config }) { config.getDouble("default", 0.2) }
+    override val default by ReloadAwareLazy(Nodens.config) { config.getDouble("default", 0.2) }
 }

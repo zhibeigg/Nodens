@@ -4,16 +4,15 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.module.item.condition.ICondition
-import org.gitee.nodens.util.ConfigLazy
 import taboolib.common5.cint
+import taboolib.module.configuration.util.ReloadAwareLazy
 import java.time.LocalDateTime
-import java.util.Timer
 
 object TimeCondition: ICondition {
 
-    override val keywords by ConfigLazy { Nodens.config.getStringList("condition.time.keywords") }
+    override val keywords by ReloadAwareLazy(Nodens.config) { Nodens.config.getStringList("condition.time.keywords") }
 
-    val pattern by ConfigLazy { Nodens.config.getString("condition.time.pattern", "-")!! }
+    val pattern by ReloadAwareLazy(Nodens.config) { Nodens.config.getString("condition.time.pattern", "-")!! }
 
     override fun check(livingEntity: LivingEntity, itemStack: ItemStack, remain: String?, map: Map<String, String>): Boolean {
         remain ?: return true

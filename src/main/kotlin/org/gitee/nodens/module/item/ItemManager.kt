@@ -26,6 +26,7 @@ import taboolib.common.platform.function.info
 import taboolib.common.util.unsafeLazy
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
+import taboolib.module.configuration.util.ReloadAwareLazy
 import taboolib.platform.util.isAir
 import taboolib.platform.util.onlinePlayers
 import java.util.*
@@ -38,7 +39,7 @@ object ItemManager {
 
     private val dragonCoreIsEnabled by unsafeLazy { DragonCorePlugin.isEnabled }
 
-    val dragoncoreSlots by ConfigLazy { Nodens.config.getStringList("update-dragoncore-slots") }
+    val dragoncoreSlots by ReloadAwareLazy(Nodens.config) { Nodens.config.getStringList("update-dragoncore-slots") }
 
     @Reload(0)
     @Awake(LifeCycle.ENABLE)
