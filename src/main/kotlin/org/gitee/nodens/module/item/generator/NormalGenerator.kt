@@ -127,7 +127,7 @@ object NormalGenerator: IItemGenerator {
         builder.finishing = {
             val tag = it.getItemTag()
             // 保存上下文(序列化压缩)
-            tag[CONTEXT_TAG] = compress(VariableRegistry.json.encodeToString(context))
+            tag[CONTEXT_TAG] = context.toByteArray()
             tag[DURABILITY] = context[DURABILITY]!!.cint
             tag[QUALITY] = context[QUALITY_TAG]!!.cint
             // 保存自定义NBT
