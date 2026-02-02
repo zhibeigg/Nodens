@@ -5,11 +5,11 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.gitee.nodens.api.events.entity.NodensEntityDamageEvents
 import org.gitee.nodens.common.Handle.doDamage
+import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.attribute.Crit
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.NODENS_NAMESPACE
-import org.gitee.nodens.util.comparePriority
 
 /**
  * @param damageType 攻击类型，一般来自[org.gitee.nodens.core.attribute.Damage]中的[IAttributeGroup.Number.name]
@@ -58,9 +58,10 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
         }
     }
 
-    internal val damageSources = hashMapOf<String, DamageSource>()
-    internal val defenceSources = hashMapOf<String, DefenceSource>()
-    internal val runnableList = mutableListOf<PriorityRunnable>()
+    // 预分配 HashMap 容量，减少扩容开销
+    internal val damageSources = HashMap<String, DamageSource>(16)
+    internal val defenceSources = HashMap<String, DefenceSource>(16)
+    internal val runnableList = ArrayList<PriorityRunnable>(4)
 
     fun getDamageSource(key: String): DamageSource? {
         return damageSources[key]
@@ -129,23 +130,21 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
     }
 
     fun handleAttacker(vararg skipNumber: IAttributeGroup.Number) {
-        attacker.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
-            if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
-        }?.forEach {
-            if (it.key in skipNumber) return@forEach
-            it.key.handleAttacker(this, it.value)
-        }
+        attacker.attributeMemory()?.mergedAllAttribute()
+            ?.toSortedMap(AttributeManager.ATTRIBUTE_COMPARATOR)
+            ?.forEach {
+                if (it.key in skipNumber) return@forEach
+                it.key.handleAttacker(this, it.value)
+            }
     }
 
     fun handleDefender(vararg skipNumber: IAttributeGroup.Number) {
-        defender.attributeMemory()?.mergedAllAttribute()?.toSortedMap { o1, o2 ->
-            val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
-            if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
-        }?.forEach {
-            if (it.key in skipNumber) return@forEach
-            it.key.handleDefender(this, it.value)
-        }
+        defender.attributeMemory()?.mergedAllAttribute()
+            ?.toSortedMap(AttributeManager.ATTRIBUTE_COMPARATOR)
+            ?.forEach {
+                if (it.key in skipNumber) return@forEach
+                it.key.handleDefender(this, it.value)
+            }
     }
 
     override fun toString(): String {

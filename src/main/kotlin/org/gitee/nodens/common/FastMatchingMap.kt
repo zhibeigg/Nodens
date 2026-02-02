@@ -1,7 +1,6 @@
 package org.gitee.nodens.common
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicReferenceArray
 
 /**
  * # FastMatchingMap - 高性能字符串匹配容器
@@ -10,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray
  * 支持纳秒级的字符串匹配操作，特别适用于 Minecraft 插件中的 Lore 解析场景。
  *
  * ## 特性
- * - **线程安全**：使用 [AtomicReferenceArray] 和 [ConcurrentHashMap] 实现无锁并发
+ * - **线程安全**：使用 [ConcurrentHashMap] 实现无锁并发
  * - **高性能**：基于 Trie 树的 O(m) 时间复杂度匹配（m 为匹配串长度）
  * - **灵活过滤**：支持忽略空格、颜色代码、冒号等干扰字符
  * - **前缀匹配**：支持从任意位置开始匹配，无需精确对齐
@@ -49,14 +48,17 @@ class FastMatchingMap<T>(
      * Trie 树节点
      *
      * 每个节点包含：
-     * - 子节点数组：使用 UTF-16 代码单元（0-65535）作为索引
+     * - 子节点 Map：使用字符作为键，按需创建子节点
      * - 终止值：当该节点是某个 key 的终点时，存储对应的值
      *
-     * @param children 子节点数组，使用 [AtomicReferenceArray] 保证线程安全
+     * 内存优化：使用 [ConcurrentHashMap] 替代固定大小数组，
+     * 从每节点 512KB 降低到约 1KB（假设平均 10 个子节点）
+     *
+     * @param children 子节点 Map，使用 [ConcurrentHashMap] 保证线程安全
      * @param value 该节点对应的值，使用 [@Volatile] 保证可见性
      */
     private class TrieNode<T>(
-        val children: AtomicReferenceArray<TrieNode<T>?> = AtomicReferenceArray(65536),
+        val children: ConcurrentHashMap<Char, TrieNode<T>> = ConcurrentHashMap(4),
         @Volatile var value: T? = null
     )
 
@@ -95,16 +97,8 @@ class FastMatchingMap<T>(
 
         // 沿着 key 的每个字符向下遍历/创建节点
         for (c in cleanKey) {
-            val code = c.code
-            var node = current.children[code]
-
-            // 惰性创建子节点
-            if (node == null) {
-                node = TrieNode()
-                current.children.set(code, node)
-            }
-
-            current = node
+            // 使用 computeIfAbsent 原子性地获取或创建子节点
+            current = current.children.computeIfAbsent(c) { TrieNode() }
         }
 
         // 在终止节点设置值
@@ -147,7 +141,7 @@ class FastMatchingMap<T>(
         // 沿 Trie 树向下搜索
         var current = root
         for (i in start until line.length) {
-            val node = current.children[line[i].code] ?: return null
+            val node = current.children[line[i]] ?: return null
             // 最短匹配：找到值立即返回
             node.value?.let { return it }
             current = node
@@ -184,7 +178,7 @@ class FastMatchingMap<T>(
 
         var current = root
         for (i in start until line.length) {
-            val node = current.children[line[i].code] ?: return null
+            val node = current.children[line[i]] ?: return null
             node.value?.let {
                 return MatchResult(
                     remain = line.substring(i + 1).takeIf { i + 1 < line.length },

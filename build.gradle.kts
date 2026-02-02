@@ -41,8 +41,10 @@ taboolib {
             name("纸杯")
         }
         dependencies {
+            name("RedisChannel").optional(true)
             name("DragonCore").optional(true)
             name("DragonArmourers").optional(true)
+            name("MythicMobs").optional(true)
             name("GlowAPI").optional(true)
         }
     }

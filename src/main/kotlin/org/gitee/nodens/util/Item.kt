@@ -29,13 +29,15 @@ const val DURABILITY = "durability"
 /**
  * NormalContext 缓存
  * - 使用 ItemStack 的弱引用作为 key，避免内存泄漏
- * - 100ms 过期时间，平衡缓存命中率和数据一致性
+ * - 500ms 访问后过期，提高缓存命中率
  * - 最大 2000 条缓存
+ * - 启用统计以监控缓存效率
  */
 private val contextCache = Caffeine.newBuilder()
     .weakKeys()
-    .expireAfterWrite(100, TimeUnit.MILLISECONDS)
+    .expireAfterAccess(500, TimeUnit.MILLISECONDS)
     .maximumSize(2000)
+    .recordStats()
     .build<ItemStack, NormalContext>()
 
 /**

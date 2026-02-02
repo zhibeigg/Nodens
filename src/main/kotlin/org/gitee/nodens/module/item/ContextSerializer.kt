@@ -40,6 +40,9 @@ object ContextSerializer {
     private const val TYPE_ARRAY: Byte = 10
     private const val TYPE_MAP: Byte = 11
 
+    /** 最大嵌套深度限制，防止栈溢出 */
+    private const val MAX_DEPTH = 16
+
     /**
      * 序列化 [NormalContext] 为字节数组
      *
@@ -47,7 +50,9 @@ object ContextSerializer {
      * @return 序列化后的字节数组
      */
     fun serialize(context: NormalContext): ByteArray {
-        val baos = ByteArrayOutputStream(256)
+        // 根据变量数量估算容量，减少扩容开销
+        val estimatedSize = 64 + context.sourceMap().size * 32
+        val baos = ByteArrayOutputStream(estimatedSize)
         DataOutputStream(baos).use { dos ->
             // 写入 key
             dos.writeUTF(context.key)
@@ -58,7 +63,7 @@ object ContextSerializer {
             dos.writeInt(map.size)
             map.forEach { (key, variable) ->
                 dos.writeUTF(key)
-                writeVariable(dos, variable)
+                writeVariable(dos, variable, 0)
             }
         }
         return baos.toByteArray()
@@ -95,8 +100,13 @@ object ContextSerializer {
      *
      * @param dos 数据输出流
      * @param variable 要写入的变量
+     * @param depth 当前嵌套深度
+     * @throws IllegalStateException 如果嵌套深度超过限制
      */
-    private fun writeVariable(dos: DataOutputStream, variable: Variable<*>) {
+    private fun writeVariable(dos: DataOutputStream, variable: Variable<*>, depth: Int) {
+        if (depth > MAX_DEPTH) {
+            throw IllegalStateException("Variable 嵌套深度超过限制: $MAX_DEPTH")
+        }
         when (variable) {
             is NullVariable -> dos.writeByte(TYPE_NULL.toInt())
             is ByteVariable -> {
@@ -138,14 +148,14 @@ object ContextSerializer {
             is ArrayVariable -> {
                 dos.writeByte(TYPE_ARRAY.toInt())
                 dos.writeInt(variable.value.size)
-                variable.value.forEach { writeVariable(dos, it) }
+                variable.value.forEach { writeVariable(dos, it, depth + 1) }
             }
             is MapVariable -> {
                 dos.writeByte(TYPE_MAP.toInt())
                 dos.writeInt(variable.value.size)
                 variable.value.forEach { (k, v) ->
                     dos.writeUTF(k)
-                    writeVariable(dos, v)
+                    writeVariable(dos, v, depth + 1)
                 }
             }
             else -> {
@@ -164,9 +174,14 @@ object ContextSerializer {
      * 从输入流读取 [Variable]
      *
      * @param dis 数据输入流
+     * @param depth 当前嵌套深度
      * @return 读取的 [Variable] 对象
+     * @throws IllegalStateException 如果嵌套深度超过限制
      */
-    private fun readVariable(dis: DataInputStream): Variable<*> {
+    private fun readVariable(dis: DataInputStream, depth: Int = 0): Variable<*> {
+        if (depth > MAX_DEPTH) {
+            throw IllegalStateException("Variable 嵌套深度超过限制: $MAX_DEPTH")
+        }
         return when (val type = dis.readByte()) {
             TYPE_NULL -> NullVariable(null)
             TYPE_BYTE -> ByteVariable(dis.readByte())
@@ -181,7 +196,7 @@ object ContextSerializer {
             TYPE_ARRAY -> {
                 val size = dis.readInt()
                 val list = ArrayList<Variable<*>>(size)
-                repeat(size) { list.add(readVariable(dis)) }
+                repeat(size) { list.add(readVariable(dis, depth + 1)) }
                 ArrayVariable(list)
             }
             TYPE_MAP -> {
@@ -189,7 +204,7 @@ object ContextSerializer {
                 val map = HashMap<String, Variable<*>>(size)
                 repeat(size) {
                     val key = dis.readUTF()
-                    map[key] = readVariable(dis)
+                    map[key] = readVariable(dis, depth + 1)
                 }
                 MapVariable(map)
             }

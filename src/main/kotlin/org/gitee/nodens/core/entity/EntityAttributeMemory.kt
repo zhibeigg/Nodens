@@ -2,7 +2,6 @@ package org.gitee.nodens.core.entity
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import eos.moe.dragoncore.api.SlotAPI
-import kotlinx.coroutines.launch
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDeathEvent
@@ -10,7 +9,6 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.api.Nodens
-import org.gitee.nodens.api.NodensAPI.Companion.pluginScope
 import org.gitee.nodens.api.events.entity.NodensEntityRegainEvents
 import org.gitee.nodens.api.events.player.NodensPlayerAttributeSyncEvent
 import org.gitee.nodens.api.events.player.NodensPlayerAttributeUpdateEvents
@@ -51,19 +49,44 @@ class EntityAttributeMemory(val entity: LivingEntity) {
 
         private val attributeDragoncoreSlots by ReloadAwareLazy(Nodens.config) { Nodens.config.getStringList("attribute-dragoncore-slots") }
         private val attributeCatch = Caffeine.newBuilder()
-            .initialCapacity(50)
-            .maximumSize(100)
+            .initialCapacity(200)
+            .maximumSize(500)
             .expireAfterAccess(5, TimeUnit.MINUTES)
+            .recordStats()
             .build<UUID, List<IAttributeData>>()
 
-        @Schedule(async = false, period = 20)
+        /** 玩家最后访问时间记录，用于超时清理 */
+        private val playerLastAccessTime = ConcurrentHashMap<UUID, Long>()
+        /** 玩家数据超时时间（10分钟） */
+        private const val PLAYER_DATA_TIMEOUT_MS = 600_000L
+
+        @Schedule(async = false, period = 100)
         private fun schedule() {
+            val now = System.currentTimeMillis()
             val iterator = entityAttributeMemoriesMap.iterator()
             while (iterator.hasNext()) {
                 val entry = iterator.next()
-                if (entry.value.entity is Player) continue
-                if (!entry.value.entity.isValid) {
-                    iterator.remove()
+                val memory = entry.value
+                if (memory.entity is Player) {
+                    val player = memory.entity as Player
+                    // 检查玩家是否在线
+                    if (!player.isOnline) {
+                        // 检查是否超时
+                        val lastAccess = playerLastAccessTime[entry.key] ?: now
+                        if (now - lastAccess > PLAYER_DATA_TIMEOUT_MS) {
+                            memory.entitySyncProfile.resetHealth()
+                            iterator.remove()
+                            playerLastAccessTime.remove(entry.key)
+                        }
+                    } else {
+                        // 更新在线玩家的最后访问时间
+                        playerLastAccessTime[entry.key] = now
+                    }
+                } else {
+                    // 非玩家实体：检查是否有效
+                    if (!memory.entity.isValid) {
+                        iterator.remove()
+                    }
                 }
             }
         }
@@ -80,6 +103,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
             entityAttributeMemoriesMap.remove(event.player.uniqueId)?.entitySyncProfile?.apply {
                 resetHealth()
             }
+            playerLastAccessTime.remove(event.player.uniqueId)
         }
 
         @SubscribeEvent
@@ -222,19 +246,14 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         if (entity.isDead) return
         val event = NodensPlayerAttributeUpdateEvents.Pre(this)
         if (event.call()) {
+            // 同步清理过期的临时属性，避免并发问题
+            extendMemory.entries.removeIf { it.value.closed }
+            // 失效缓存
             removeCatch(entity.uniqueId)
-            pluginScope.launch {
-                val iterator = extendMemory.iterator()
-                while (iterator.hasNext()) {
-                    val entry = iterator.next()
-                    if (entry.value.closed) {
-                        iterator.remove()
-                    }
-                }
-            }.invokeOnCompletion {
-                syncAttributeToBukkit()
-                NodensPlayerAttributeUpdateEvents.Post(this@EntityAttributeMemory).call()
-            }
+            // 同步属性到 Bukkit
+            syncAttributeToBukkit()
+            // 触发后置事件
+            NodensPlayerAttributeUpdateEvents.Post(this@EntityAttributeMemory).call()
         }
     }
 

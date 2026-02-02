@@ -27,6 +27,12 @@ object AttributeManager {
 
     internal val ATTRIBUTE_MATCHING_MAP = FastMatchingMap<IAttributeGroup.Number>()
 
+    /** 预计算的属性排序比较器，避免每次伤害计算都重新创建 */
+    val ATTRIBUTE_COMPARATOR: Comparator<IAttributeGroup.Number> = Comparator { o1, o2 ->
+        val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)
+        if (priorityCompare != 0) priorityCompare else o1.name.compareTo(o2.name)
+    }
+
     val healthScaled by ReloadAwareLazy(Nodens.config) { Nodens.config.getBoolean("healthScaled", true) }
 
     @Reload(0)

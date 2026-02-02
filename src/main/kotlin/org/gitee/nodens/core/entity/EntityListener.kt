@@ -3,7 +3,6 @@ package org.gitee.nodens.core.entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
-import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause.*
@@ -19,53 +18,92 @@ import org.gitee.nodens.core.attribute.Exp
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.event.SubscribeEvent
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submit
 import taboolib.common5.cdouble
 import taboolib.common5.cint
 import taboolib.platform.util.attacker
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 object EntityListener {
+
+    /** 防抖时间（毫秒） */
+    private const val DEBOUNCE_TIME_MS = 50L
+    /** 玩家最后更新时间记录 */
+    private val lastUpdateTime = ConcurrentHashMap<UUID, Long>()
+    /** 玩家待处理更新标记 */
+    private val pendingUpdate = ConcurrentHashMap.newKeySet<UUID>()
+
+    /**
+     * 带防抖的属性更新
+     * 在短时间内多次触发时，只执行一次更新
+     */
+    private fun Player.debouncedUpdateAttribute() {
+        val now = System.currentTimeMillis()
+        val lastTime = lastUpdateTime[uniqueId] ?: 0L
+
+        if (now - lastTime >= DEBOUNCE_TIME_MS) {
+            // 超过防抖时间，立即更新
+            lastUpdateTime[uniqueId] = now
+            attributeMemory()?.updateAttributeAsync()
+        } else if (pendingUpdate.add(uniqueId)) {
+            // 在防抖时间内，延迟执行
+            submit(delay = DEBOUNCE_TIME_MS - (now - lastTime) + 1) {
+                if (pendingUpdate.remove(uniqueId)) {
+                    lastUpdateTime[uniqueId] = System.currentTimeMillis()
+                    attributeMemory()?.updateAttributeAsync()
+                }
+            }
+        }
+        // 如果已有待处理更新，忽略本次请求
+    }
 
     @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onSwapHandItems(e: PlayerSwapHandItemsEvent) {
         if (e.isCancelled) return
-        e.player.attributeMemory()?.updateAttributeAsync()
+        e.player.debouncedUpdateAttribute()
     }
 
     @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onInventoryClick(e: InventoryClickEvent) {
         if (e.isCancelled) return
-        e.whoClicked.attributeMemory()?.updateAttributeAsync()
+        (e.whoClicked as? Player)?.debouncedUpdateAttribute()
     }
 
     @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onInventoryDrag(e: InventoryDragEvent) {
         if (e.isCancelled) return
-        e.whoClicked.attributeMemory()?.updateAttributeAsync()
+        (e.whoClicked as? Player)?.debouncedUpdateAttribute()
     }
 
     @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onItemHeld(e: PlayerItemHeldEvent) {
         if (e.isCancelled) return
-        e.player.attributeMemory()?.updateAttributeAsync()
+        e.player.debouncedUpdateAttribute()
     }
 
     @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onDropItem(e: PlayerDropItemEvent) {
         if (e.isCancelled) return
-        e.player.attributeMemory()?.updateAttributeAsync()
+        e.player.debouncedUpdateAttribute()
     }
 
     @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onItemBreak(e: PlayerItemBreakEvent) {
-        e.player.attributeMemory()?.updateAttributeAsync()
+        e.player.debouncedUpdateAttribute()
     }
 
     @SubscribeEvent(priority = EventPriority.MONITOR)
     private fun onInteract(e: PlayerInteractEvent) {
         if (e.useItemInHand() == Event.Result.DENY) return
-        e.player.attributeMemory()?.updateAttributeAsync()
+        e.player.debouncedUpdateAttribute()
+    }
+
+    @SubscribeEvent(priority = EventPriority.MONITOR)
+    private fun onPlayerQuit(e: PlayerQuitEvent) {
+        // 清理玩家的防抖数据
+        lastUpdateTime.remove(e.player.uniqueId)
+        pendingUpdate.remove(e.player.uniqueId)
     }
 
     @SubscribeEvent
