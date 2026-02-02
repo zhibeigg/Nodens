@@ -24,11 +24,11 @@ import taboolib.common5.cbool
 import taboolib.common5.cdouble
 import taboolib.common5.cint
 
-@Ghost
 object MythicMobsHook {
 
     private const val ATTRIBUTE_TAG = "Nodens@MythicMobs"
 
+    @Ghost
     @Awake(LifeCycle.ENABLE)
     private fun loadActive() {
         if (!MythicMobsPlugin.isEnabled) return

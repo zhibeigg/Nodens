@@ -173,12 +173,12 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         }
     }
 
+    private val extendMemory = ConcurrentHashMap<String, TempAttributeData>()
+    val entitySyncProfile = EntitySyncProfile(entity)
+
     init {
         updateAttributeAsync()
     }
-
-    private val extendMemory = ConcurrentHashMap<String, TempAttributeData>()
-    val entitySyncProfile = EntitySyncProfile(entity)
 
     fun addAttribute(name: String, value: TempAttributeData) {
         extendMemory[name] = value
