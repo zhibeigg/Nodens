@@ -25,23 +25,69 @@ fun mergeValues(vararg values: DigitalParser.Value): Map<DigitalParser.Type, Dou
     val result = EnumMap<DigitalParser.Type, DoubleArray>(DigitalParser.Type::class.java)
 
     for (value in values) {
-        val type = value.type
-        val arr = value.doubleArray
-        val existing = result[type]
+        mergeValueInto(result, value.type, value.doubleArray)
+    }
 
-        if (existing == null) {
-            result[type] = arr.copyOf()
-        } else if (arr.size <= existing.size) {
-            for (i in arr.indices) {
-                existing[i] += arr[i]
-            }
-        } else {
-            val newArr = arr.copyOf()
-            for (i in existing.indices) {
-                newArr[i] += existing[i]
-            }
-            result[type] = newArr
+    return result
+}
+
+/**
+ * 合并多个 [DigitalParser.Value] 值（List 版本），避免 spread operator 的数组复制开销。
+ *
+ * @param values 要合并的值列表
+ * @return 按类型分组的合并结果
+ */
+fun mergeValues(values: List<DigitalParser.Value>): Map<DigitalParser.Type, DoubleArray> {
+    if (values.isEmpty()) return emptyMap()
+
+    val result = EnumMap<DigitalParser.Type, DoubleArray>(DigitalParser.Type::class.java)
+
+    for (value in values) {
+        mergeValueInto(result, value.type, value.doubleArray)
+    }
+
+    return result
+}
+
+/**
+ * 将单个值合并到结果 Map 中（内部辅助函数）。
+ */
+private fun mergeValueInto(result: EnumMap<DigitalParser.Type, DoubleArray>, type: DigitalParser.Type, arr: DoubleArray) {
+    val existing = result[type]
+
+    if (existing == null) {
+        result[type] = arr.copyOf()
+    } else if (arr.size <= existing.size) {
+        for (i in arr.indices) {
+            existing[i] += arr[i]
         }
+    } else {
+        val newArr = arr.copyOf()
+        for (i in existing.indices) {
+            newArr[i] += existing[i]
+        }
+        result[type] = newArr
+    }
+}
+
+/**
+ * 合并两个 Map<DigitalParser.Type, DoubleArray>，避免创建临时 DigitalParser.Value 对象。
+ *
+ * @param map1 第一个 Map（可为 null）
+ * @param map2 第二个 Map（可为 null）
+ * @return 合并后的结果
+ */
+fun mergeMaps(map1: Map<DigitalParser.Type, DoubleArray>?, map2: Map<DigitalParser.Type, DoubleArray>?): Map<DigitalParser.Type, DoubleArray> {
+    if (map1 == null || map1.isEmpty()) return map2 ?: emptyMap()
+    if (map2 == null || map2.isEmpty()) return map1
+
+    val result = EnumMap<DigitalParser.Type, DoubleArray>(DigitalParser.Type::class.java)
+
+    for ((type, arr) in map1) {
+        mergeValueInto(result, type, arr)
+    }
+    for ((type, arr) in map2) {
+        mergeValueInto(result, type, arr)
     }
 
     return result

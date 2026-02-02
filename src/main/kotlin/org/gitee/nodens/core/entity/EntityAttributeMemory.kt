@@ -261,59 +261,102 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     }
 
     fun mergedAllAttribute(isTransferMap: Boolean = true): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
-        val extData = extendMemory.values.flatMap { if (!it.closed) it.attributeData else emptyList() }
-        val itemsData = getItemsAttribute()
-        val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
-        (extData + itemsData).groupBy { it.attributeNumber }.forEach { (number, list) ->
-            mergeData[number] = mergeValues(*list.map { it.value }.toTypedArray())
+        val mergeData = hashMapOf<IAttributeGroup.Number, MutableList<DigitalParser.Value>>()
+
+        // 直接遍历 extendMemory，避免 flatMap 创建临时列表
+        for (temp in extendMemory.values) {
+            if (!temp.closed) {
+                for (attr in temp.attributeData) {
+                    mergeData.getOrPut(attr.attributeNumber) { mutableListOf() }.add(attr.value)
+                }
+            }
         }
+
+        // 直接遍历 itemsData，避免 + 操作创建临时列表
+        for (attr in getItemsAttribute()) {
+            mergeData.getOrPut(attr.attributeNumber) { mutableListOf() }.add(attr.value)
+        }
+
+        // 使用 List 版本的 mergeValues，避免 spread operator
+        val result = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
+        for ((number, values) in mergeData) {
+            result[number] = mergeValues(values)
+        }
+
         return if (isTransferMap) {
-            transferMap(mergeData)
+            transferMap(result)
         } else {
-            mergeData
+            result
         }
     }
 
     fun mergedExtendAttribute(isTransferMap: Boolean = true): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
-        val extData = extendMemory.values.flatMap { if (!it.closed) it.attributeData else emptyList() }
-        val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
-        extData.groupBy { it.attributeNumber }.forEach { (number, list) ->
-            mergeData[number] = mergeValues(*list.map { tempAttributeData ->
-                tempAttributeData.value
-            }.toTypedArray())
+        val mergeData = hashMapOf<IAttributeGroup.Number, MutableList<DigitalParser.Value>>()
+
+        // 直接遍历 extendMemory，避免 flatMap 创建临时列表
+        for (temp in extendMemory.values) {
+            if (!temp.closed) {
+                for (attr in temp.attributeData) {
+                    mergeData.getOrPut(attr.attributeNumber) { mutableListOf() }.add(attr.value)
+                }
+            }
         }
+
+        // 使用 List 版本的 mergeValues
+        val result = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
+        for ((number, values) in mergeData) {
+            result[number] = mergeValues(values)
+        }
+
         return if (isTransferMap) {
-            transferMap(mergeData)
+            transferMap(result)
         } else {
-            mergeData
+            result
         }
     }
 
     fun mergedAttribute(attribute: IAttributeGroup.Number, isTransferMap: Boolean = true): Map<DigitalParser.Type, DoubleArray> {
-        val extData = extendMemory.values.flatMap { if (!it.closed) it.attributeData else emptyList() }
-        val itemsData = getItemsAttribute()
-        val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
-        (extData + itemsData).groupBy { it.attributeNumber }.forEach { (number, list) ->
-            if (number === attribute || number is Mapping.MappingAttribute) {
-                mergeData[number] = mergeValues(*list.map { it.value }.toTypedArray())
+        val mergeData = hashMapOf<IAttributeGroup.Number, MutableList<DigitalParser.Value>>()
+
+        // 直接遍历并只收集需要的属性
+        for (temp in extendMemory.values) {
+            if (!temp.closed) {
+                for (attr in temp.attributeData) {
+                    val number = attr.attributeNumber
+                    if (number === attribute || number is Mapping.MappingAttribute) {
+                        mergeData.getOrPut(number) { mutableListOf() }.add(attr.value)
+                    }
+                }
             }
         }
+
+        for (attr in getItemsAttribute()) {
+            val number = attr.attributeNumber
+            if (number === attribute || number is Mapping.MappingAttribute) {
+                mergeData.getOrPut(number) { mutableListOf() }.add(attr.value)
+            }
+        }
+
+        // 使用 List 版本的 mergeValues
+        val result = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
+        for ((number, values) in mergeData) {
+            result[number] = mergeValues(values)
+        }
+
         return if (isTransferMap) {
-            transferMap(mergeData)[attribute] ?: emptyMap()
+            transferMap(result)[attribute] ?: emptyMap()
         } else {
-            mergeData[attribute] ?: emptyMap()
+            result[attribute] ?: emptyMap()
         }
     }
 
     fun transferMap(map: Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
         val mutableMap = map.toMutableMap()
-        map.forEach { (key, value) ->
+        for ((key, value) in map) {
             if (key is Mapping.MappingAttribute) {
-                key.getAttributes(entity, value).forEach {
-                    mutableMap[it.key] = mergeValues(
-                        *it.value.map { entry -> DigitalParser.Value(entry.key, entry.value) }.toTypedArray(),
-                        *mutableMap[it.key]?.map { entry -> DigitalParser.Value(entry.key, entry.value) }?.toTypedArray() ?: emptyArray()
-                    )
+                for ((attrKey, attrValue) in key.getAttributes(entity, value)) {
+                    // 使用 mergeMaps 避免创建临时 DigitalParser.Value 对象
+                    mutableMap[attrKey] = mergeMaps(attrValue, mutableMap[attrKey])
                 }
             }
         }
@@ -321,28 +364,33 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     }
 
     fun getCombatPower(): Map<IAttributeGroup.Number, Double> {
-        return mergedAllAttribute(true).map {
-            it.key to it.key.combatPower(it.value)
-        }.toMap()
+        return mergedAllAttribute(true).mapValues { (key, value) ->
+            key.combatPower(value)
+        }
     }
 
     fun mergedAllAttribute(data: List<IAttributeData>, isTransferMap: Boolean = true): Map<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>> {
-        val mergeData = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
-        data.groupBy { it.attributeNumber }.forEach { (number, list) ->
-            mergeData[number] = mergeValues(*list.map { tempAttributeData ->
-                tempAttributeData.value
-            }.toTypedArray())
+        val mergeData = hashMapOf<IAttributeGroup.Number, MutableList<DigitalParser.Value>>()
+
+        for (attr in data) {
+            mergeData.getOrPut(attr.attributeNumber) { mutableListOf() }.add(attr.value)
         }
+
+        val result = hashMapOf<IAttributeGroup.Number, Map<DigitalParser.Type, DoubleArray>>()
+        for ((number, values) in mergeData) {
+            result[number] = mergeValues(values)
+        }
+
         return if (isTransferMap) {
-            transferMap(mergeData)
+            transferMap(result)
         } else {
-            mergeData
+            result
         }
     }
 
     fun getCombatPower(data: List<IAttributeData>): Map<IAttributeGroup.Number, Double> {
-        return mergedAllAttribute(data, true).map {
-            it.key to it.key.combatPower(it.value)
-        }.toMap()
+        return mergedAllAttribute(data, true).mapValues { (key, value) ->
+            key.combatPower(value)
+        }
     }
 }
