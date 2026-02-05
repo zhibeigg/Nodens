@@ -32,7 +32,7 @@ taboolib {
         install(Kether)
         install(JavaScript)
         install(Jexl)
-        //repoTabooLib = "https://jfrog.mcwar.cn/artifactory/maven-releases"
+        //repoTabooLib = "https://maven.mcwar.cn/releases"
     }
     description {
         name = "Nodens"
@@ -57,7 +57,7 @@ taboolib {
 repositories {
     mavenCentral()
     maven("https://repo.tabooproject.org/repository/releases")
-    maven("https://jfrog.mcwar.cn/artifactory/maven-releases")
+    maven("https://maven.mcwar.cn/releases")
 }
 
 dependencies {
@@ -71,7 +71,7 @@ dependencies {
     compileOnly("org.eldergod.ext:DragonArmourers:6.72")
     compileOnly("org.eldergod.ext:MythicMobs:4.11.0")
     compileOnly("org.eldergod.ext:GlowAPI:1.4.6")
-    compileOnly("org.gitee.orryx:orryx:latest.release:api")
+    compileOnly("org.gitee.orryx:orryx:1.35.91:api")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     compileOnly("com.eatthepath:fast-uuid:0.2.0")
@@ -103,7 +103,7 @@ kotlin {
 publishing {
     repositories {
         maven {
-            url = uri("https://jfrog.mcwar.cn/artifactory/maven-releases")
+            url = uri("https://maven.mcwar.cn/releases")
             credentials {
                 username = publishUsername
                 password = publishPassword
