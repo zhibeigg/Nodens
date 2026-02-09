@@ -43,9 +43,23 @@ class ItemConfigManagerUI(val viewer: Player) {
                         it
                     )
                 }
+            }.sortedWith(compareBy<Node> { it !is ParentNode }.thenBy { it.file.name })
+        }
+
+        fun findParent(target: Node, current: ParentNode = node): ParentNode? {
+            for (i in current.subNode) {
+                if (i == target) return current
+                if (i is ParentNode) return findParent(target, i) ?: continue
             }
+            return null
         }
     }
+
+    private fun pageItem(name: String, active: Boolean) = ItemBuilder(
+        if (active) XMaterial.REDSTONE_TORCH else XMaterial.LEVER
+    ).apply {
+        this.name = if (active) name else "无"
+    }.build()
 
     fun open() {
         open(node)
@@ -58,67 +72,29 @@ class ItemConfigManagerUI(val viewer: Player) {
                 rows(6)
                 slots((0..44).toList())
                 elements { node.subNode }
-                setPreviousPage(45) { _, hasPreviousPage ->
-                    if (hasPreviousPage) {
-                        ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
-                            name = "上一页"
-                        }.build()
-                    } else {
-                        ItemBuilder(XMaterial.LEVER).apply {
-                            name = "无"
-                        }.build()
-                    }
-                }
-                setNextPage(53) { _, hasNextPage ->
-                    if (hasNextPage) {
-                        ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
-                            name = "下一页"
-                        }.build()
-                    } else {
-                        ItemBuilder(XMaterial.LEVER).apply {
-                            name = "无"
-                        }.build()
-                    }
-                }
+                setPreviousPage(45) { _, has -> pageItem("上一页", has) }
+                setNextPage(53) { _, has -> pageItem("下一页", has) }
                 if (node != Companion.node) {
                     set(46, ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
                         name = "返回"
                     }.build()) {
-                        fun find(parentNode: ParentNode): ParentNode? {
-                            for (i in parentNode.subNode) {
-                                if (i == node) {
-                                    return parentNode
-                                } else {
-                                    if (i is ParentNode) {
-                                        return find(i) ?: continue
-                                    }
-                                }
-                            }
-                            return null
-                        }
-                        open(find(Companion.node) ?: Companion.node)
+                        open(findParent(node) ?: Companion.node)
                     }
                 }
                 onGenerate(false) { _, element, _, _ ->
-                    return@onGenerate when (element) {
-                        is ParentNode -> {
-                            ItemBuilder(XMaterial.CHEST).apply {
-                                name = element.file.nameWithoutExtension
-                                lore.add("左键打开此文件夹")
-                            }.build()
-                        }
-
-                        is SubNode -> {
-                            ItemBuilder(XMaterial.PAPER).apply {
-                                name = element.file.nameWithoutExtension
-                                lore.add("左键打开此配置")
-                            }.build()
-                        }
-
+                    when (element) {
+                        is ParentNode -> ItemBuilder(XMaterial.CHEST).apply {
+                            name = element.file.nameWithoutExtension
+                            lore.add("左键打开此文件夹")
+                        }.build()
+                        is SubNode -> ItemBuilder(XMaterial.PAPER).apply {
+                            name = element.file.nameWithoutExtension
+                            lore.add("左键打开此配置")
+                        }.build()
                         else -> error("Unknown element type ${element.file.name}")
                     }
                 }
-                onClick { event, element ->
+                onClick { _, element ->
                     open(element)
                 }
             }
@@ -128,45 +104,13 @@ class ItemConfigManagerUI(val viewer: Player) {
                 rows(6)
                 slots((0..44).toList())
                 elements { node.configs.filter { !it.ignoreGenerate } }
-                setPreviousPage(45) { _, hasPreviousPage ->
-                    if (hasPreviousPage) {
-                        ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
-                            name = "上一页"
-                        }.build()
-                    } else {
-                        ItemBuilder(XMaterial.LEVER).apply {
-                            name = "无"
-                        }.build()
-                    }
-                }
+                setPreviousPage(45) { _, has -> pageItem("上一页", has) }
                 set(46, ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
                     name = "返回"
                 }.build()) {
-                    fun find(parentNode: ParentNode): ParentNode? {
-                        for (i in parentNode.subNode) {
-                            if (i == node) {
-                                return parentNode
-                            } else {
-                                if (i is ParentNode) {
-                                    return find(i) ?: continue
-                                }
-                            }
-                        }
-                        return null
-                    }
-                    open(find(Companion.node) ?: Companion.node)
+                    open(findParent(node) ?: Companion.node)
                 }
-                setNextPage(53) { _, hasNextPage ->
-                    if (hasNextPage) {
-                        ItemBuilder(XMaterial.REDSTONE_TORCH).apply {
-                            name = "下一页"
-                        }.build()
-                    } else {
-                        ItemBuilder(XMaterial.LEVER).apply {
-                            name = "无"
-                        }.build()
-                    }
-                }
+                setNextPage(53) { _, has -> pageItem("下一页", has) }
                 onGenerate(false) { player, element, _, _ ->
                     element.generate(1, player)
                 }
