@@ -6,7 +6,6 @@ import org.gitee.nodens.module.item.ItemConfig
 import org.gitee.nodens.module.item.ItemManager
 import taboolib.common.platform.function.getDataFolder
 import taboolib.library.xseries.XMaterial
-import taboolib.module.configuration.Configuration
 import taboolib.module.ui.openMenu
 import taboolib.module.ui.type.impl.PageableChestImpl
 import taboolib.platform.util.ItemBuilder
@@ -37,13 +36,23 @@ class ItemConfigManagerUI(val viewer: Player) {
                     ParentNode(deepFind(it), it)
                 } else {
                     SubNode(
-                        Configuration.loadFromFile(it).getKeys(false).mapNotNull { key ->
+                        getOrderedKeys(it).mapNotNull { key ->
                             ItemManager.getItemConfig(key)
                         },
                         it
                     )
                 }
             }.sortedWith(compareBy<Node> { it !is ParentNode }.thenBy { it.file.name })
+        }
+
+        private fun getOrderedKeys(file: File): List<String> {
+            return file.readLines().mapNotNull { line ->
+                if (line.isNotBlank() && !line[0].isWhitespace() && !line.startsWith("#")) {
+                    val colonIndex = line.indexOf(':')
+                    if (colonIndex > 0) line.substring(0, colonIndex).trim()
+                        .removeSurrounding("'").removeSurrounding("\"") else null
+                } else null
+            }
         }
 
         fun findParent(target: Node, current: ParentNode = node): ParentNode? {
