@@ -55,11 +55,16 @@ fun ItemStack.context(): NormalContext? {
     // 尝试从缓存获取
     contextCache.getIfPresent(this)?.let { return it }
     // 缓存未命中，执行完整解析
-    val byteArray = getItemTag()[CONTEXT_TAG]?.asByteArray() ?: return null
-    val context = ContextSerializer.deserialize(decompressToBytes(byteArray))
-    // 存入缓存
-    contextCache.put(this, context)
-    return context
+    return try {
+        val byteArray = getItemTag()[CONTEXT_TAG]?.asByteArray() ?: return null
+        val context = ContextSerializer.deserialize(decompressToBytes(byteArray))
+        // 存入缓存
+        contextCache.put(this, context)
+        context
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }
 
 /**
@@ -69,8 +74,13 @@ fun ItemStack.context(): NormalContext? {
  * @return 压缩后的字节数组
  * @see ContextSerializer.serialize
  */
-fun NormalContext.toByteArray(): ByteArray {
-    return compress(ContextSerializer.serialize(this))
+fun NormalContext.toByteArray(): ByteArray? {
+    return try {
+        compress(ContextSerializer.serialize(this))
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }
 
 /**
@@ -83,12 +93,16 @@ fun NormalContext.toByteArray(): ByteArray {
  * @see NormalContext
  */
 fun ItemStack.modifyContext(consumer: Consumer<NormalContext>) {
-    val context = context()?.also { consumer.accept(it) } ?: return
-    val tag = getItemTag()
-    tag[CONTEXT_TAG] = context.toByteArray()
-    tag.saveTo(this)
-    // 修改后使缓存失效
-    contextCache.invalidate(this)
+    try {
+        val context = context()?.also { consumer.accept(it) } ?: return
+        val tag = getItemTag()
+        tag[CONTEXT_TAG] = context.toByteArray() ?: return
+        tag.saveTo(this)
+        // 修改后使缓存失效
+        contextCache.invalidate(this)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
 }
 
 /**

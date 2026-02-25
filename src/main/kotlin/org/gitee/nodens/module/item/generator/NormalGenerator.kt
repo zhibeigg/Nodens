@@ -124,10 +124,10 @@ object NormalGenerator: IItemGenerator {
         }
 
         // ========== 阶段5: 保存NBT数据 ==========
-        builder.finishing = {
+        builder.finishing = finishing@{
             val tag = it.getItemTag()
             // 保存上下文(序列化压缩)
-            tag[CONTEXT_TAG] = context.toByteArray()
+            tag[CONTEXT_TAG] = context.toByteArray() ?: return@finishing
             tag[DURABILITY] = context[DURABILITY]!!.cint
             tag[QUALITY] = context[QUALITY_TAG]!!.cint
             // 保存自定义NBT
