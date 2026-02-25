@@ -1,5 +1,7 @@
 package org.gitee.nodens.module.item
 
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.PolymorphicSerializer
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -162,7 +164,7 @@ object ContextSerializer {
                 // 对于外部注册的 Variable 类型，回退到 JSON 序列化
                 dos.writeByte(-1)
                 val json = VariableRegistry.json.encodeToString(
-                    kotlinx.serialization.serializer<Variable<*>>(),
+                    PolymorphicSerializer(Variable::class),
                     variable
                 )
                 dos.writeUTF(json)
@@ -212,7 +214,7 @@ object ContextSerializer {
                 // 外部注册的 Variable 类型，使用 JSON 反序列化
                 val json = dis.readUTF()
                 VariableRegistry.json.decodeFromString(
-                    kotlinx.serialization.serializer<Variable<*>>(),
+                    PolymorphicSerializer(Variable::class),
                     json
                 )
             }
