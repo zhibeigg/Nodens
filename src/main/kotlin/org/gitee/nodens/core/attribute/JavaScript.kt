@@ -13,6 +13,7 @@ import org.gitee.nodens.core.AttributeManager.ATTRIBUTE_MATCHING_MAP
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.util.debug
 import org.gitee.nodens.util.files
+import org.apache.commons.lang3.tuple.Pair
 import taboolib.common.platform.function.warning
 import taboolib.common5.cdouble
 import taboolib.common5.scriptEngine
@@ -155,8 +156,8 @@ object JavaScript: IAttributeGroup {
 
         override fun getFinalValue(entity: LivingEntity, valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
             return object : IAttributeGroup.Number.FinalValue {
-                override val type = IAttributeGroup.Number.ValueType.SINGLE
-                override val value: Double = 0.0
+                override val type: IAttributeGroup.Number.ValueType = IAttributeGroup.Number.ValueType.SINGLE
+                override val value: Double? = 0.0
                 override val rangeValue: Pair<Double, Double>? = null
             }
         }
