@@ -90,8 +90,9 @@ object JavaScript: IAttributeGroup {
 
     /**
      * 带超时执行脚本函数
+     * @param silent 为 true 时不打印错误日志（用于可选函数的探测调用）
      */
-    private fun <T> invokeWithTimeout(invocable: Invocable, function: String, vararg args: Any?): T? {
+    private fun <T> invokeWithTimeout(invocable: Invocable, function: String, vararg args: Any?, silent: Boolean = false): T? {
         val future = scriptExecutor.submit(Callable {
             @Suppress("UNCHECKED_CAST")
             invocable.invokeFunction(function, *args) as T?
@@ -100,10 +101,10 @@ object JavaScript: IAttributeGroup {
             future.get(SCRIPT_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         } catch (e: TimeoutException) {
             future.cancel(true)
-            warning("脚本函数 $function 执行超时 (>${SCRIPT_TIMEOUT_MS}ms)")
+            if (!silent) warning("脚本函数 $function 执行超时 (>${SCRIPT_TIMEOUT_MS}ms)")
             null
         } catch (e: Exception) {
-            warning("脚本函数 $function 执行错误: ${e.message}")
+            if (!silent) warning("脚本函数 $function 执行错误: ${e.message}")
             null
         }
     }
@@ -111,6 +112,26 @@ object JavaScript: IAttributeGroup {
     override val name: String = "JavaScript"
 
     override val numbers = hashMapOf<String, JsAttribute>()
+
+    /**
+     * 标准属性值计算（与 AbstractNumber.getValue 一致）
+     */
+    private fun getValueFromMap(valueMap: Map<DigitalParser.Type, DoubleArray>): Pair<Double, Double> {
+        var value: Pair<Double, Double> = Pair.of(0.0, 0.0)
+        val count = valueMap[DigitalParser.Type.COUNT]
+        if (count != null) {
+            value = if (count.size == 2) {
+                Pair.of(count[0], count[1])
+            } else {
+                Pair.of(count[0], count[0])
+            }
+        }
+        val percent = valueMap[DigitalParser.Type.PERCENT]
+        if (percent != null) {
+            value = Pair.of(value.left * (1 + percent[0]), value.right * (1 + percent[0]))
+        }
+        return value
+    }
 
     private fun createBindings(config: AttributeConfig) = SimpleBindings(mapOf(
         "keys" to config.keys,
@@ -155,10 +176,33 @@ object JavaScript: IAttributeGroup {
         }
 
         override fun getFinalValue(entity: LivingEntity, valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
+            // 尝试调用脚本中的 getFinalValue 函数（未定义时静默返回 null）
+            val scriptResult = invokeWithTimeout<Any>(invocable, "getFinalValue", entity, valueMap, silent = true)
+            if (scriptResult != null) {
+                // 脚本返回了结果，尝试解析
+                if (scriptResult is IAttributeGroup.Number.FinalValue) {
+                    return scriptResult
+                }
+                // 脚本返回了数值，包装为 SINGLE 类型
+                val numValue = scriptResult.cdouble
+                return object : IAttributeGroup.Number.FinalValue {
+                    override val type = config.valueType
+                    override val value: Double? = numValue
+                    override val rangeValue: Pair<Double, Double>? = null
+                }
+            }
+            // 回退到标准计算逻辑（与 AbstractNumber.getFinalValue 一致）
+            val value = getValueFromMap(valueMap)
             return object : IAttributeGroup.Number.FinalValue {
-                override val type: IAttributeGroup.Number.ValueType = IAttributeGroup.Number.ValueType.SINGLE
-                override val value: Double? = 0.0
-                override val rangeValue: Pair<Double, Double>? = null
+                override val type = config.valueType
+                override val value: Double? = when (config.valueType) {
+                    IAttributeGroup.Number.ValueType.RANGE -> null
+                    IAttributeGroup.Number.ValueType.SINGLE -> value.left
+                }
+                override val rangeValue: Pair<Double, Double>? = when (config.valueType) {
+                    IAttributeGroup.Number.ValueType.RANGE -> value
+                    IAttributeGroup.Number.ValueType.SINGLE -> null
+                }
             }
         }
 

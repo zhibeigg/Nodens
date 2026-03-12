@@ -18,6 +18,7 @@ import org.gitee.nodens.common.RegainProcessor
 import org.gitee.nodens.core.*
 import org.gitee.nodens.core.attribute.Health
 import org.gitee.nodens.core.attribute.JavaScript
+import org.gitee.nodens.core.attribute.Luck
 import org.gitee.nodens.core.attribute.Mapping
 import org.gitee.nodens.core.attribute.Speed
 import org.gitee.nodens.core.reload.Reload
@@ -266,6 +267,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
                 Health.Max.sync(entitySyncProfile, attributeData[Health.Max] ?: emptyMap())
                 Speed.Attack.sync(entitySyncProfile, attributeData[Speed.Attack] ?: emptyMap())
                 Speed.Move.sync(entitySyncProfile, attributeData[Speed.Move] ?: emptyMap())
+                Luck.Max.sync(entitySyncProfile, attributeData[Luck.Max] ?: emptyMap())
                 JavaScript.numbers.values.forEach {
                     try {
                         it.sync(entitySyncProfile, attributeData[it] ?: emptyMap())

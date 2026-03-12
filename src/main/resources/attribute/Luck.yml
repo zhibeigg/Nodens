@@ -3,5 +3,6 @@ Max:
   valueType: SINGLE
   handlePriority: 1
   syncPriority: 1
+  default: 0.0
   keys:
     - 幸运

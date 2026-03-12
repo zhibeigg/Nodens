@@ -10,7 +10,7 @@ object Speed: IAttributeGroup {
 
     override val name: String = "Speed"
 
-    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf(Attack, Move).associateBy { it.name }
+    override val numbers: Map<String, IAttributeGroup.Number> = arrayOf<IAttributeGroup.Number>(Attack, Move, Skill).associateBy { it.name }
 
     object Attack: AbstractSyncPercentNumber() {
 

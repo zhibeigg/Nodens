@@ -16,3 +16,12 @@ Move:
   keys:
     - 移动速度
     - 移速加成
+Skill:
+  combatPower: 1.0
+  valueType: SINGLE
+  handlePriority: 1
+  syncPriority: 1
+  default: 0.0
+  keys:
+    - 技能速度
+    - 技能加速

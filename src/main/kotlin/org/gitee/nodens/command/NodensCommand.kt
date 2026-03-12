@@ -1,11 +1,8 @@
 package org.gitee.nodens.command
 
-import org.bukkit.attribute.Attribute
-import org.bukkit.entity.Player
 import org.gitee.nodens.core.reload.ReloadAPI
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.*
-import taboolib.common.platform.function.info
 import taboolib.expansion.createHelper
 
 @CommandHeader("Nodens", ["no"], "Nodens属性插件主指令")
@@ -30,14 +27,4 @@ object NodensCommand {
 
     @CommandBody
     val source = NodensSourceCommand
-
-    @CommandBody
-    val test = subCommand {
-        exec<Player> {
-            info(sender.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)?.defaultValue)
-            info(sender.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)?.baseValue)
-            info(sender.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)?.value)
-            info(sender.walkSpeed)
-        }
-    }
 }
