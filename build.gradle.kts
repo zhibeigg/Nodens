@@ -66,12 +66,12 @@ dependencies {
     compileOnly("ink.ptms.core:v11200:11200")
     compileOnly("ink.ptms:nms-all:1.0.0")
 
-    implementation("com.gitee.redischannel:RedisChannel:1.14.10:api")
+    implementation("com.gitee.redischannel:RedisChannel:1.14.11:api")
     compileOnly("org.eldergod.ext:DragonCore:2.6.2.9")
     compileOnly("org.eldergod.ext:DragonArmourers:6.72")
     compileOnly("org.eldergod.ext:MythicMobs:4.11.0")
     compileOnly("org.eldergod.ext:GlowAPI:1.4.6")
-    compileOnly("org.gitee.orryx:orryx:1.35.91:api")
+    compileOnly("org.gitee.orryx:orryx:1.35.95:api")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     compileOnly("com.eatthepath:fast-uuid:0.2.0")
