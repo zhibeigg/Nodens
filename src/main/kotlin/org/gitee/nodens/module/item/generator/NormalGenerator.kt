@@ -112,14 +112,14 @@ object NormalGenerator: IItemGenerator {
         // 初始化当前耐久为最大耐久
         val durability = context[DURABILITY]
         if (durability == null) {
-            context[DURABILITY] = context[DURABILITY_TAG]!!
+            context[DURABILITY] = context[DURABILITY_TAG] ?: 0
         }
 
         // 根据耐久比例设置物品损坏度显示
         if (!itemConfig.isUnBreakable) {
-            val max = context[DURABILITY_TAG]!!.cint
+            val max = (context[DURABILITY_TAG] ?: 0).cint
             if (max != 0) {
-                builder.damage = (builder.material.maxDurability.cdouble * (1 - context[DURABILITY]!!.cdouble / max.cdouble)).cint
+                builder.damage = (builder.material.maxDurability.cdouble * (1 - (context[DURABILITY] ?: 0).cdouble / max.cdouble)).cint
             }
         }
 
@@ -128,8 +128,8 @@ object NormalGenerator: IItemGenerator {
             val tag = it.getItemTag()
             // 保存上下文(序列化压缩)
             tag[CONTEXT_TAG] = context.toByteArray() ?: return@finishing
-            tag[DURABILITY] = context[DURABILITY]!!.cint
-            tag[QUALITY] = context[QUALITY_TAG]!!.cint
+            tag[DURABILITY] = (context[DURABILITY] ?: 0).cint
+            tag[QUALITY] = (context[QUALITY_TAG] ?: 0).cint
             // 保存自定义NBT
             itemConfig.nbt?.forEach { (key, value) ->
                 tag[key] = value
@@ -143,8 +143,8 @@ object NormalGenerator: IItemGenerator {
                             *it.getItemAttribute().toTypedArray()
                         )
                     ).toString(),
-                    "{MaxDurability}" to context[DURABILITY_TAG]!!.cint.toString(),
-                    "{Sell}" to ceil(context[SELL_TAG]!!.cdouble).toString()
+                    "{MaxDurability}" to (context[DURABILITY_TAG] ?: 0).cint.toString(),
+                    "{Sell}" to ceil((context[SELL_TAG] ?: 0.0).cdouble).toString()
                 )
             )
         }

@@ -34,7 +34,7 @@ object MythicMobsHook {
         if (!MythicMobsPlugin.isEnabled) return
         MythicMobs.inst().mobManager.activeMobs.forEach {
             val attributes = Nodens.api().matchAttributes(it.type.config.getStringList("Nodens"))
-            entityAttributeMemoriesMap[it.uniqueId] = EntityAttributeMemory(it.entity.bukkitEntity as? LivingEntity ?: return).apply {
+            entityAttributeMemoriesMap[it.uniqueId] = EntityAttributeMemory(it.entity.bukkitEntity as? LivingEntity ?: return@forEach).apply {
                 addAttribute(ATTRIBUTE_TAG, TempAttributeData(-1, attributes, true))
             }
         }

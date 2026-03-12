@@ -112,7 +112,7 @@ interface VariableAdapter<T : Variable<*>> {
  */
 object VariableRegistry {
 
-    private val adapters = mutableMapOf<String, VariableAdapter<*>>()
+    private val adapters = java.util.concurrent.ConcurrentHashMap<String, VariableAdapter<*>>()
 
     /**
      * 当前配置好的 Json 实例，支持已注册的 Variable 多态序列化

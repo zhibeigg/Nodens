@@ -16,6 +16,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.adaptCommandSender
 import taboolib.common.platform.function.info
+import taboolib.common.platform.function.warning
 import taboolib.common5.cdouble
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.library.reflex.Reflex.Companion.setProperty
@@ -56,9 +57,24 @@ object Handle {
     @Reload(1)
     @Awake(LifeCycle.ENABLE)
     private fun init() {
-        catchMap.clear()
-        catchMap[SCRIPT_ON_DAMAGE] = getScript(SCRIPT_ON_DAMAGE, handle.getString("onDamage")!!) ?: error("请补充handle.yml中的onDamage脚本")
-        catchMap[SCRIPT_ON_REGAIN] = getScript(SCRIPT_ON_REGAIN, handle.getString("onRegain")!!) ?: error("请补充handle.yml中的onRegain脚本")
+        val newDamage = getScript(SCRIPT_ON_DAMAGE, handle.getString("onDamage") ?: run {
+            warning("请补充handle.yml中的onDamage脚本")
+            return
+        })
+        val newRegain = getScript(SCRIPT_ON_REGAIN, handle.getString("onRegain") ?: run {
+            warning("请补充handle.yml中的onRegain脚本")
+            return
+        })
+        if (newDamage == null) {
+            warning("handle.yml中的onDamage脚本解析失败，保留旧脚本")
+            if (!catchMap.containsKey(SCRIPT_ON_DAMAGE)) error("请补充handle.yml中的onDamage脚本")
+        }
+        if (newRegain == null) {
+            warning("handle.yml中的onRegain脚本解析失败，保留旧脚本")
+            if (!catchMap.containsKey(SCRIPT_ON_REGAIN)) error("请补充handle.yml中的onRegain脚本")
+        }
+        if (newDamage != null) catchMap[SCRIPT_ON_DAMAGE] = newDamage
+        if (newRegain != null) catchMap[SCRIPT_ON_REGAIN] = newRegain
         consoleMessage("&e┣&7Handle loaded &a√")
     }
 
@@ -133,6 +149,22 @@ object Handle {
             }
             // 1.18.* 1.19.* bd
             11 -> setProperty("entity/bd", killer.getProperty("entity"))
+            // 1.20+ 尝试使用 Bukkit API
+            else -> {
+                if (this is org.bukkit.entity.Player) {
+                    // Player 有 setKiller 方法，但普通 LivingEntity 没有
+                    // 使用 Bukkit 的 killer 属性
+                }
+                try {
+                    setProperty("entity/bd", killer.getProperty("entity"))
+                } catch (_: Throwable) {
+                    try {
+                        setProperty("entity/bc", killer.getProperty("entity"))
+                    } catch (_: Throwable) {
+                        warning("无法设置击杀者信息，当前版本 ${MinecraftVersion.minecraftVersion} 可能不受支持")
+                    }
+                }
+            }
         }
     }
 }

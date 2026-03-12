@@ -15,7 +15,7 @@ class DropUser(val uuid: UUID) {
     val player: Player
         get() = Bukkit.getPlayer(uuid)!!
 
-    val dropMap = mutableListOf<Info>()
+    val dropMap = java.util.concurrent.CopyOnWriteArrayList<Info>()
     val chanceMap: Cache<String, DropChance> = Caffeine.newBuilder()
         .initialCapacity(30)
         .maximumSize(100)
@@ -55,8 +55,10 @@ class DropUser(val uuid: UUID) {
         val chance = cache.get(key) {
             DropChance(percent).apply {
                 set = false
-                ISyncCache.INSTANCE.getDropTimes(player, key, global).thenAccept {
-                    times = it
+                try {
+                    times = ISyncCache.INSTANCE.getDropTimes(player, key, global).get(3, java.util.concurrent.TimeUnit.SECONDS)
+                } catch (_: Exception) {
+                    times = 0
                 }
             }
         }

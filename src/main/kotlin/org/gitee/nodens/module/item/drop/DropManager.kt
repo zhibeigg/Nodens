@@ -19,6 +19,7 @@ import org.inventivetalent.glow.GlowAPI
 import taboolib.common.platform.Ghost
 import taboolib.common.platform.Schedule
 import taboolib.common.platform.event.SubscribeEvent
+import taboolib.common.platform.function.warning
 import taboolib.common.util.random
 import taboolib.module.configuration.util.ReloadAwareLazy
 import taboolib.module.nms.getName
@@ -79,15 +80,19 @@ object DropManager {
     }
 
     fun tryDrop(player: Player, mob: String, item: String, percent: Double, location: Location, amount: Int, globalPrd: Boolean = false, map: Map<String, Any> = emptyMap()): Boolean {
+        val itemConfig = ItemManager.getItemConfig(item) ?: run {
+            warning("掉落物品配置不存在: $item")
+            return false
+        }
         return if (percent > 0.5) {
             if (random(percent)) {
-                val itemStack = NormalGenerator.generate(ItemManager.getItemConfig(item)!!, amount, player, map)
+                val itemStack = NormalGenerator.generate(itemConfig, amount, player, map)
                 drop(player, location, itemStack)
                 true
             } else false
         } else {
             if (dropMap.getOrPut(player.uniqueId) { DropUser(player.uniqueId) }.hasDrop(mob, item, percent, globalPrd)) {
-                val itemStack = NormalGenerator.generate(ItemManager.getItemConfig(item)!!, amount, player, map)
+                val itemStack = NormalGenerator.generate(itemConfig, amount, player, map)
                 drop(player, location, itemStack)
                 true
             } else false
@@ -112,7 +117,7 @@ object DropManager {
             val item = user.dropMap.firstOrNull { info ->
                 info.item.uniqueId == e.entityUUID
             }
-            if (!GlowAPIPlugin.isEnabled && item != null) {
+            if (GlowAPIPlugin.isEnabled && item != null) {
                 if (key == e.player.uniqueId) {
                     GlowAPI.setGlowing(item.item, GlowAPI.Color.GREEN, e.player)
                 } else {

@@ -144,11 +144,11 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         @Awake(LifeCycle.ACTIVE)
         private fun createRegain() {
             regainTask?.cancel()
-            regainTask = submitAsync(period = Health.Regain.period) {
+            regainTask = submit(period = Health.Regain.period) {
                 onlinePlayers.forEach {
                     val processor = RegainProcessor(RegainProcessor.NATURAL_REASON, it, it)
                     processor.handle()
-                    submit { processor.callRegain() }
+                    processor.callRegain()
                 }
             }
             consoleMessage("&e┣&7RegainTask loaded &a√")

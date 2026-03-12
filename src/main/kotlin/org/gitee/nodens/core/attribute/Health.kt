@@ -142,7 +142,7 @@ object Health: IAttributeGroup {
             get() = Health
 
         override fun handlePassive(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            val percent = when (MagicChance.config.valueType) {
+            val percent = when (config.valueType) {
                 SINGLE -> valueMap[PERCENT]!![0]
                 RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])
             }
@@ -157,7 +157,7 @@ object Health: IAttributeGroup {
             get() = Health
 
         override fun handleHealer(regainProcessor: RegainProcessor, valueMap: Map<DigitalParser.Type, DoubleArray>) {
-            val percent = when (MagicChance.config.valueType) {
+            val percent = when (config.valueType) {
                 SINGLE -> valueMap[PERCENT]!![0]
                 RANGE -> random(valueMap[PERCENT]!![0], valueMap[PERCENT]!![1])
             }

@@ -39,6 +39,6 @@ object Nodens {
      */
     @JvmStatic
     fun api(): INodensAPI {
-        return api ?: error("OrryxAPI has not finished loading, or failed to load!")
+        return api ?: error("NodensAPI has not finished loading, or failed to load!")
     }
 }

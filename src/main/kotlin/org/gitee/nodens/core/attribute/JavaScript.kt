@@ -29,14 +29,14 @@ object JavaScript: IAttributeGroup {
     private const val SCRIPT_TIMEOUT_MS = 5000L
 
     /** 用于执行脚本的线程池 */
-    private val scriptExecutor = Executors.newCachedThreadPool()
+    private val scriptExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors().coerceAtLeast(2))
 
     private fun createSafeEngine(): ScriptEngine {
         return try {
             val factory = NashornScriptEngineFactory()
             factory.getScriptEngine(SafeClassFilter())
         } catch (e: Exception) {
-            warning("无法创建安全脚本引擎，回退到默认引擎: ${e.message}")
+            warning("无法创建安全脚本引擎(Nashorn 在 Java 15+ 已移除)，回退到默认引擎(无类过滤保护): ${e.message}")
             scriptEngine
         }
     }
@@ -154,7 +154,11 @@ object JavaScript: IAttributeGroup {
         }
 
         override fun getFinalValue(entity: LivingEntity, valueMap: Map<DigitalParser.Type, DoubleArray>): IAttributeGroup.Number.FinalValue {
-            throw UnsupportedOperationException("JavaScript attributes do not support getFinalValue")
+            return object : IAttributeGroup.Number.FinalValue {
+                override val type = IAttributeGroup.Number.ValueType.SINGLE
+                override val value: Double = 0.0
+                override val rangeValue: Pair<Double, Double>? = null
+            }
         }
 
         override fun toString(): String {

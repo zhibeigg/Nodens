@@ -35,7 +35,7 @@ interface ISyncCache {
 
         @Awake(LifeCycle.ENABLE)
         private fun enable() {
-            if (org.gitee.nodens.util.RedisChannelPlugin.isEnabled) {
+            if (!::INSTANCE.isInitialized) {
                 INSTANCE = JSONManager()
             }
         }

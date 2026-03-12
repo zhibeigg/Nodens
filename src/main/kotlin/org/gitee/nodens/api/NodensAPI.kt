@@ -106,22 +106,24 @@ class NodensAPI: INodensAPI {
          * @param timeout 等待协程完成的超时时间（秒）
          */
         internal fun shutdownScopes(timeout: Long = 5) {
-            runBlocking {
-                // 先取消所有子协程，给它们发送取消信号
-                pluginJob.cancelChildren()
+            // 先取消所有子协程
+            pluginJob.cancelChildren()
 
-                // 等待子协程完成，带超时保护
-                try {
+            try {
+                // 使用 runBlocking(Dispatchers.IO) 避免在主线程上阻塞导致死锁
+                runBlocking(Dispatchers.IO) {
                     withTimeout(timeout.seconds) {
                         pluginJob.children.forEach { it.join() }
                     }
-                } catch (_: TimeoutCancellationException) {
-                    // 超时后强制取消
                 }
-
-                // 最终取消整个作用域
-                pluginJob.cancel()
+            } catch (_: TimeoutCancellationException) {
+                // 超时后强制取消
+            } catch (_: Exception) {
+                // 忽略其他异常
             }
+
+            // 最终取消整个作用域
+            pluginJob.cancel()
         }
     }
 }

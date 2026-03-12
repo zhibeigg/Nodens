@@ -33,8 +33,8 @@ import java.util.*
 
 object ItemManager {
 
-    val itemConfigs = mutableMapOf<String, ItemConfig>()
-    private val heldItemArmourersMap by unsafeLazy { mutableMapOf<UUID, Set<String>>() }
+    val itemConfigs = java.util.concurrent.ConcurrentHashMap<String, ItemConfig>()
+    private val heldItemArmourersMap by unsafeLazy { java.util.concurrent.ConcurrentHashMap<UUID, Set<String>>() }
     private val enableArmourers by unsafeLazy { Bukkit.getPluginManager().isPluginEnabled("DragonArmourers") }
 
     private val dragonCoreIsEnabled by unsafeLazy { DragonCorePlugin.isEnabled }
@@ -143,9 +143,9 @@ object ItemManager {
         if (dragonCoreIsEnabled) {
             dragoncoreSlots.forEach {
                 val item = SlotAPI.getCacheSlotItem(player, it)
-                if (item.isAir()) return
-                val context = item.context() ?: return
-                val config = getItemConfig(context.key) ?: return
+                if (item.isAir()) return@forEach
+                val context = item.context() ?: return@forEach
+                val config = getItemConfig(context.key) ?: return@forEach
                 if (config.isUpdate && config.hashCode != context.hashcode) {
                     val new = updateItem(player, item)
                     SlotAPI.setSlotItem(player, it, new, false)

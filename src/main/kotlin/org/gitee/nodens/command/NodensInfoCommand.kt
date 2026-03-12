@@ -45,7 +45,10 @@ object NodensInfoCommand {
     val entity = subCommand {
         bool("transferMap") {
             exec<Player> {
-                val entity = sender.getNearbyEntities(1.0, 1.0, 1.0).first() as LivingEntity
+                val entity = sender.getNearbyEntities(1.0, 1.0, 1.0).filterIsInstance<LivingEntity>().firstOrNull() ?: run {
+                    sender.sendMessage("§c附近没有找到生物实体")
+                    return@exec
+                }
                 sender.sendLang("info-attribute")
                 entity.attributeMemory()?.mergedAllAttribute(ctx["transferMap"].cbool)?.toSortedMap { o1, o2 ->
                     val priorityCompare = comparePriority(o1.config.handlePriority, o2.config.handlePriority)

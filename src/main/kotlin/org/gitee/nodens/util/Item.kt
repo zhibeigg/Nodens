@@ -34,7 +34,6 @@ const val DURABILITY = "durability"
  * - 启用统计以监控缓存效率
  */
 private val contextCache = Caffeine.newBuilder()
-    .weakKeys()
     .expireAfterAccess(500, TimeUnit.MILLISECONDS)
     .maximumSize(2000)
     .recordStats()
@@ -176,7 +175,6 @@ fun Player.giveItems(item: String, amount: Int, map: Map<String, Any> = emptyMap
 
         inventory.addItem(itemStack).values.forEach {
             DropManager.drop(this, location, it)
-            world.dropItem(location, it)
         }
         itemStack.amount = preAmount
     }
