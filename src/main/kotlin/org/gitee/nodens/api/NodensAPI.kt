@@ -1,6 +1,5 @@
 package org.gitee.nodens.api
 
-import kotlinx.coroutines.*
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.gitee.nodens.api.interfaces.IAttributeAPI
@@ -13,13 +12,9 @@ import org.gitee.nodens.core.TempAttributeData
 import org.gitee.nodens.core.entity.EntityAttributeMemory
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.module.item.VariableRegistry
-import taboolib.common.LifeCycle
 import taboolib.common.env.RuntimeDependencies
 import taboolib.common.env.RuntimeDependency
-import taboolib.common.platform.Awake
 import taboolib.common.platform.PlatformFactory
-import taboolib.expansion.AsyncDispatcher
-import kotlin.time.Duration.Companion.seconds
 
 @RuntimeDependencies(
     RuntimeDependency(
@@ -91,39 +86,4 @@ class NodensAPI: INodensAPI {
         entity.attributeMemory()?.updateAttributeAsync()
     }
 
-    companion object {
-
-        private val pluginJob = SupervisorJob()
-        internal val pluginScope = CoroutineScope(AsyncDispatcher + pluginJob)
-
-        @Awake(LifeCycle.DISABLE)
-        private fun release() {
-            shutdownScopes(10)
-        }
-
-        /**
-         * 优雅关闭所有协程作用域
-         * @param timeout 等待协程完成的超时时间（秒）
-         */
-        internal fun shutdownScopes(timeout: Long = 5) {
-            // 先取消所有子协程
-            pluginJob.cancelChildren()
-
-            try {
-                // 使用 runBlocking(Dispatchers.IO) 避免在主线程上阻塞导致死锁
-                runBlocking(Dispatchers.IO) {
-                    withTimeout(timeout.seconds) {
-                        pluginJob.children.forEach { it.join() }
-                    }
-                }
-            } catch (_: TimeoutCancellationException) {
-                // 超时后强制取消
-            } catch (_: Exception) {
-                // 忽略其他异常
-            }
-
-            // 最终取消整个作用域
-            pluginJob.cancel()
-        }
-    }
 }
