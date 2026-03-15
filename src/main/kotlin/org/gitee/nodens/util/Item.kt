@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.*
 import org.gitee.nodens.module.item.drop.DropManager
 import org.gitee.nodens.module.item.generator.NormalGenerator.generate
+import taboolib.common.platform.function.warning
 import taboolib.module.nms.getItemTag
 import taboolib.platform.util.isAir
 import taboolib.platform.util.isNotAir
@@ -61,7 +62,7 @@ fun ItemStack.context(): NormalContext? {
         contextCache.put(this, context)
         context
     } catch (e: Exception) {
-        e.printStackTrace()
+        warning("物品 Context 反序列化失败: ${e.javaClass.simpleName} - ${e.message}")
         null
     }
 }

@@ -1,7 +1,7 @@
 package org.gitee.nodens.module.item
 
-import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.PolymorphicSerializer
+import taboolib.common.platform.function.warning
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -213,10 +213,15 @@ object ContextSerializer {
             else -> {
                 // 外部注册的 Variable 类型，使用 JSON 反序列化
                 val json = dis.readUTF()
-                VariableRegistry.json.decodeFromString(
-                    PolymorphicSerializer(Variable::class),
-                    json
-                )
+                try {
+                    VariableRegistry.json.decodeFromString(
+                        PolymorphicSerializer(Variable::class),
+                        json
+                    )
+                } catch (e: Exception) {
+                    warning("反序列化外部 Variable 失败，原始 JSON 已保留为 StringVariable: ${e.message}")
+                    StringVariable(json)
+                }
             }
         }
     }
