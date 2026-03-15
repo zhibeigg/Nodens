@@ -62,7 +62,7 @@ fun ItemStack.context(): NormalContext? {
         contextCache.put(this, context)
         context
     } catch (e: Exception) {
-        warning("物品 Context 反序列化失败: ${e.javaClass.simpleName} - ${e.message}")
+        warning("物品 Context 反序列化失败: ${e.javaClass.simpleName}")
         null
     }
 }
