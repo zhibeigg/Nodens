@@ -119,7 +119,52 @@ Nodens 提供了一套完整的 RPG 属性体系：
     custom-tag:
       value: 'example'
       nt: string
+  # 物品动作
+  actions:
+    - trigger: "attack"
+      action:
+        - 'tell color inline "&a攻击触发!"'
+    - trigger: "attack,attacked"
+      action:
+        - 'tell color inline "&e战斗中..."'
+    - trigger: "right_click_air,right_click_block"
+      action:
+        - 'tell color inline "&b右键使用!"'
 ```
+
+### 物品动作系统
+
+物品动作允许在特定事件触发时执行 Kether 脚本。配置在物品的 `actions` 节下，`trigger` 支持逗号分隔多个触发器 ID。
+
+#### 原版触发器
+
+| 触发器 ID | 说明 | 注入变量 |
+|-----------|------|----------|
+| `attack` | 攻击实体时 | attacker, damager, entity |
+| `attacked` | 被攻击时 | attacker, damager, entity |
+| `shoot` | 弓/弩射击时 | bow, consumable, projectile |
+| `shield_lift` | 举盾时 | - |
+| `left_click_air` | 左键空气 | action |
+| `left_click_block` | 左键方块 | action, block |
+| `right_click_air` | 右键空气 | action |
+| `right_click_block` | 右键方块 | action, block |
+
+#### Orryx 触发器（需安装 Orryx 插件）
+
+| 触发器 ID | 说明 | 注入变量 |
+|-----------|------|----------|
+| `orryx_press_start` | 按键开始 | skill, pressTick |
+| `orryx_press_stop` | 按键停止 | skill, pressTick, maxPressTick |
+| `orryx_press_tick` | 按键持续 | skill, period, pressTick, maxPressTick |
+| `orryx_damage_pre_attacker` | 伤害前（攻击者） | attacker, defender, damage, damageType |
+| `orryx_damage_pre_defender` | 伤害前（防御者） | attacker, defender, damage, damageType |
+| `orryx_damage_post_attacker` | 伤害后（攻击者） | attacker, defender, damage, damageType, crit |
+| `orryx_damage_post_defender` | 伤害后（防御者） | attacker, defender, damage, damageType, crit |
+| `orryx_job_change` | 职业变更 | job |
+| `orryx_skill_cast_check` | 技能释放检查 | skill, skillParameter |
+| `orryx_skill_cast` | 技能释放 | skill, skillParameter |
+| `orryx_skill_level_up` | 技能升级 | skill, upLevel |
+| `orryx_skill_level_down` | 技能降级 | skill, downLevel |
 
 ### 物品条件系统
 

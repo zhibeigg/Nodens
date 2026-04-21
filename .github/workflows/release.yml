@@ -34,11 +34,91 @@ jobs:
       - name: Build and publish
         run: ./gradlew build publish -Pbuild=./build -PpublishUsername=${{ secrets.PUBLISH_USERNAME }} -PpublishPassword=${{ secrets.PUBLISH_PASSWORD }}
 
+      - name: Generate release notes
+        id: notes
+        run: |
+          TAG="${{ github.ref_name }}"
+          # 找到上一个 tag，如果没有则取全部历史
+          PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${TAG}$" | head -1)
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="${PREV_TAG}..${TAG}"
+          else
+            RANGE="${TAG}"
+          fi
+
+          # 收集各类 commit（只取第一行，去重）
+          feat=""
+          fix=""
+          perf=""
+          refactor=""
+          other=""
+
+          while IFS= read -r line; do
+            hash="${line%% *}"
+            msg="${line#* }"
+            # 取 commit message 第一行
+            first_line=$(echo "$msg" | head -1)
+            # 统一全角括号为半角
+            first_line=$(echo "$first_line" | sed 's/（/(/g; s/）/)/g')
+
+            case "$first_line" in
+              feat*)
+                # 去掉前缀 feat(xxx): 或 feat:
+                desc=$(echo "$first_line" | sed -E 's/^feat(\([^)]*\))?[：: ]*//')
+                feat="${feat}- ${desc} (\`${hash}\`)\n"
+                ;;
+              fix*)
+                desc=$(echo "$first_line" | sed -E 's/^fix(\([^)]*\))?[：: ]*//')
+                fix="${fix}- ${desc} (\`${hash}\`)\n"
+                ;;
+              perf*)
+                desc=$(echo "$first_line" | sed -E 's/^perf(\([^)]*\))?[：: ]*//')
+                perf="${perf}- ${desc} (\`${hash}\`)\n"
+                ;;
+              refactor*)
+                desc=$(echo "$first_line" | sed -E 's/^refactor(\([^)]*\))?[：: ]*//')
+                refactor="${refactor}- ${desc} (\`${hash}\`)\n"
+                ;;
+              chore*|ci*|test*|docs*)
+                # 跳过构建/CI/测试/文档类 commit
+                ;;
+              *)
+                other="${other}- ${first_line} (\`${hash}\`)\n"
+                ;;
+            esac
+          done <<< "$(git log --oneline --no-merges "$RANGE")"
+
+          # 组装 release notes
+          notes=""
+          if [ -n "$feat" ]; then
+            notes="${notes}## ✨ 新功能\n${feat}\n"
+          fi
+          if [ -n "$fix" ]; then
+            notes="${notes}## 🐛 修复\n${fix}\n"
+          fi
+          if [ -n "$perf" ]; then
+            notes="${notes}## ⚡ 性能优化\n${perf}\n"
+          fi
+          if [ -n "$refactor" ]; then
+            notes="${notes}## ♻️ 重构\n${refactor}\n"
+          fi
+          if [ -n "$other" ]; then
+            notes="${notes}## 📝 其他\n${other}\n"
+          fi
+
+          # 添加尾部信息
+          if [ -n "$PREV_TAG" ]; then
+            notes="${notes}---\n**完整变更**: [\`${PREV_TAG}...${TAG}\`](https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${TAG})"
+          fi
+
+          # 写入文件避免转义问题
+          echo -e "$notes" > release_notes.md
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ github.ref_name }}" \
-            --title "${{ github.ref_name }}" \
-            --generate-notes \
+            --title "Nodens ${{ github.ref_name }}" \
+            --notes-file release_notes.md \
             build/*.jar

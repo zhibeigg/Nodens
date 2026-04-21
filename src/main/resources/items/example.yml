@@ -39,3 +39,40 @@
       剑修:
         value: 1
         nt: int
+  # 物品动作 - 当特定事件触发时执行 Kether 脚本
+  # trigger: 触发器ID，多个用逗号分隔
+  # action: Kether 脚本列表
+  #
+  # ===== 原版触发器 =====
+  # attack          - 攻击实体时 (变量: attacker, damager, entity)
+  # attacked        - 被攻击时 (变量: attacker, damager, entity)
+  # shoot           - 弓/弩射击时 (变量: bow, consumable, projectile)
+  # shield_lift     - 举盾时
+  # left_click_air  - 左键空气 (变量: action)
+  # left_click_block  - 左键方块 (变量: action, block)
+  # right_click_air   - 右键空气 (变量: action)
+  # right_click_block - 右键方块 (变量: action, block)
+  #
+  # ===== Orryx 触发器 (需安装 Orryx 插件) =====
+  # orryx_press_start   - 按键开始 (变量: skill, pressTick)
+  # orryx_press_stop    - 按键停止 (变量: skill, pressTick, maxPressTick)
+  # orryx_press_tick    - 按键持续 (变量: skill, period, pressTick, maxPressTick)
+  # orryx_damage_pre_attacker   - 伤害前/攻击者 (变量: attacker, defender, damage, damageType)
+  # orryx_damage_pre_defender   - 伤害前/防御者 (变量: attacker, defender, damage, damageType)
+  # orryx_damage_post_attacker  - 伤害后/攻击者 (变量: attacker, defender, damage, damageType, crit)
+  # orryx_damage_post_defender  - 伤害后/防御者 (变量: attacker, defender, damage, damageType, crit)
+  # orryx_job_change            - 职业变更 (变量: job)
+  # orryx_skill_cast_check      - 技能释放检查 (变量: skill, skillParameter)
+  # orryx_skill_cast            - 技能释放 (变量: skill, skillParameter)
+  # orryx_skill_level_up        - 技能升级 (变量: skill, upLevel)
+  # orryx_skill_level_down      - 技能降级 (变量: skill, downLevel)
+  actions:
+    - trigger: "attack"
+      action:
+        - 'tell color inline "&a攻击触发!"'
+    - trigger: "attack,attacked"
+      action:
+        - 'tell color inline "&e战斗中..."'
+    - trigger: "right_click_air,right_click_block"
+      action:
+        - 'tell color inline "&b右键使用!"'
