@@ -88,6 +88,11 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     testImplementation("org.xerial.snappy:snappy-java:1.1.10.7")
+    testImplementation("io.mockk:mockk:1.14.9")
+    // Bukkit API for mock-based tests
+    testImplementation("ink.ptms.core:v12004:12004:mapped")
+    testImplementation("ink.ptms.core:v12004:12004:universal")
+    testImplementation("com.github.ben-manes.caffeine:caffeine:2.9.3")
 }
 
 tasks.test {
