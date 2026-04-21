@@ -1,5 +1,6 @@
 package org.gitee.nodens.module.item
 
+import org.gitee.nodens.module.item.action.ItemAction
 import org.gitee.nodens.util.nbtParse
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.library.xseries.XEnchantment
@@ -95,6 +96,12 @@ class CloneItemConfig(override val key: String, val copy: ItemConfig, private va
         configurationSection.getConfigurationSection("nbt")?.let { nbtParse(it) }
     } else {
         copy.nbt
+    }
+
+    override val actions: List<ItemAction> = if (configurationSection.contains("actions")) {
+        configurationSection.getMapList("actions").mapNotNull { ItemAction.parse(it) }
+    } else {
+        copy.actions
     }
 
     override fun get(path: String): Any? {

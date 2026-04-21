@@ -3,6 +3,7 @@ package org.gitee.nodens.core.kether
 import org.bukkit.inventory.ItemStack
 import org.gitee.nodens.module.item.ItemConfig
 import org.gitee.nodens.module.item.NormalContext
+import org.gitee.nodens.module.item.action.ActionContext
 import org.gitee.nodens.module.item.group.GroupManager
 import org.gitee.nodens.module.random.RandomManager
 import org.gitee.nodens.util.NODENS_NAMESPACE
@@ -113,6 +114,27 @@ object ItemActions {
         }
     }
 
+
+    @KetherProperty(bind = ActionContext::class)
+    fun propertyActionContext() = object : ScriptProperty<ActionContext>("ActionContext.operator") {
+
+        override fun read(instance: ActionContext, key: String): OpenResult {
+            return when (key) {
+                "player" -> OpenResult.successful(instance.player)
+                "event" -> OpenResult.successful(instance.event)
+                "trigger", "triggerId" -> OpenResult.successful(instance.triggerId)
+                else -> {
+                    val value = instance.get<Any>(key)
+                    if (value != null) OpenResult.successful(value) else OpenResult.failed()
+                }
+            }
+        }
+
+        override fun write(instance: ActionContext, key: String, value: Any?): OpenResult {
+            instance[key] = value
+            return OpenResult.successful()
+        }
+    }
 
     fun randomsEval(sender: ProxyCommandSender?, randoms: String, map: Map<String, Any?>): CompletableFuture<Any?> {
         val randoms = RandomManager.randomsMap[randoms] ?: return CompletableFuture.completedFuture(null)

@@ -2,6 +2,7 @@ package org.gitee.nodens.module.item
 
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.gitee.nodens.module.item.action.ItemAction
 import org.gitee.nodens.module.item.generator.NormalGenerator
 import org.gitee.nodens.util.nbtParse
 import taboolib.library.configuration.ConfigurationSection
@@ -46,6 +47,9 @@ open class ItemConfig(open val key: String, private val configurationSection: Co
     open val armourers = configurationSection.getStringList("armourers")
 
     open val nbt = configurationSection.getConfigurationSection("nbt")?.let { nbtParse(it) }
+
+    /** 物品动作列表，从 actions 配置节解析 */
+    open val actions: List<ItemAction> = configurationSection.getMapList("actions").mapNotNull { ItemAction.parse(it) }
 
     // 标注版本
     open val hashCode = configurationSection.toString().hashCode()
