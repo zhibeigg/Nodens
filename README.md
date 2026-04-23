@@ -26,13 +26,34 @@
 
 ## 特性一览
 
-- **丰富的属性系统** - 15+ 种属性类型，涵盖生命、伤害、防御、速度、暴击、法力等
-- **动态物品生成** - 支持随机属性、Kether 表达式、变量插值
-- **战斗系统集成** - 完整的伤害计算、治疗处理、暴击机制
-- **多插件兼容** - 原生支持 DragonCore、MythicMobs、DragonArmourers 等
-- **高性能缓存** - 基于 Caffeine 的实体属性缓存系统
-- **热重载支持** - 无需重启服务器即可重载配置
-- **脚本扩展** - 支持 Kether 和 JavaScript 动态脚本
+- **Trie 前缀树属性识别** — 基于 `FastMatchingMap` 构建的 Trie 前缀树，O(m) 时间复杂度完成 Lore 属性关键词匹配，ConcurrentHashMap 节点实现无锁并发读写，单节点内存占用从 512KB 压缩至约 1KB
+- **PRD 伪随机分布算法** — 移植 DOTA2 的 PRD 概率模型，连续未触发时概率递增，杜绝纯随机下的极端不触发与连续触发，启动时预计算 C 值并持久化缓存，运行时 O(1) 查表
+- **全链路攻击流引擎** — 从 Bukkit 事件拦截 → DamageProcessor 构建 → 攻击者/防御者属性按优先级逐层结算 → Kether 脚本驱动伤害公式 → PriorityRunnable 后置回调（吸血等），完整的伤害/恢复双向处理管线
+- **属性源追踪溯源** — 每条伤害/防御/恢复来源均持有唯一 Source Key，运行时可通过 Kether 脚本精确查询、动态修改任意来源的贡献值，临时属性支持持续时间、死亡移除与倒计时查询
+- **六阶段物品生成流水线** — 变量初始化 → 核心属性计算 → Lore/Name 模板解析 → 物品构建 → NBT 二进制序列化 → 事件触发，全流程 Kether 表达式驱动，`*0*` 标记自动剔除零值行
+- **Caffeine 高性能缓存** — 初始容量 200 / 最大 500 条 / 5 分钟 TTL，装备变更事件 50ms 防抖合并，recordStats 命中率监控，避免每 tick 重复解析装备栏 Lore
+- **沙箱化 JavaScript 引擎** — Nashorn 预编译 + 独立线程池执行，SafeClassFilter 白名单隔离危险包（io/nio/net/reflect/Runtime），5 秒超时自动熔断，每个 JS 文件即一个自定义属性
+- **热重载 & 脚本热更新** — 伤害公式、物品配置、属性定义均可运行时重载，无需重启服务器；Kether 脚本即时生效，Mapping 属性支持一对多动态映射转换
+
+---
+
+## 项目优势
+
+### 🧩 极致可扩展的物品体系
+
+物品系统采用 **触发器 + 条件 + 动作** 三层解耦架构。`ActionTrigger` 通过 ClassVisitor 自动发现注册，外部插件只需实现接口即可注入自定义触发器；`ICondition` 条件接口与 `VariableAdapter` 变量适配器同样支持热插拔扩展。内置 12 种 Variable 类型、`ContextSerializer` 二进制序列化压缩存储，物品上下文在 NBT 中的体积远小于 JSON 方案。`@PluginDepend` 注解实现软依赖自动降级——Orryx 未安装时，相关触发器静默跳过，零侵入零报错。
+
+### 🔬 毫秒级属性源溯源
+
+每个属性变动都携带结构化的 Source 元数据（来源 Key、属性类型、贡献数值），从装备 Lore 解析到临时 Buff 叠加，全部纳入统一的 `EntityAttributeMemory` 管理。开发者可在 Kether 脚本中通过 `source.key` / `source.amount` 实时读写任意来源，也可通过命令行一键查看玩家所有临时属性的来源链路。调试属性冲突、排查数值异常，不再需要逐个插件排查。
+
+### ⚡ 零妥协的性能设计
+
+Trie 前缀树将属性匹配从暴力遍历降维到字符级扫描；Caffeine 缓存 + 50ms 防抖将装备变更的属性重算频率压到最低；PRD 算法预计算 + 文件持久化实现启动零开销；JavaScript 脚本预编译 + 线程池隔离 + 5 秒熔断，杜绝恶意脚本拖垮主线程。属性同步通过 `syncPriority` 排序后批量写入 Bukkit Attribute，减少不必要的 NMS 调用。
+
+### 🛡️ 生产级安全防护
+
+JavaScript 引擎内置 `SafeClassFilter` 白名单，`java.io`、`java.net`、`Runtime`、`ProcessBuilder`、`reflect` 等危险包全部拦截；脚本执行在独立线程池中运行，超时自动取消，主线程零阻塞。Redis 缓存支持 Single/Cluster 双模式，3 小时自动过期，本地 JSON 文件兜底回退，数据链路不存在单点故障。
 
 ---
 
