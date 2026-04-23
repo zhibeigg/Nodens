@@ -1,6 +1,10 @@
 # Nodens
 
 <p align="center">
+  <img src="https://image.mcwar.cn/i/2026/04/23/69ea0b9089e31.png" alt="Nodens Logo" width="600"/>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Minecraft-1.12--1.20+-brightgreen?style=for-the-badge&logo=minecraft" alt="Minecraft Version"/>
   <img src="https://img.shields.io/badge/Kotlin-2.1.20-7F52FF?style=for-the-badge&logo=kotlin" alt="Kotlin"/>
   <img src="https://img.shields.io/badge/License-Free-blue?style=for-the-badge" alt="License"/>
