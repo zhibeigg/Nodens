@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Minecraft-1.12--1.20+-brightgreen?style=for-the-badge&logo=minecraft" alt="Minecraft Version"/>
   <img src="https://img.shields.io/badge/Kotlin-2.1.20-7F52FF?style=for-the-badge&logo=kotlin" alt="Kotlin"/>
   <img src="https://img.shields.io/badge/License-Free-blue?style=for-the-badge" alt="License"/>
-  <img src="https://img.shields.io/badge/Version-1.24.0-orange?style=for-the-badge" alt="Version"/>
+  <img src="https://img.shields.io/badge/Version-1.23.42-orange?style=for-the-badge" alt="Version"/>
 </p>
 
 <p align="center">
