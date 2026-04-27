@@ -9,7 +9,7 @@ plugins {
     `maven-publish`
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.serialization") version "2.1.20"
-    id("io.izzel.taboolib") version "2.0.30"
+    id("io.izzel.taboolib") version "2.0.37"
 }
 
 taboolib {
@@ -51,7 +51,10 @@ taboolib {
     relocate("com.github.benmanes.caffeine", "org.gitee.nodens.caffeine")
     relocate("com.eatthepath.uuid", "org.gitee.nodens.eatthepath.uuid")
     relocate("kotlinx.serialization", "org.gitee.nodens.serialization")
-    version { taboolib = "6.2.4-99fb800" }
+    version {
+        taboolib = "6.3.0-932e79c"
+        coroutines = "1.10.1"
+    }
 }
 
 repositories {
