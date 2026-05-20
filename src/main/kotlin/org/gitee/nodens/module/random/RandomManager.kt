@@ -15,6 +15,10 @@ object RandomManager {
     @Reload(1)
     @Awake(LifeCycle.ENABLE)
     private fun load() {
+        reloadRandoms()
+    }
+
+    fun reloadRandoms() {
         randomsMap.clear()
         try {
             files("randoms", "example.yml") {

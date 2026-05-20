@@ -330,20 +330,62 @@ dependencies {
 }
 ```
 
-> 将 `{VERSION}` 替换为版本号，如 `1.19.30`
+> 将 `{VERSION}` 替换为版本号，如 `1.24.0`。
 
 ### API 示例
 
 ```kotlin
 import org.gitee.nodens.api.Nodens
 
-// 获取玩家属性
 val api = Nodens.api()
-val playerAttributes = api.getEntityAttributeMemory(player)
 
-// 获取物品 API
-val itemApi = Nodens.itemApi()
-val item = itemApi.generateItem("村好剑", mapOf("level" to "5"))
+// 获取或创建实体属性内存
+val memory = api.ensureAttributeMemory(player)
+val nullableMemory = api.getEntityAttributeMemory(player)
+
+// 查询属性组、属性和配置
+val healthGroup = api.getAttributeGroup("Health")
+val maxHealth = api.attributeAPI.getAttributeNumber("Health", "Max")
+val maxHealthConfig = api.getAttributeConfig("Health", "Max")
+
+// 匹配 Lore 属性并刷新实体属性
+val attributeData = api.matchAttribute("最大生命: 20")
+api.updateAttribute(player)
+
+// 获取子 API
+val itemApi = Nodens.itemAPI()
+val attributeApi = Nodens.attributeAPI()
+val reloadApi = Nodens.reloadAPI()
+```
+
+### 运行期属性组注册
+
+外部插件可以实现 `IAttributeGroup` 并在运行期注册。注册后默认会重载属性匹配表并刷新当前实体属性。
+
+```kotlin
+import org.gitee.nodens.api.Nodens
+import org.gitee.nodens.core.IAttributeGroup
+
+object MyAttributeGroup : IAttributeGroup {
+    override val name = "MyGroup"
+    override val numbers = mapOf("Power" to MyPowerAttribute)
+}
+
+Nodens.registerAttributeGroup(MyAttributeGroup)
+Nodens.unregisterAttributeGroup("MyGroup")
+```
+
+### 分模块重载
+
+```kotlin
+Nodens.reloadConfig()       // config.yml
+Nodens.reloadHandle()       // handle.yml 脚本
+Nodens.reloadAttributes()   // attribute 目录与属性匹配表
+Nodens.reloadItems()        // items 目录
+Nodens.reloadItemGroups()   // group.yml
+Nodens.reloadConditions()   // 条件匹配表
+Nodens.reloadRandoms()      // randoms 目录
+Nodens.reloadRegainTask()   // 自然恢复任务
 ```
 
 ---

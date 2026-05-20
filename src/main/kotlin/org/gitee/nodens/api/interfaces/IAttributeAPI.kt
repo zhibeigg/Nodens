@@ -2,6 +2,7 @@ package org.gitee.nodens.api.interfaces
 
 import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.common.DigitalParser
+import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.IAttributeGroup
 
 /**
@@ -74,12 +75,52 @@ interface IAttributeAPI {
     fun getCombatPowerBreakdown(entity: LivingEntity): Map<IAttributeGroup.Number, Double>?
 
     /**
+     * 注册运行期属性组。
+     *
+     * @param group 属性组实例
+     * @param reloadAttributes 是否立即重载属性匹配表和在线实体属性
+     * @return 被同名运行期属性组替换的旧实例，不存在则返回 null
+     */
+    fun registerAttributeGroup(group: IAttributeGroup, reloadAttributes: Boolean = true): IAttributeGroup?
+
+    /**
+     * 注销运行期属性组。
+     *
+     * 仅会注销通过 [registerAttributeGroup] 注册的属性组，不会移除插件内置属性组。
+     *
+     * @param groupName 属性组名
+     * @param reloadAttributes 是否立即重载属性匹配表和在线实体属性
+     * @return 被移除的运行期属性组，不存在则返回 null
+     */
+    fun unregisterAttributeGroup(groupName: String, reloadAttributes: Boolean = true): IAttributeGroup?
+
+    /**
+     * 根据属性组名获取属性组。
+     * @param groupName 属性组名（如 "Health", "Damage"）
+     * @return 属性组对象，不存在则返回 null
+     */
+    fun getAttributeGroup(groupName: String): IAttributeGroup?
+
+    /**
+     * 获取当前已加载的全部属性组快照。
+     */
+    fun getAttributeGroups(): Map<String, IAttributeGroup>
+
+    /**
      * 根据属性组名和属性名获取属性
      * @param groupName 属性组名（如 "Health", "Damage"）
      * @param attributeName 属性名（如 "Max", "Physics"）
      * @return 属性对象，不存在则返回 null
      */
     fun getAttributeNumber(groupName: String, attributeName: String): IAttributeGroup.Number?
+
+    /**
+     * 根据属性组名和属性名获取属性配置。
+     * @param groupName 属性组名（如 "Health", "Damage"）
+     * @param attributeName 属性名（如 "Max", "Physics"）
+     * @return 属性配置，不存在则返回 null
+     */
+    fun getAttributeConfig(groupName: String, attributeName: String): AttributeConfig?
 
     /**
      * 属性最终值数据类

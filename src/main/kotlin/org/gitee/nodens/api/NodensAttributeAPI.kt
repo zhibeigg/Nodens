@@ -4,8 +4,10 @@ import org.bukkit.entity.LivingEntity
 import org.gitee.nodens.api.interfaces.IAttributeAPI
 import org.gitee.nodens.api.interfaces.IAttributeAPI.AttributeFinalValue
 import org.gitee.nodens.common.DigitalParser
+import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.entity.EntityAttributeMemory
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.comparePriority
 import taboolib.common.LifeCycle
@@ -102,8 +104,36 @@ class NodensAttributeAPI : IAttributeAPI {
         return entity.attributeMemory()?.getCombatPower()
     }
 
+    override fun registerAttributeGroup(group: IAttributeGroup, reloadAttributes: Boolean): IAttributeGroup? {
+        val previous = AttributeManager.registerAttributeGroup(group, reloadAttributes)
+        if (reloadAttributes) {
+            EntityAttributeMemory.updateAllAttributeMemories()
+        }
+        return previous
+    }
+
+    override fun unregisterAttributeGroup(groupName: String, reloadAttributes: Boolean): IAttributeGroup? {
+        val previous = AttributeManager.unregisterAttributeGroup(groupName, reloadAttributes)
+        if (reloadAttributes) {
+            EntityAttributeMemory.updateAllAttributeMemories()
+        }
+        return previous
+    }
+
+    override fun getAttributeGroup(groupName: String): IAttributeGroup? {
+        return AttributeManager.getGroup(groupName)
+    }
+
+    override fun getAttributeGroups(): Map<String, IAttributeGroup> {
+        return AttributeManager.getAttributeGroups()
+    }
+
     override fun getAttributeNumber(groupName: String, attributeName: String): IAttributeGroup.Number? {
         return AttributeManager.getNumber(groupName, attributeName)
+    }
+
+    override fun getAttributeConfig(groupName: String, attributeName: String): AttributeConfig? {
+        return AttributeManager.getConfigOrNull(groupName, attributeName)
     }
 
     companion object {

@@ -51,6 +51,13 @@ class AttributeManagerTest {
         }
     }
 
+    private fun mockGroup(name: String): IAttributeGroup {
+        return mockk {
+            every { this@mockk.name } returns name
+            every { this@mockk.numbers } returns emptyMap()
+        }
+    }
+
     @Test
     fun `ATTRIBUTE_COMPARATOR 按 handlePriority 排序`() {
         val low = mockNumber(1, "A")
@@ -72,6 +79,52 @@ class AttributeManagerTest {
         val a = mockNumber(5, "Same")
         val b = mockNumber(5, "Same")
         assertEquals(0, AttributeManager.ATTRIBUTE_COMPARATOR.compare(a, b))
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  运行期属性组注册
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    @Test
+    fun `registerAttributeGroup 延迟重载时写入注册表和当前映射`() {
+        val group = mockGroup("RuntimeGroup")
+        try {
+            val previous = AttributeManager.registerAttributeGroup(group, reloadAttributes = false)
+
+            assertNull(previous)
+            assertSame(group, AttributeManager.getGroup("RuntimeGroup"))
+            assertSame(group, AttributeManager.getRegisteredAttributeGroups()["RuntimeGroup"])
+        } finally {
+            AttributeManager.unregisterAttributeGroup("RuntimeGroup", reloadAttributes = false)
+        }
+    }
+
+    @Test
+    fun `registerAttributeGroup 同名注册返回旧实例并替换当前映射`() {
+        val oldGroup = mockGroup("ReplaceGroup")
+        val newGroup = mockGroup("ReplaceGroup")
+        try {
+            AttributeManager.registerAttributeGroup(oldGroup, reloadAttributes = false)
+            val previous = AttributeManager.registerAttributeGroup(newGroup, reloadAttributes = false)
+
+            assertSame(oldGroup, previous)
+            assertSame(newGroup, AttributeManager.getGroup("ReplaceGroup"))
+            assertSame(newGroup, AttributeManager.getRegisteredAttributeGroups()["ReplaceGroup"])
+        } finally {
+            AttributeManager.unregisterAttributeGroup("ReplaceGroup", reloadAttributes = false)
+        }
+    }
+
+    @Test
+    fun `unregisterAttributeGroup 移除运行期属性组`() {
+        val group = mockGroup("RemoveGroup")
+        AttributeManager.registerAttributeGroup(group, reloadAttributes = false)
+
+        val removed = AttributeManager.unregisterAttributeGroup("RemoveGroup", reloadAttributes = false)
+
+        assertSame(group, removed)
+        assertNull(AttributeManager.getGroup("RemoveGroup"))
+        assertFalse(AttributeManager.getRegisteredAttributeGroups().containsKey("RemoveGroup"))
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

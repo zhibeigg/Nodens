@@ -16,6 +16,10 @@ object GroupManager {
     @Reload(0)
     @Awake(LifeCycle.ENABLE)
     private fun reload() {
+        reloadItemGroups()
+    }
+
+    fun reloadItemGroups() {
         group.reload()
         itemGroups.clear()
         group.getKeys(false).forEach { key ->

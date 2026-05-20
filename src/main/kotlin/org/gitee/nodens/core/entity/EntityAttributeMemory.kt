@@ -129,7 +129,42 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         }
 
         fun LivingEntity.attributeMemory(): EntityAttributeMemory? {
-            return entityAttributeMemoriesMap[uniqueId]
+            val memory = entityAttributeMemoriesMap[uniqueId]
+            if (memory != null && this is Player && isOnline) {
+                playerLastAccessTime[uniqueId] = System.currentTimeMillis()
+            }
+            return memory
+        }
+
+        fun LivingEntity.ensureAttributeMemory(): EntityAttributeMemory {
+            if (this is Player && isOnline) {
+                playerLastAccessTime[uniqueId] = System.currentTimeMillis()
+            }
+            return entityAttributeMemoriesMap.computeIfAbsent(uniqueId) {
+                EntityAttributeMemory(this)
+            }
+        }
+
+        fun removeAttributeMemory(entity: LivingEntity, resetHealth: Boolean = true): EntityAttributeMemory? {
+            val memory = entityAttributeMemoriesMap.remove(entity.uniqueId)
+            playerLastAccessTime.remove(entity.uniqueId)
+            removeCatch(entity.uniqueId)
+            if (resetHealth) {
+                memory?.entitySyncProfile?.resetHealth()
+            }
+            return memory
+        }
+
+        fun getAttributeMemories(): Map<UUID, EntityAttributeMemory> {
+            return entityAttributeMemoriesMap.toMap()
+        }
+
+        fun updateAllAttributeMemories() {
+            entityAttributeMemoriesMap.values.forEach { it.updateAttributeAsync() }
+        }
+
+        fun invalidateAttributeCache(entity: LivingEntity) {
+            removeCatch(entity.uniqueId)
         }
 
         @Awake(LifeCycle.DISABLE)
@@ -144,6 +179,10 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         @Reload(1)
         @Awake(LifeCycle.ACTIVE)
         private fun createRegain() {
+            reloadRegainTask()
+        }
+
+        fun reloadRegainTask() {
             regainTask?.cancel()
             regainTask = submit(period = Health.Regain.period) {
                 onlinePlayers.forEach {

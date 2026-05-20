@@ -57,6 +57,11 @@ object Handle {
     @Reload(1)
     @Awake(LifeCycle.ENABLE)
     private fun init() {
+        reloadHandle()
+    }
+
+    fun reloadHandle() {
+        handle.reload()
         val newDamage = getScript(SCRIPT_ON_DAMAGE, handle.getString("onDamage") ?: run {
             warning("请补充handle.yml中的onDamage脚本")
             return

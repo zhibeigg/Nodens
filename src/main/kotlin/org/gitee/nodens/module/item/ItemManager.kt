@@ -44,6 +44,10 @@ object ItemManager {
     @Reload(0)
     @Awake(LifeCycle.ENABLE)
     private fun reload() {
+        reloadItems()
+    }
+
+    fun reloadItems() {
         itemConfigs.clear()
         val cloneMap = hashMapOf<String, ConfigurationSection>()
         files("items", "example.yml") {

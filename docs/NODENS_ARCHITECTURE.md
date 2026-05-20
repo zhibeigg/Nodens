@@ -8,6 +8,7 @@
 - [5. 伤害计算流程](#5-伤害计算流程)
 - [6. 恢复计算流程](#6-恢复计算流程)
 - [7. 核心类说明](#7-核心类说明)
+- [8. 公开 API 边界](#8-公开-api-边界)
 
 ---
 
@@ -522,6 +523,63 @@ object Handle {
     fun doHeal(passive, regain): Event?                         // 执行治疗
 }
 ```
+
+---
+
+## 8. 公开 API 边界
+
+Nodens 对外提供三层入口：
+
+| 入口 | 说明 |
+|------|------|
+| `Nodens.api()` | 获取完整 `INodensAPI` 门面 |
+| `Nodens.attributeAPI()` / `Nodens.itemAPI()` / `Nodens.reloadAPI()` | 获取分模块 API |
+| `Nodens.reloadAttributes()`、`Nodens.ensureAttributeMemory()` 等静态快捷方法 | 面向常用场景的直接调用 |
+
+### 8.1 属性组注册
+
+运行期属性组通过 `AttributeManager` 的外部注册表接入。重载属性时会先扫描插件内置 `IAttributeGroup`，再合并运行期注册的属性组，并原子替换运行时 `groupMap` 和属性配置表。
+
+```kotlin
+Nodens.registerAttributeGroup(myGroup)
+Nodens.unregisterAttributeGroup("MyGroup")
+Nodens.getAttributeGroups()
+Nodens.getAttributeConfig("Health", "Max")
+```
+
+`registerAttributeGroup(group, reloadAttributes = true)` 默认会重建属性匹配表，并刷新当前 `EntityAttributeMemory`，使新属性尽快对在线实体生效。
+
+### 8.2 实体属性内存
+
+`EntityAttributeMemory` 现在同时支持只读获取和确保创建：
+
+```kotlin
+Nodens.getEntityAttributeMemory(entity) // 不存在则返回 null
+Nodens.ensureAttributeMemory(entity)    // 不存在则创建
+Nodens.removeAttributeMemory(entity)
+Nodens.updateAllAttributes()
+```
+
+这使外部插件可以为非玩家实体、召唤物或脚本生成实体主动建立属性内存。
+
+### 8.3 分模块重载
+
+`IReloadAPI` 支持完整重载、按权重重载和常用模块重载：
+
+```kotlin
+Nodens.reload()
+Nodens.reloadConfig()
+Nodens.reloadHandle()
+Nodens.reloadAttributes(updateEntities = true)
+Nodens.reloadItems()
+Nodens.reloadItemGroups()
+Nodens.reloadConditions()
+Nodens.reloadRandoms()
+Nodens.reloadRegainTask()
+Nodens.reloadByWeight(0)
+```
+
+完整重载仍会触发 `NodensPluginReloadEvent`，外部插件可继续通过事件注册带权重的扩展重载函数。
 
 ---
 

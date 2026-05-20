@@ -20,6 +20,10 @@ object ConditionManager {
     @Reload(0)
     @Awake(LifeCycle.ENABLE)
     private fun load() {
+        reloadConditions()
+    }
+
+    fun reloadConditions() {
         CONDITION_MATCHING_MAP.clear()
         conditionMap.clear()
         runningClassesWithoutLibrary.forEach {
