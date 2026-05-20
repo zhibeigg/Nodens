@@ -142,6 +142,7 @@ publishing {
                 classifier = "api"
             }
             groupId = project.group.toString()
+            artifactId = "nodens"
         }
     }
 }
