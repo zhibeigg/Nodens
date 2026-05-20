@@ -153,6 +153,48 @@ class DamageProcessorTest {
         assertEquals(0.0, processor.getFinalDamage())
     }
 
+    @Test
+    fun `DamageFormulaProvider 返回值时接管最终伤害`() {
+        try {
+            val result = DamageProcessor.registerDamageFormulaProvider("test-provider", 0) { 123.0 }
+            assertTrue(result.success)
+
+            val processor = createProcessor()
+            assertEquals(123.0, processor.getFinalDamage())
+        } finally {
+            DamageProcessor.unregisterDamageFormulaProvider("test-provider")
+        }
+    }
+
+    @Test
+    fun `DamageFormulaProvider 返回 null 时回退到 Handle`() {
+        mockkObject(Handle)
+        every { Handle.runProcessor(any<DamageProcessor>()) } returns 88.0
+        try {
+            DamageProcessor.registerDamageFormulaProvider("test-null-provider", 0) { null }
+
+            val processor = createProcessor()
+            assertEquals(88.0, processor.getFinalDamage())
+            verify(exactly = 1) { Handle.runProcessor(any<DamageProcessor>()) }
+        } finally {
+            DamageProcessor.unregisterDamageFormulaProvider("test-null-provider")
+        }
+    }
+
+    @Test
+    fun `DamageFormulaProvider 按 priority 升序选择第一个非 null 结果`() {
+        try {
+            DamageProcessor.registerDamageFormulaProvider("provider-high", 10) { 200.0 }
+            DamageProcessor.registerDamageFormulaProvider("provider-low", 1) { 100.0 }
+
+            val processor = createProcessor()
+            assertEquals(100.0, processor.getFinalDamage())
+        } finally {
+            DamageProcessor.unregisterDamageFormulaProvider("provider-high")
+            DamageProcessor.unregisterDamageFormulaProvider("provider-low")
+        }
+    }
+
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     //  callback 优先级排序
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -198,6 +240,22 @@ class DamageProcessorTest {
         val str = source.toString()
         assertTrue(str.contains("base"))
         assertTrue(str.contains("100.0"))
+    }
+
+    @Test
+    fun `Source 默认暴露属性组和完整名称`() {
+        val group = mockk<IAttributeGroup> {
+            every { name } returns "Damage"
+        }
+        val number = mockk<IAttributeGroup.Number> {
+            every { this@mockk.group } returns group
+            every { name } returns "Physics"
+        }
+        val source = DamageProcessor.DamageSource("base", number, 100.0)
+
+        assertEquals("Damage", source.attributeGroup)
+        assertEquals("Physics", source.attributeName)
+        assertEquals("Damage:Physics", source.attributeFullName)
     }
 
     @Test

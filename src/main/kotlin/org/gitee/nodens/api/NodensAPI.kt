@@ -2,6 +2,8 @@ package org.gitee.nodens.api
 
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.gitee.nodens.api.result.RegisterResult
+import org.gitee.nodens.api.result.ReloadResult
 import org.gitee.nodens.api.interfaces.IAttributeAPI
 import org.gitee.nodens.api.interfaces.IItemAPI
 import org.gitee.nodens.api.interfaces.INodensAPI
@@ -71,7 +73,16 @@ class NodensAPI: INodensAPI {
     }
 
     override fun addTempAttribute(entity: LivingEntity, key: String, tempAttributeData: TempAttributeData) {
-        entity.attributeMemory()?.addAttribute(key, tempAttributeData)
+        addTempAttribute(entity, key, tempAttributeData, createIfAbsent = false)
+    }
+
+    override fun addTempAttribute(entity: LivingEntity, key: String, tempAttributeData: TempAttributeData, createIfAbsent: Boolean) {
+        val memory = if (createIfAbsent) entity.ensureAttributeMemory() else entity.attributeMemory()
+        memory?.addAttribute(key, tempAttributeData)
+    }
+
+    override fun addTempAttributeOrCreateMemory(entity: LivingEntity, key: String, tempAttributeData: TempAttributeData) {
+        addTempAttribute(entity, key, tempAttributeData, createIfAbsent = true)
     }
 
     override fun removeTempAttribute(entity: LivingEntity, key: String) {
@@ -111,15 +122,35 @@ class NodensAPI: INodensAPI {
     }
 
     override fun updateAttribute(entity: LivingEntity) {
-        entity.attributeMemory()?.updateAttributeAsync()
+        entity.attributeMemory()?.updateAttribute()
     }
 
     override fun registerAttributeGroup(group: IAttributeGroup, reloadAttributes: Boolean): IAttributeGroup? {
         return attributeAPI.registerAttributeGroup(group, reloadAttributes)
     }
 
+    override fun registerAttributeGroup(
+        group: IAttributeGroup,
+        configs: Map<String, AttributeRegistrationConfig>,
+        reloadAttributes: Boolean,
+    ): RegisterResult {
+        return attributeAPI.registerAttributeGroup(group, configs, reloadAttributes)
+    }
+
+    override fun registerAttributeGroupResult(group: IAttributeGroup, reloadAttributes: Boolean): RegisterResult {
+        return attributeAPI.registerAttributeGroupResult(group, reloadAttributes)
+    }
+
     override fun unregisterAttributeGroup(groupName: String, reloadAttributes: Boolean): IAttributeGroup? {
         return attributeAPI.unregisterAttributeGroup(groupName, reloadAttributes)
+    }
+
+    override fun unregisterAttributeGroupResult(groupName: String, reloadAttributes: Boolean): RegisterResult {
+        return attributeAPI.unregisterAttributeGroupResult(groupName, reloadAttributes)
+    }
+
+    override fun rebuildAttributeMatchingMap(): ReloadResult {
+        return attributeAPI.rebuildAttributeMatchingMap()
     }
 
     override fun getAttributeGroup(groupName: String): IAttributeGroup? {
@@ -138,44 +169,104 @@ class NodensAPI: INodensAPI {
         reloadAPI.reload()
     }
 
+    override fun reloadResult(): ReloadResult {
+        return reloadAPI.reloadResult()
+    }
+
     override fun reloadConfig() {
         reloadAPI.reloadConfig()
+    }
+
+    override fun reloadConfigResult(): ReloadResult {
+        return reloadAPI.reloadConfigResult()
     }
 
     override fun reloadAttributes(updateEntities: Boolean) {
         reloadAPI.reloadAttributes(updateEntities)
     }
 
+    override fun reloadAttributesResult(updateEntities: Boolean): ReloadResult {
+        return reloadAPI.reloadAttributesResult(updateEntities)
+    }
+
     override fun reloadHandle() {
         reloadAPI.reloadHandle()
+    }
+
+    override fun reloadHandleResult(): ReloadResult {
+        return reloadAPI.reloadHandleResult()
     }
 
     override fun reloadItems() {
         reloadAPI.reloadItems()
     }
 
+    override fun reloadItemsResult(): ReloadResult {
+        return reloadAPI.reloadItemsResult()
+    }
+
     override fun reloadItemGroups() {
         reloadAPI.reloadItemGroups()
+    }
+
+    override fun reloadItemGroupsResult(): ReloadResult {
+        return reloadAPI.reloadItemGroupsResult()
     }
 
     override fun reloadConditions() {
         reloadAPI.reloadConditions()
     }
 
+    override fun reloadConditionsResult(): ReloadResult {
+        return reloadAPI.reloadConditionsResult()
+    }
+
     override fun reloadRandoms() {
         reloadAPI.reloadRandoms()
+    }
+
+    override fun reloadRandomsResult(): ReloadResult {
+        return reloadAPI.reloadRandomsResult()
     }
 
     override fun reloadRegainTask() {
         reloadAPI.reloadRegainTask()
     }
 
+    override fun reloadRegainTaskResult(): ReloadResult {
+        return reloadAPI.reloadRegainTaskResult()
+    }
+
     override fun reloadByWeight(weight: Int) {
         reloadAPI.reloadByWeight(weight)
     }
 
+    override fun reloadByWeightResult(weight: Int): ReloadResult {
+        return reloadAPI.reloadByWeightResult(weight)
+    }
+
     override fun reloadByWeights(vararg weights: Int) {
         reloadAPI.reloadByWeights(*weights)
+    }
+
+    override fun reloadByWeightsResult(vararg weights: Int): ReloadResult {
+        return reloadAPI.reloadByWeightsResult(*weights)
+    }
+
+    override fun registerReloadHook(owner: String, weight: Int, function: Runnable): RegisterResult {
+        return reloadAPI.registerReloadHook(owner, weight, function)
+    }
+
+    override fun unregisterReloadHooks(owner: String): RegisterResult {
+        return reloadAPI.unregisterReloadHooks(owner)
+    }
+
+    override fun registerDamageFormulaProvider(id: String, priority: Int, provider: DamageFormulaProvider): RegisterResult {
+        return DamageProcessor.registerDamageFormulaProvider(id, priority, provider)
+    }
+
+    override fun unregisterDamageFormulaProvider(id: String): RegisterResult {
+        return DamageProcessor.unregisterDamageFormulaProvider(id)
     }
 
 }

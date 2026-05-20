@@ -160,7 +160,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         }
 
         fun updateAllAttributeMemories() {
-            entityAttributeMemoriesMap.values.forEach { it.updateAttributeAsync() }
+            entityAttributeMemoriesMap.values.forEach { it.updateAttribute() }
         }
 
         fun invalidateAttributeCache(entity: LivingEntity) {
@@ -217,17 +217,17 @@ class EntityAttributeMemory(val entity: LivingEntity) {
     val entitySyncProfile = EntitySyncProfile(entity)
 
     init {
-        updateAttributeAsync()
+        updateAttribute()
     }
 
     fun addAttribute(name: String, value: TempAttributeData) {
         extendMemory[name] = value
-        updateAttributeAsync()
+        updateAttribute()
     }
 
     fun removeAttribute(name: String): TempAttributeData? {
         val remove = extendMemory.remove(name)
-        updateAttributeAsync()
+        updateAttribute()
         return remove
     }
 
@@ -282,7 +282,7 @@ class EntityAttributeMemory(val entity: LivingEntity) {
         }
     }
 
-    fun updateAttributeAsync() {
+    fun updateAttribute() {
         if (entity.isDead) return
         val event = NodensPlayerAttributeUpdateEvents.Pre(this)
         if (event.call()) {
@@ -295,6 +295,15 @@ class EntityAttributeMemory(val entity: LivingEntity) {
             // 触发后置事件
             NodensPlayerAttributeUpdateEvents.Post(this@EntityAttributeMemory).call()
         }
+    }
+
+    fun refreshAttribute() {
+        updateAttribute()
+    }
+
+    @Deprecated("Use updateAttribute() instead; this method is not strictly asynchronous.", ReplaceWith("updateAttribute()"))
+    fun updateAttributeAsync() {
+        updateAttribute()
     }
 
     fun syncAttributeToBukkit() {

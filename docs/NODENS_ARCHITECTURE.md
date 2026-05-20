@@ -581,6 +581,73 @@ Nodens.reloadByWeight(0)
 
 完整重载仍会触发 `NodensPluginReloadEvent`，外部插件可继续通过事件注册带权重的扩展重载函数。
 
+### 8.4 纯内存属性配置
+
+外部插件可以通过 `AttributeRegistrationConfig` 注册运行期属性组，不再需要构造 `ConfigurationSection` 或写入临时配置文件：
+
+```kotlin
+Nodens.registerAttributeGroup(
+    myGroup,
+    mapOf(
+        "Power" to AttributeRegistrationConfig(
+            keys = listOf("力量"),
+            valueType = IAttributeGroup.Number.ValueType.SINGLE,
+            combatPower = 1.0,
+            syncPriority = 0,
+            handlePriority = 1,
+        )
+    )
+)
+```
+
+该配置会进入运行期属性配置表，并参与属性匹配表重建。
+
+### 8.5 结构化结果与长期 Reload Hook
+
+注册、注销、重载类 API 提供 `RegisterResult` / `ReloadResult`，用于外部插件判断成功状态和失败原因：
+
+```kotlin
+val result = Nodens.reloadHandleResult()
+if (!result.success) {
+    result.throwable?.printStackTrace()
+}
+```
+
+外部插件可以注册长期 Reload Hook，避免每次都依赖事件中的临时函数：
+
+```kotlin
+Nodens.registerReloadHook("BattleCodex", 0, Runnable {
+    // 同步外部插件托管配置并重新注册属性组
+})
+Nodens.unregisterReloadHooks("BattleCodex")
+```
+
+### 8.6 伤害公式提供者
+
+`DamageFormulaProvider` 允许外部插件在 `DamageProcessor.getFinalDamage()` 阶段接管公式：
+
+```kotlin
+Nodens.registerDamageFormulaProvider("custom", 10) { processor ->
+    if (processor.damageType == "PHYSICAL") 100.0 else null
+}
+```
+
+提供者按 `priority` 升序执行；返回 `null` 表示不处理，继续尝试下一个提供者，全部返回 `null` 时回退到 `handle.yml`。
+
+### 8.7 Source 属性信息
+
+`Source` 保留原有 `attribute` 名称，同时增加：
+
+- `attributeGroup`
+- `attributeName`
+- `attributeFullName`
+
+Kether 中可读取 `group`、`attributeName`、`attributeFullName`，用于区分同名属性，如 `Damage:Physics` 与 `Defence:Physics`。
+
+### 8.8 属性刷新命名
+
+`EntityAttributeMemory.updateAttribute()` 是新的明确命名；`refreshAttribute()` 为别名。旧 `updateAttributeAsync()` 保留兼容，但标记为废弃，因为它并不表示整个流程都在异步线程执行。
+
 ---
 
 ## 附录: 属性配置示例

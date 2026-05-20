@@ -2,6 +2,7 @@ package org.gitee.nodens.core
 
 import io.mockk.every
 import io.mockk.mockk
+import org.gitee.nodens.api.AttributeRegistrationConfig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import taboolib.library.configuration.ConfigurationSection
@@ -68,5 +69,24 @@ class AttributeConfigTest {
     fun `handlePriority 正确读取`() {
         val config = AttributeConfig(mockSection(handlePriority = 5))
         assertEquals(5, config.handlePriority)
+    }
+
+    @Test
+    fun `可从 AttributeRegistrationConfig 创建配置`() {
+        val config = AttributeConfig(
+            AttributeRegistrationConfig(
+                keys = listOf("命中", "Hit"),
+                valueType = IAttributeGroup.Number.ValueType.SINGLE,
+                combatPower = 2.0,
+                syncPriority = 3,
+                handlePriority = 4,
+            )
+        )
+
+        assertEquals(listOf("命中", "Hit"), config.keys)
+        assertEquals(IAttributeGroup.Number.ValueType.SINGLE, config.valueType)
+        assertEquals(2.0, config.combatPower)
+        assertEquals(3, config.syncPriority)
+        assertEquals(4, config.handlePriority)
     }
 }

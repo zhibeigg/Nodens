@@ -14,7 +14,10 @@ object SourceActions {
         override fun read(instance: Source, key: String): OpenResult {
             return when (key) {
                 "key" -> OpenResult.successful(instance.key)
-                "attribute" -> OpenResult.successful(instance.attribute.name)
+                "group", "attributeGroup" -> OpenResult.successful(instance.attributeGroup)
+                "attribute" -> OpenResult.successful(instance.attributeName)
+                "attributeName" -> OpenResult.successful(instance.attributeName)
+                "attributeFullName" -> OpenResult.successful(instance.attributeFullName)
                 "amount", "value" -> OpenResult.successful(instance.amount)
                 else -> OpenResult.failed()
             }

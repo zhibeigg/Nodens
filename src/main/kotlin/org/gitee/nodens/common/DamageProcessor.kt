@@ -3,13 +3,16 @@ package org.gitee.nodens.common
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import org.gitee.nodens.api.DamageFormulaProvider
 import org.gitee.nodens.api.events.entity.NodensEntityDamageEvents
+import org.gitee.nodens.api.result.RegisterResult
 import org.gitee.nodens.common.Handle.doDamage
 import org.gitee.nodens.core.AttributeManager
 import org.gitee.nodens.core.IAttributeGroup
 import org.gitee.nodens.core.attribute.Crit
 import org.gitee.nodens.core.entity.EntityAttributeMemory.Companion.attributeMemory
 import org.gitee.nodens.util.NODENS_NAMESPACE
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * @param damageType 攻击类型，一般来自[org.gitee.nodens.core.attribute.Damage]中的[IAttributeGroup.Number.name]
@@ -17,6 +20,52 @@ import org.gitee.nodens.util.NODENS_NAMESPACE
  * @param defender 防御者
  * */
 class DamageProcessor(damageType: String, val attacker: LivingEntity, val defender: LivingEntity) {
+
+    companion object {
+
+        private data class RegisteredDamageFormulaProvider(
+            val id: String,
+            val priority: Int,
+            val provider: DamageFormulaProvider,
+        )
+
+        private val formulaProviders = ConcurrentHashMap<String, RegisteredDamageFormulaProvider>()
+
+        fun registerDamageFormulaProvider(id: String, priority: Int, provider: DamageFormulaProvider): RegisterResult {
+            return runCatching {
+                require(id.isNotBlank()) { "伤害公式提供者 ID 不能为空" }
+                val replaced = formulaProviders.put(id, RegisteredDamageFormulaProvider(id, priority, provider))
+                RegisterResult.success(if (replaced == null) "伤害公式提供者 $id 注册成功" else "伤害公式提供者 $id 已替换")
+            }.getOrElse {
+                RegisterResult.failure("伤害公式提供者 $id 注册失败: ${it.message ?: it.javaClass.simpleName}", it)
+            }
+        }
+
+        fun unregisterDamageFormulaProvider(id: String): RegisterResult {
+            return runCatching {
+                val removed = formulaProviders.remove(id)
+                if (removed == null) {
+                    RegisterResult.failure("伤害公式提供者 $id 不存在")
+                } else {
+                    RegisterResult.success("伤害公式提供者 $id 已注销")
+                }
+            }.getOrElse {
+                RegisterResult.failure("伤害公式提供者 $id 注销失败: ${it.message ?: it.javaClass.simpleName}", it)
+            }
+        }
+
+        fun getDamageFormulaProviders(): Map<String, DamageFormulaProvider> {
+            return formulaProviders.mapValues { it.value.provider }
+        }
+
+        private fun calculateWithProvider(processor: DamageProcessor): Double? {
+            return formulaProviders.values
+                .sortedWith(compareBy<RegisteredDamageFormulaProvider> { it.priority }.thenBy { it.id })
+                .firstNotNullOfOrNull { registered ->
+                    runCatching { registered.provider.calculate(processor) }.getOrNull()
+                }
+        }
+    }
 
     private var damageCache: Double? = null
 
@@ -83,7 +132,7 @@ class DamageProcessor(damageType: String, val attacker: LivingEntity, val defend
 
     fun getFinalDamage(): Double {
         if (damageCache == null) {
-            damageCache = Handle.runProcessor(this).coerceAtLeast(0.0)
+            damageCache = (calculateWithProvider(this) ?: Handle.runProcessor(this)).coerceAtLeast(0.0)
         }
         return damageCache!!
     }

@@ -1,8 +1,11 @@
 package org.gitee.nodens.api
 
 import org.bukkit.entity.LivingEntity
+import org.gitee.nodens.api.AttributeRegistrationConfig
 import org.gitee.nodens.api.interfaces.IAttributeAPI
 import org.gitee.nodens.api.interfaces.IAttributeAPI.AttributeFinalValue
+import org.gitee.nodens.api.result.RegisterResult
+import org.gitee.nodens.api.result.ReloadResult
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.AttributeManager
@@ -112,12 +115,44 @@ class NodensAttributeAPI : IAttributeAPI {
         return previous
     }
 
+    override fun registerAttributeGroup(
+        group: IAttributeGroup,
+        configs: Map<String, AttributeRegistrationConfig>,
+        reloadAttributes: Boolean,
+    ): RegisterResult {
+        val result = AttributeManager.registerAttributeGroup(group, configs, reloadAttributes)
+        if (result.success && reloadAttributes) {
+            EntityAttributeMemory.updateAllAttributeMemories()
+        }
+        return result
+    }
+
+    override fun registerAttributeGroupResult(group: IAttributeGroup, reloadAttributes: Boolean): RegisterResult {
+        val result = AttributeManager.registerAttributeGroupResult(group, reloadAttributes)
+        if (result.success && reloadAttributes) {
+            EntityAttributeMemory.updateAllAttributeMemories()
+        }
+        return result
+    }
+
     override fun unregisterAttributeGroup(groupName: String, reloadAttributes: Boolean): IAttributeGroup? {
         val previous = AttributeManager.unregisterAttributeGroup(groupName, reloadAttributes)
         if (reloadAttributes) {
             EntityAttributeMemory.updateAllAttributeMemories()
         }
         return previous
+    }
+
+    override fun unregisterAttributeGroupResult(groupName: String, reloadAttributes: Boolean): RegisterResult {
+        val result = AttributeManager.unregisterAttributeGroupResult(groupName, reloadAttributes)
+        if (result.success && reloadAttributes) {
+            EntityAttributeMemory.updateAllAttributeMemories()
+        }
+        return result
+    }
+
+    override fun rebuildAttributeMatchingMap(): ReloadResult {
+        return AttributeManager.rebuildAttributeMatchingMap()
     }
 
     override fun getAttributeGroup(groupName: String): IAttributeGroup? {

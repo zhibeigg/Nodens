@@ -45,13 +45,13 @@ object EntityListener {
         if (now - lastTime >= DEBOUNCE_TIME_MS) {
             // 超过防抖时间，立即更新
             lastUpdateTime[uniqueId] = now
-            attributeMemory()?.updateAttributeAsync()
+            attributeMemory()?.updateAttribute()
         } else if (pendingUpdate.add(uniqueId)) {
             // 在防抖时间内，延迟执行
             submit(delay = DEBOUNCE_TIME_MS - (now - lastTime) + 1) {
                 if (pendingUpdate.remove(uniqueId)) {
                     lastUpdateTime[uniqueId] = System.currentTimeMillis()
-                    attributeMemory()?.updateAttributeAsync()
+                    attributeMemory()?.updateAttribute()
                 }
             }
         }

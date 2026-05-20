@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import org.gitee.nodens.api.AttributeRegistrationConfig
 import org.gitee.nodens.api.Nodens
 import org.gitee.nodens.common.DigitalParser
 import org.junit.jupiter.api.AfterAll
@@ -125,6 +126,34 @@ class AttributeManagerTest {
         assertSame(group, removed)
         assertNull(AttributeManager.getGroup("RemoveGroup"))
         assertFalse(AttributeManager.getRegisteredAttributeGroups().containsKey("RemoveGroup"))
+    }
+
+    @Test
+    fun `registerAttributeGroup 支持纯内存配置`() {
+        val config = AttributeRegistrationConfig(keys = listOf("运行期属性"), combatPower = 7.0, handlePriority = 2)
+        val number = mockk<IAttributeGroup.Number>(relaxed = true)
+        val group = mockk<IAttributeGroup> {
+            every { name } returns "MemoryConfigGroup"
+            every { numbers } returns mapOf("Runtime" to number)
+        }
+        every { number.group } returns group
+        every { number.name } returns "Runtime"
+        every { number.config } answers { AttributeManager.getConfig("MemoryConfigGroup", "Runtime") }
+
+        try {
+            val result = AttributeManager.registerAttributeGroup(
+                group,
+                mapOf("Runtime" to config),
+                reloadAttributes = false,
+            )
+
+            assertTrue(result.success)
+            assertSame(group, AttributeManager.getGroup("MemoryConfigGroup"))
+            assertEquals(listOf("运行期属性"), AttributeManager.getConfig("MemoryConfigGroup", "Runtime").keys)
+            assertSame(number, AttributeManager.ATTRIBUTE_MATCHING_MAP.get("运行期属性 10"))
+        } finally {
+            AttributeManager.unregisterAttributeGroup("MemoryConfigGroup", reloadAttributes = false)
+        }
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

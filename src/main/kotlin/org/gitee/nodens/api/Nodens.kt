@@ -1,12 +1,15 @@
 package org.gitee.nodens.api
 
 import org.bukkit.entity.LivingEntity
+import org.gitee.nodens.api.result.RegisterResult
+import org.gitee.nodens.api.result.ReloadResult
 import org.gitee.nodens.api.interfaces.IAttributeAPI
 import org.gitee.nodens.api.interfaces.IItemAPI
 import org.gitee.nodens.api.interfaces.INodensAPI
 import org.gitee.nodens.api.interfaces.IReloadAPI
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.IAttributeGroup
+import org.gitee.nodens.core.TempAttributeData
 import org.gitee.nodens.core.entity.EntityAttributeMemory
 import org.gitee.nodens.core.reload.Reload
 import org.gitee.nodens.module.item.VariableRegistry
@@ -68,6 +71,21 @@ object Nodens {
     }
 
     @JvmStatic
+    fun addTempAttribute(entity: LivingEntity, key: String, tempAttributeData: TempAttributeData) {
+        api().addTempAttribute(entity, key, tempAttributeData)
+    }
+
+    @JvmStatic
+    fun addTempAttribute(entity: LivingEntity, key: String, tempAttributeData: TempAttributeData, createIfAbsent: Boolean) {
+        api().addTempAttribute(entity, key, tempAttributeData, createIfAbsent)
+    }
+
+    @JvmStatic
+    fun addTempAttributeOrCreateMemory(entity: LivingEntity, key: String, tempAttributeData: TempAttributeData) {
+        api().addTempAttributeOrCreateMemory(entity, key, tempAttributeData)
+    }
+
+    @JvmStatic
     fun getAttributeMemory(entity: LivingEntity): EntityAttributeMemory? {
         return api().getAttributeMemory(entity)
     }
@@ -98,8 +116,32 @@ object Nodens {
     }
 
     @JvmStatic
+    fun registerAttributeGroup(
+        group: IAttributeGroup,
+        configs: Map<String, AttributeRegistrationConfig>,
+        reloadAttributes: Boolean = true,
+    ): RegisterResult {
+        return api().registerAttributeGroup(group, configs, reloadAttributes)
+    }
+
+    @JvmStatic
+    fun registerAttributeGroupResult(group: IAttributeGroup, reloadAttributes: Boolean = true): RegisterResult {
+        return api().registerAttributeGroupResult(group, reloadAttributes)
+    }
+
+    @JvmStatic
     fun unregisterAttributeGroup(groupName: String, reloadAttributes: Boolean = true): IAttributeGroup? {
         return api().unregisterAttributeGroup(groupName, reloadAttributes)
+    }
+
+    @JvmStatic
+    fun unregisterAttributeGroupResult(groupName: String, reloadAttributes: Boolean = true): RegisterResult {
+        return api().unregisterAttributeGroupResult(groupName, reloadAttributes)
+    }
+
+    @JvmStatic
+    fun rebuildAttributeMatchingMap(): ReloadResult {
+        return api().rebuildAttributeMatchingMap()
     }
 
     @JvmStatic
@@ -123,9 +165,19 @@ object Nodens {
     }
 
     @JvmStatic
+    fun reloadResult(): ReloadResult {
+        return api().reloadResult()
+    }
+
+    @JvmStatic
     fun reloadConfig() {
         config.reload()
         consoleMessage("&e┣&7Config loaded &a√")
+    }
+
+    @JvmStatic
+    fun reloadConfigResult(): ReloadResult {
+        return api().reloadConfigResult()
     }
 
     @JvmStatic
@@ -134,8 +186,18 @@ object Nodens {
     }
 
     @JvmStatic
+    fun reloadAttributesResult(updateEntities: Boolean = true): ReloadResult {
+        return api().reloadAttributesResult(updateEntities)
+    }
+
+    @JvmStatic
     fun reloadHandle() {
         api().reloadHandle()
+    }
+
+    @JvmStatic
+    fun reloadHandleResult(): ReloadResult {
+        return api().reloadHandleResult()
     }
 
     @JvmStatic
@@ -144,23 +206,48 @@ object Nodens {
     }
 
     @JvmStatic
+    fun reloadItemsResult(): ReloadResult {
+        return api().reloadItemsResult()
+    }
+
+    @JvmStatic
     fun reloadItemGroups() {
-        api().reloadAPI.reloadItemGroups()
+        api().reloadItemGroups()
+    }
+
+    @JvmStatic
+    fun reloadItemGroupsResult(): ReloadResult {
+        return api().reloadItemGroupsResult()
     }
 
     @JvmStatic
     fun reloadConditions() {
-        api().reloadAPI.reloadConditions()
+        api().reloadConditions()
+    }
+
+    @JvmStatic
+    fun reloadConditionsResult(): ReloadResult {
+        return api().reloadConditionsResult()
     }
 
     @JvmStatic
     fun reloadRandoms() {
-        api().reloadAPI.reloadRandoms()
+        api().reloadRandoms()
+    }
+
+    @JvmStatic
+    fun reloadRandomsResult(): ReloadResult {
+        return api().reloadRandomsResult()
     }
 
     @JvmStatic
     fun reloadRegainTask() {
-        api().reloadAPI.reloadRegainTask()
+        api().reloadRegainTask()
+    }
+
+    @JvmStatic
+    fun reloadRegainTaskResult(): ReloadResult {
+        return api().reloadRegainTaskResult()
     }
 
     @JvmStatic
@@ -169,7 +256,37 @@ object Nodens {
     }
 
     @JvmStatic
+    fun reloadByWeightResult(weight: Int): ReloadResult {
+        return api().reloadByWeightResult(weight)
+    }
+
+    @JvmStatic
     fun reloadByWeights(vararg weights: Int) {
         api().reloadByWeights(*weights)
+    }
+
+    @JvmStatic
+    fun reloadByWeightsResult(vararg weights: Int): ReloadResult {
+        return api().reloadByWeightsResult(*weights)
+    }
+
+    @JvmStatic
+    fun registerReloadHook(owner: String, weight: Int, function: Runnable): RegisterResult {
+        return api().registerReloadHook(owner, weight, function)
+    }
+
+    @JvmStatic
+    fun unregisterReloadHooks(owner: String): RegisterResult {
+        return api().unregisterReloadHooks(owner)
+    }
+
+    @JvmStatic
+    fun registerDamageFormulaProvider(id: String, priority: Int, provider: DamageFormulaProvider): RegisterResult {
+        return api().registerDamageFormulaProvider(id, priority, provider)
+    }
+
+    @JvmStatic
+    fun unregisterDamageFormulaProvider(id: String): RegisterResult {
+        return api().unregisterDamageFormulaProvider(id)
     }
 }

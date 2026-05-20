@@ -330,7 +330,7 @@ dependencies {
 }
 ```
 
-> 将 `{VERSION}` 替换为版本号，如 `1.24.0`。
+> 将 `{VERSION}` 替换为版本号，如 `1.25.0`。
 
 ### API 示例
 
@@ -342,6 +342,9 @@ val api = Nodens.api()
 // 获取或创建实体属性内存
 val memory = api.ensureAttributeMemory(player)
 val nullableMemory = api.getEntityAttributeMemory(player)
+
+// 添加临时属性；createIfAbsent=true 时会自动创建 AttributeMemory
+api.addTempAttribute(player, "buff", tempAttributeData, createIfAbsent = true)
 
 // 查询属性组、属性和配置
 val healthGroup = api.getAttributeGroup("Health")
@@ -375,6 +378,23 @@ Nodens.registerAttributeGroup(MyAttributeGroup)
 Nodens.unregisterAttributeGroup("MyGroup")
 ```
 
+也可以不写入 `attribute/*.yml`，直接通过纯内存配置注册：
+
+```kotlin
+import org.gitee.nodens.api.AttributeRegistrationConfig
+
+Nodens.registerAttributeGroup(
+    MyAttributeGroup,
+    mapOf(
+        "Power" to AttributeRegistrationConfig(
+            keys = listOf("力量", "Power"),
+            combatPower = 1.0,
+            handlePriority = 1,
+        )
+    )
+)
+```
+
 ### 分模块重载
 
 ```kotlin
@@ -386,7 +406,29 @@ Nodens.reloadItemGroups()   // group.yml
 Nodens.reloadConditions()   // 条件匹配表
 Nodens.reloadRandoms()      // randoms 目录
 Nodens.reloadRegainTask()   // 自然恢复任务
+
+// 需要结构化结果时使用 Result 版本
+val result = Nodens.reloadHandleResult()
+if (!result.success) {
+    result.throwable?.printStackTrace()
+}
 ```
+
+### Reload Hook 与伤害公式提供者
+
+```kotlin
+// 长期参与 Nodens reload 流程
+Nodens.registerReloadHook("my-plugin", weight = 0, Runnable {
+    Nodens.registerAttributeGroup(MyAttributeGroup)
+})
+
+// 接管伤害公式；返回 null 表示继续使用 Nodens handle.yml
+Nodens.registerDamageFormulaProvider("my-formula", priority = 10) { processor ->
+    if (processor.damageType == "PHYSICAL") 100.0 else null
+}
+```
+
+`Source` 现在同时暴露 `attributeGroup`、`attributeName` 与 `attributeFullName`，Kether 中可读取 `group` / `attributeName` / `attributeFullName` 来区分 `Damage.Physics` 与 `Defence.Physics`。
 
 ---
 

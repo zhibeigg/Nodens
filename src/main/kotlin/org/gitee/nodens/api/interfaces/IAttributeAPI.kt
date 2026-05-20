@@ -1,6 +1,9 @@
 package org.gitee.nodens.api.interfaces
 
 import org.bukkit.entity.LivingEntity
+import org.gitee.nodens.api.AttributeRegistrationConfig
+import org.gitee.nodens.api.result.RegisterResult
+import org.gitee.nodens.api.result.ReloadResult
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.core.AttributeConfig
 import org.gitee.nodens.core.IAttributeGroup
@@ -84,6 +87,25 @@ interface IAttributeAPI {
     fun registerAttributeGroup(group: IAttributeGroup, reloadAttributes: Boolean = true): IAttributeGroup?
 
     /**
+     * 注册运行期属性组，并使用纯内存属性配置。
+     *
+     * @param group 属性组实例
+     * @param configs 属性名到注册配置的映射
+     * @param reloadAttributes 是否立即重载属性匹配表和在线实体属性
+     * @return 结构化注册结果
+     */
+    fun registerAttributeGroup(
+        group: IAttributeGroup,
+        configs: Map<String, AttributeRegistrationConfig>,
+        reloadAttributes: Boolean = true,
+    ): RegisterResult
+
+    /**
+     * 注册运行期属性组，并返回结构化结果。
+     */
+    fun registerAttributeGroupResult(group: IAttributeGroup, reloadAttributes: Boolean = true): RegisterResult
+
+    /**
      * 注销运行期属性组。
      *
      * 仅会注销通过 [registerAttributeGroup] 注册的属性组，不会移除插件内置属性组。
@@ -93,6 +115,16 @@ interface IAttributeAPI {
      * @return 被移除的运行期属性组，不存在则返回 null
      */
     fun unregisterAttributeGroup(groupName: String, reloadAttributes: Boolean = true): IAttributeGroup?
+
+    /**
+     * 注销运行期属性组，并返回结构化结果。
+     */
+    fun unregisterAttributeGroupResult(groupName: String, reloadAttributes: Boolean = true): RegisterResult
+
+    /**
+     * 重建属性匹配表。
+     */
+    fun rebuildAttributeMatchingMap(): ReloadResult
 
     /**
      * 根据属性组名获取属性组。

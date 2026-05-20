@@ -1,6 +1,9 @@
 package org.gitee.nodens.core
 
+import org.gitee.nodens.api.AttributeRegistrationConfig
 import org.gitee.nodens.api.Nodens
+import org.gitee.nodens.api.result.RegisterResult
+import org.gitee.nodens.api.result.ReloadResult
 import org.gitee.nodens.common.DigitalParser
 import org.gitee.nodens.common.FastMatchingMap
 import org.gitee.nodens.core.attribute.JavaScript
@@ -26,6 +29,7 @@ object AttributeManager {
     private var attributeNumberConfigs = ConcurrentHashMap<String, ConcurrentHashMap<String, AttributeConfig>>()
 
     private val registeredAttributeGroups = ConcurrentHashMap<String, IAttributeGroup>()
+    private val registeredAttributeConfigs = ConcurrentHashMap<String, ConcurrentHashMap<String, AttributeRegistrationConfig>>()
 
     internal val ATTRIBUTE_MATCHING_MAP = FastMatchingMap<IAttributeGroup.Number>()
 
@@ -77,6 +81,12 @@ object AttributeManager {
                 }
             }
         }
+        registeredAttributeConfigs.forEach { (groupName, configs) ->
+            val map = newAttributeNumberConfigs.getOrPut(groupName) { ConcurrentHashMap() }
+            configs.forEach { (attributeName, config) ->
+                map[attributeName] = AttributeConfig(config)
+            }
+        }
 
         // 原子替换
         groupMap = newGroupMap
@@ -90,26 +100,7 @@ object AttributeManager {
         groupMap[Mapping.name] = Mapping
 
         // 创建 MatchMap
-        ATTRIBUTE_MATCHING_MAP.clear()
-        var totalKeys = 0
-        consoleMessage("&6├─────────────────────────────────────────")
-        consoleMessage("&6│ &e📦 &f属性组注册")
-        groupMap.values.forEach { group ->
-            if (group === JavaScript) return@forEach
-            consoleMessage("&6│ &7├ &b${group.name} &8» &7${group.numbers.size}个属性")
-            group.numbers.forEach { (name, number) ->
-                try {
-                    val keys = number.config.keys
-                    consoleMessage("&6│ &7│ &7└ &a$name &8(&7${keys.size} keys&8)")
-                    keys.forEach { key ->
-                        ATTRIBUTE_MATCHING_MAP.put(key, number)
-                        totalKeys++
-                    }
-                } catch (e: Exception) {
-                    consoleMessage("&6│ &7│ &7└ &c✘ $name &8- &c${e.message}")
-                }
-            }
-        }
+        val totalKeys = rebuildAttributeMatchingMapInternal(includeJavaScript = false, log = true)
         consoleMessage("&6├─────────────────────────────────────────")
         consoleMessage("&6│ &7总计: &f$totalKeys &7个属性匹配键")
         // 加载 Js 属性
@@ -117,6 +108,54 @@ object AttributeManager {
         consoleMessage("&6╰─────────────────────────────────────────")
         consoleMessage("&a✔ &f属性系统加载完成!")
         consoleMessage("")
+    }
+
+    fun rebuildAttributeMatchingMap(): ReloadResult {
+        return runCatching {
+            val totalKeys = rebuildAttributeMatchingMapInternal(includeJavaScript = true, log = false)
+            ReloadResult.success("属性匹配表重建完成 keys=$totalKeys")
+        }.getOrElse {
+            ReloadResult.failure("属性匹配表重建失败: ${it.message ?: it.javaClass.simpleName}", it)
+        }
+    }
+
+    private fun rebuildAttributeMatchingMapInternal(includeJavaScript: Boolean, log: Boolean): Int {
+        ATTRIBUTE_MATCHING_MAP.clear()
+        var totalKeys = 0
+        if (log) {
+            consoleMessage("&6├─────────────────────────────────────────")
+            consoleMessage("&6│ &e📦 &f属性组注册")
+        }
+        fun registerGroup(group: IAttributeGroup) {
+            if (log) {
+                consoleMessage("&6│ &7├ &b${group.name} &8» &7${group.numbers.size}个属性")
+            }
+            group.numbers.forEach { (name, number) ->
+                try {
+                    val keys = number.config.keys
+                    if (log) {
+                        consoleMessage("&6│ &7│ &7└ &a$name &8(&7${keys.size} keys&8)")
+                    }
+                    keys.forEach { key ->
+                        ATTRIBUTE_MATCHING_MAP.put(key, number)
+                        totalKeys++
+                    }
+                } catch (e: Exception) {
+                    if (log) {
+                        consoleMessage("&6│ &7│ &7└ &c✘ $name &8- &c${e.message}")
+                    }
+                }
+            }
+        }
+        groupMap.values.forEach { group ->
+            if (group !== JavaScript) {
+                registerGroup(group)
+            }
+        }
+        if (includeJavaScript) {
+            registerGroup(JavaScript)
+        }
+        return totalKeys
     }
 
     fun registerAttributeGroup(group: IAttributeGroup, reloadAttributes: Boolean = true): IAttributeGroup? {
@@ -130,18 +169,74 @@ object AttributeManager {
         return previous
     }
 
+    fun registerAttributeGroupResult(group: IAttributeGroup, reloadAttributes: Boolean = true): RegisterResult {
+        return runCatching {
+            val previous = registerAttributeGroup(group, reloadAttributes)
+            RegisterResult.success(if (previous == null) "属性组 ${group.name} 注册成功" else "属性组 ${group.name} 已替换旧实例")
+        }.getOrElse {
+            RegisterResult.failure("属性组 ${group.name} 注册失败: ${it.message ?: it.javaClass.simpleName}", it)
+        }
+    }
+
+    fun registerAttributeGroup(
+        group: IAttributeGroup,
+        configs: Map<String, AttributeRegistrationConfig>,
+        reloadAttributes: Boolean = true,
+    ): RegisterResult {
+        return runCatching {
+            require(group.name.isNotBlank()) { "属性组名称不能为空" }
+            val missingConfigs = group.numbers.keys.filter { it !in configs }
+            require(missingConfigs.isEmpty()) { "属性组 ${group.name} 缺少配置: ${missingConfigs.joinToString() }" }
+            registeredAttributeGroups[group.name] = group
+            registeredAttributeConfigs[group.name] = ConcurrentHashMap(configs)
+            if (reloadAttributes) {
+                reloadAttributes()
+            } else {
+                groupMap[group.name] = group
+                val map = attributeNumberConfigs.getOrPut(group.name) { ConcurrentHashMap() }
+                configs.forEach { (attributeName, config) ->
+                    map[attributeName] = AttributeConfig(config)
+                }
+                rebuildAttributeMatchingMapInternal(includeJavaScript = true, log = false)
+            }
+            RegisterResult.success("属性组 ${group.name} 注册成功 attributes=${group.numbers.size} configs=${configs.size}")
+        }.getOrElse {
+            RegisterResult.failure("属性组 ${group.name} 注册失败: ${it.message ?: it.javaClass.simpleName}", it)
+        }
+    }
+
     fun unregisterAttributeGroup(groupName: String, reloadAttributes: Boolean = true): IAttributeGroup? {
         val previous = registeredAttributeGroups.remove(groupName)
+        registeredAttributeConfigs.remove(groupName)
         if (reloadAttributes) {
             reloadAttributes()
         } else if (previous != null) {
             groupMap.remove(groupName)
+            attributeNumberConfigs.remove(groupName)
+            rebuildAttributeMatchingMapInternal(includeJavaScript = true, log = false)
         }
         return previous
     }
 
+    fun unregisterAttributeGroupResult(groupName: String, reloadAttributes: Boolean = true): RegisterResult {
+        return runCatching {
+            val previous = unregisterAttributeGroup(groupName, reloadAttributes)
+            if (previous == null) {
+                RegisterResult.failure("运行期属性组 $groupName 不存在")
+            } else {
+                RegisterResult.success("运行期属性组 $groupName 已注销")
+            }
+        }.getOrElse {
+            RegisterResult.failure("运行期属性组 $groupName 注销失败: ${it.message ?: it.javaClass.simpleName}", it)
+        }
+    }
+
     fun getRegisteredAttributeGroups(): Map<String, IAttributeGroup> {
         return registeredAttributeGroups.toMap()
+    }
+
+    fun getRegisteredAttributeConfigs(): Map<String, Map<String, AttributeRegistrationConfig>> {
+        return registeredAttributeConfigs.mapValues { it.value.toMap() }
     }
 
     fun getAttributeGroups(): Map<String, IAttributeGroup> {
