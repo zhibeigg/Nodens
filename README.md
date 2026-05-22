@@ -310,9 +310,31 @@ Move:
 |---------------------|--------------|
 | **DragonCore**      | 装备槽位、UI 集成   |
 | **DragonArmourers** | 盔甲皮肤系统       |
-| **MythicMobs**      | 自定义怪物属性、伤害机制 |
+| **MythicMobs 4.11 / 5.x** | 自定义怪物属性、伤害机制 |
 | **GlowAPI**         | 发光效果（可选）     |
 | **Orryx**           | 职业系统集成       |
+
+### MythicMobs 配置示例
+
+Nodens 会自动识别 MythicMobs 4.x / 5.x，无需额外切换配置。可在 MythicMob 配置中使用：
+
+```yaml
+ExampleMob:
+  Type: ZOMBIE
+  Display: '&cNodens Zombie'
+  Health: 100
+  Nodens:
+    - '物理攻击 10-20'
+    - '最大生命 100'
+  nodensDrops:
+    - 'example 0.5 false 1-2'
+  Skills:
+    - NO-DAMAGE{type=Physics;power=1.2} @target ~onAttack
+```
+
+- `Nodens`：怪物出生时挂载到实体的属性文本列表。
+- `nodensDrops`：死亡时由 Nodens 掉落系统处理的掉落列表，格式为 `物品ID 概率 是否全局PRD 数量/范围`。
+- `NO-DAMAGE`：调用 Nodens 伤害计算流程，`type/t` 指定伤害类型，`power/p` 指定伤害倍率。
 
 ---
 
@@ -331,6 +353,8 @@ dependencies {
 ```
 
 > 将 `{VERSION}` 替换为版本号，如 `1.25.0`。
+>
+> MythicMobs 5.x 兼容属于运行时 Hook 扩展，不改变 Nodens 对外 Kotlin API。
 
 ### API 示例
 

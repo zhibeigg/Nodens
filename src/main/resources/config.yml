@@ -1,3 +1,4 @@
+# MythicMobs 兼容层会自动识别 4.x / 5.x，无需额外配置。
 debug: false
 healthScaled: true
 drop:

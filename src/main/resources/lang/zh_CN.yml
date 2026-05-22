@@ -7,3 +7,6 @@ info-item-argument: "&a| &f{0}&7: &e{1} &7({2}&7)"
 source-title: "&a| &c&lNodens &e属性来源 &7- &f{0}"
 source-key: "&a| &f{0}"
 source-empty: "&a| &c&lNodens &7暂无属性来源"
+
+hook-true: "&a| &c&lNodens &7成功挂钩 &f{0}"
+hook-false: "&a| &c&lNodens &7未检测到 &f{0}&7，跳过兼容挂钩"

@@ -61,6 +61,7 @@ repositories {
     mavenCentral()
     maven("https://repo.tabooproject.org/repository/releases")
     maven("https://maven.mcwar.cn/releases")
+    maven("https://mvn.lumine.io/repository/maven-public/")
 }
 
 dependencies {
@@ -73,6 +74,7 @@ dependencies {
     compileOnly("org.eldergod.ext:DragonCore:2.6.2.9")
     compileOnly("org.eldergod.ext:DragonArmourers:6.72")
     compileOnly("org.eldergod.ext:MythicMobs:4.11.0")
+    compileOnly("io.lumine:Mythic-Dist:5.12.0")
     compileOnly("org.eldergod.ext:GlowAPI:1.4.6")
     compileOnly("org.gitee.orryx:orryx:1.36.95:api")
 
