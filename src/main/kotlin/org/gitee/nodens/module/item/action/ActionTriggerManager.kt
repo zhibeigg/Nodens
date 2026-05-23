@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap
 @Awake
 object ActionTriggerManager : ClassVisitor(1) {
 
+    private const val TRIGGER_PACKAGE = "org.gitee.nodens.module.item.action.trigger."
+
     /** 已注册的触发器 id -> trigger */
     private val triggers = ConcurrentHashMap<String, ActionTrigger<*>>()
 
@@ -38,6 +40,8 @@ object ActionTriggerManager : ClassVisitor(1) {
     override fun getLifeCycle(): LifeCycle = LifeCycle.LOAD
 
     override fun visitStart(clazz: ReflexClass) {
+        val className = clazz.name?.replace('/', '.') ?: return
+        if (!className.startsWith(TRIGGER_PACKAGE)) return
         val javaClass = clazz.toClass()
         if (!ActionTrigger::class.java.isAssignableFrom(javaClass)) return
         if (javaClass == ActionTrigger::class.java) return
