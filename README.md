@@ -279,7 +279,7 @@ onRegain: |-
 
 > 注意：handle/Kether 脚本里 `#` 注释只能**独占整行**（脚本加载时会过滤以 `#` 开头的整行），不能写在语句行尾。
 
-#### 算术 Kether 动作（`expr` / `clamp` / `sumSource`，1.27.0+）
+#### 算术 Kether 动作（`expr` / `clamp` / `sumSource`，1.27.43+）
 
 伤害/治疗公式可用以下 Nodens 自带算术动作（`namespace=Nodens, shared`，全局可用，无需前缀）。它们为伤害热路径设计：解析期一次编译、求值期同步无 `CompletableFuture` 开销。
 
