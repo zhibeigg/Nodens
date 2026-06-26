@@ -277,6 +277,35 @@ onRegain: |-
   # 自定义治疗计算逻辑
 ```
 
+> 注意：handle/Kether 脚本里 `#` 注释只能**独占整行**（脚本加载时会过滤以 `#` 开头的整行），不能写在语句行尾。
+
+#### 算术 Kether 动作（`expr` / `clamp` / `sumSource`，1.27.0+）
+
+伤害/治疗公式可用以下 Nodens 自带算术动作（`namespace=Nodens, shared`，全局可用，无需前缀）。它们为伤害热路径设计：解析期一次编译、求值期同步无 `CompletableFuture` 开销。
+
+| 动作 | 语法 | 说明 |
+|---|---|---|
+| `expr` | `expr "<表达式>"` | 解析期把整条算式编译成 RPN，求值期同步求值（DoubleArray 栈、零装箱、变量按需点读，不像 `calc` 每次拷贝整张变量表）。变量裸名引用当前帧 `set` 的局部变量，缺失记 0。 |
+| `clamp` | `clamp <值> min <下限> max <上限>` | 同步钳制到 `[下限, 上限]`，等价 `expr "clamp(x,lo,hi)"`。 |
+| `sumSource` | `sumSource <源持有者> [ attribute [ "A" "B" ] ]` | Java 侧一次遍历，按属性名汇总 `Source.value`；省略 `attribute` 时汇总全部源。取代逐源 `for + case` 累加。 |
+
+`expr` 表达式语法：`+ - * / %`、一元负号、括号、十进制常量、变量裸名，内置函数
+`min(a,b)` / `max(a,b)` / `clamp(x,lo,hi)` / `round(x)` / `floor(x)` / `ceil(x)` / `abs(x)` / `pct(x)`（= x/100）。
+
+> 说明：TabooLib 标准库的 `math` 动作仅 `add/sub/mul/div`（且已 `@Deprecated("use calc")`），**没有 `math min`/`math max`**；`calc` 走 JEXL 也无内置 `min/max`。以上动作即为此补齐，并提供热路径所需的同步零分配求值。
+
+示例（伤害公式片段）：
+
+```yaml
+onDamage: |-
+  set damage to sumSource &damageSources attribute [ "Physics" "Magic" "Fire" ]
+  set jjAtk to realm &attacker
+  set jjDef to realm &defender
+  set jjk to expr "clamp(1 + (jjAtk - jjDef) * 0.02, 0.7, 1.3)"
+  set redMul to expr "1 - clamp(reduction, 0, 1)"
+  expr "((damage + addon) * (1 - defence / (1000 + defence)) * jjk * redMul + real) * scale"
+```
+
 ### 属性配置（attribute/*.yml）
 
 ```yaml

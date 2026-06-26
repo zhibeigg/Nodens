@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture
 
 const val NODENS_NAMESPACE = "Nodens"
 
-val nodensEnvironmentNamespaces = listOf(NODENS_NAMESPACE, "kether")
+val nodensEnvironmentNamespaces = listOf(NODENS_NAMESPACE, "Yahweh", "kether")
 
 val EMPTY_FUNCTION = {}
 
