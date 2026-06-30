@@ -57,11 +57,11 @@ interface IReloadAPI {
     fun reloadConditionsResult(): ReloadResult
 
     /**
-     * 重载 randoms 目录中的随机动作配置。
+     * 重载 formulas 目录中的公式配置。
      * */
-    fun reloadRandoms()
+    fun reloadFormulas()
 
-    fun reloadRandomsResult(): ReloadResult
+    fun reloadFormulasResult(): ReloadResult
 
     /**
      * 重载自然恢复定时任务。

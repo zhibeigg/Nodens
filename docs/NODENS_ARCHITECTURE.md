@@ -575,7 +575,7 @@ Nodens.reloadAttributes(updateEntities = true)
 Nodens.reloadItems()
 Nodens.reloadItemGroups()
 Nodens.reloadConditions()
-Nodens.reloadRandoms()
+Nodens.reloadFormulas()
 Nodens.reloadRegainTask()
 Nodens.reloadByWeight(0)
 ```

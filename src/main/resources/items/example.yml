@@ -5,7 +5,7 @@
   material: DIAMOND_SWORD
   name: 无敌村好剑
   lore:
-    - "物理攻击: +{{ randoms 武器攻击 }}"
+    - "物理攻击: +{{ formula 武器攻击 }}"
     - ""
     - "村子里最好的剑"
   variables:
@@ -20,7 +20,7 @@
     - HIDE_POTION_EFFECTS
   unbreakable: true
   sell: |-
-    randoms 武器价值
+    formula 武器价值
   nbt:
     test:
       value: '测试'

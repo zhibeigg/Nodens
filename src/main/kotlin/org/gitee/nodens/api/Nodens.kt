@@ -231,13 +231,13 @@ object Nodens {
     }
 
     @JvmStatic
-    fun reloadRandoms() {
-        api().reloadRandoms()
+    fun reloadFormulas() {
+        api().reloadFormulas()
     }
 
     @JvmStatic
-    fun reloadRandomsResult(): ReloadResult {
-        return api().reloadRandomsResult()
+    fun reloadFormulasResult(): ReloadResult {
+        return api().reloadFormulasResult()
     }
 
     @JvmStatic

@@ -234,11 +234,11 @@ interface INodensAPI {
     fun reloadConditionsResult(): ReloadResult
 
     /**
-     * 重载随机动作配置。
+     * 重载公式配置。
      */
-    fun reloadRandoms()
+    fun reloadFormulas()
 
-    fun reloadRandomsResult(): ReloadResult
+    fun reloadFormulasResult(): ReloadResult
 
     /**
      * 重载自然恢复任务。

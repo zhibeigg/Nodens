@@ -11,7 +11,7 @@ import org.gitee.nodens.core.entity.EntityAttributeMemory
 import org.gitee.nodens.module.item.ItemManager
 import org.gitee.nodens.module.item.condition.ConditionManager
 import org.gitee.nodens.module.item.group.GroupManager
-import org.gitee.nodens.module.random.RandomManager
+import org.gitee.nodens.module.formula.FormulaManager
 import org.gitee.nodens.util.consoleMessage
 import org.gitee.nodens.util.debug
 import taboolib.common.LifeCycle
@@ -122,13 +122,13 @@ object ReloadAPI: IReloadAPI, ClassVisitor(3) {
         }
     }
 
-    override fun reloadRandoms() {
-        reloadRandomsResult()
+    override fun reloadFormulas() {
+        reloadFormulasResult()
     }
 
-    override fun reloadRandomsResult(): ReloadResult {
-        return runReloadAction("随机动作配置重载") {
-            RandomManager.reloadRandoms()
+    override fun reloadFormulasResult(): ReloadResult {
+        return runReloadAction("公式配置重载") {
+            FormulaManager.reloadFormulas()
         }
     }
 

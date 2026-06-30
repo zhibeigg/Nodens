@@ -127,8 +127,8 @@ Nodens 提供了一套完整的 RPG 属性体系：
   name: "&b无敌村好剑"
   lore:
     - "&7━━━━━━━━━━━━━━━━━━"
-    - "&e物理攻击: &f+{{ randoms 武器攻击 }}"
-    - "&e暴击几率: &f+{{ randoms 暴击几率 }}%"
+    - "&e物理攻击: &f+{{ formula 武器攻击 }}"
+    - "&e暴击几率: &f+{{ formula 暴击几率 }}%"
     - "&7━━━━━━━━━━━━━━━━━━"
     - "&c等级限制: {{ variable level }}"
   variables:
@@ -457,7 +457,7 @@ Nodens.reloadAttributes()   // attribute 目录与属性匹配表
 Nodens.reloadItems()        // items 目录
 Nodens.reloadItemGroups()   // group.yml
 Nodens.reloadConditions()   // 条件匹配表
-Nodens.reloadRandoms()      // randoms 目录
+Nodens.reloadFormulas()     // formulas 目录
 Nodens.reloadRegainTask()   // 自然恢复任务
 
 // 需要结构化结果时使用 Result 版本

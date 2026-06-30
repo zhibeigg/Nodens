@@ -5,15 +5,13 @@ import org.gitee.nodens.module.item.ItemConfig
 import org.gitee.nodens.module.item.NormalContext
 import org.gitee.nodens.module.item.action.ActionContext
 import org.gitee.nodens.module.item.group.GroupManager
-import org.gitee.nodens.module.random.RandomManager
+import org.gitee.nodens.module.formula.FormulaManager
 import org.gitee.nodens.util.NODENS_NAMESPACE
 import org.gitee.nodens.util.bukkitPlayer
 import org.gitee.nodens.util.context
-import org.gitee.nodens.util.nodensEnvironmentNamespaces
 import org.gitee.nodens.util.toVariable
 import taboolib.common.OpenResult
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.console
 import taboolib.module.chat.uncolored
 import taboolib.module.kether.*
 import java.util.concurrent.CompletableFuture
@@ -82,12 +80,12 @@ object ItemActions {
         }
     }
 
-    @KetherParser(["randoms"], namespace = NODENS_NAMESPACE, shared = true)
-    private fun randomsParser() = combinationParser {
+    @KetherParser(["formula"], namespace = NODENS_NAMESPACE, shared = true)
+    private fun formulaParser() = combinationParser {
         it.group(
             text()
         ).apply(it) { id ->
-            future { randomsEval(script().sender, id, variables().toMap()) }
+            future { formulaEval(script().sender, id, variables().toMap()) }
         }
     }
 
@@ -136,15 +134,8 @@ object ItemActions {
         }
     }
 
-    fun randomsEval(sender: ProxyCommandSender?, randoms: String, map: Map<String, Any?>): CompletableFuture<Any?> {
-        val randoms = RandomManager.randomsMap[randoms] ?: return CompletableFuture.completedFuture(null)
-        return KetherShell.eval(
-            randoms.action,
-            ScriptOptions.builder()
-                .vars(map)
-                .sender(sender ?: console())
-                .namespace(nodensEnvironmentNamespaces)
-                .build()
-        )
+    fun formulaEval(sender: ProxyCommandSender?, id: String, map: Map<String, Any?>): CompletableFuture<Any?> {
+        val formula = FormulaManager.formulaMap[id] ?: return CompletableFuture.completedFuture(null)
+        return formula.eval(sender, map)
     }
 }

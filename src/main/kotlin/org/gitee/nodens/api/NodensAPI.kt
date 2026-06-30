@@ -221,12 +221,12 @@ class NodensAPI: INodensAPI {
         return reloadAPI.reloadConditionsResult()
     }
 
-    override fun reloadRandoms() {
-        reloadAPI.reloadRandoms()
+    override fun reloadFormulas() {
+        reloadAPI.reloadFormulas()
     }
 
-    override fun reloadRandomsResult(): ReloadResult {
-        return reloadAPI.reloadRandomsResult()
+    override fun reloadFormulasResult(): ReloadResult {
+        return reloadAPI.reloadFormulasResult()
     }
 
     override fun reloadRegainTask() {
